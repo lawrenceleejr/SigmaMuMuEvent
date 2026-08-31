@@ -74,11 +74,24 @@ async function main() {
 
     if (o.mode === 'still') {
       await page.evaluate((u) => window.__setPhase(u), o.t);
-      await canvas.screenshot({ path: o.out, type: 'png', timeout: 120000 });
+      if (o.scale) {
+        // supersampled capture, downscaled to target with lanczos
+        const [sw, sh] = o.scale.split('x').map(Number);
+        const buf = await canvas.screenshot({ type: 'png', timeout: 120000 });
+        const ff = spawn(process.env.FFMPEG || 'ffmpeg', [
+          '-y', '-i', '-', '-vf', `scale=${sw}:${sh}:flags=lanczos`, '-frames:v', '1', o.out,
+        ], { stdio: ['pipe', 'ignore', 'ignore'] });
+        ff.stdin.end(buf);
+        const [code] = await once(ff, 'close');
+        if (code !== 0) throw new Error(`ffmpeg exited ${code}`);
+      } else {
+        await canvas.screenshot({ path: o.out, type: 'png', timeout: 120000 });
+      }
       console.log(`[still ${o.format}] wrote ${o.out} in ${((Date.now() - t0) / 1000).toFixed(1)}s`);
     } else if (o.mode === 'video') {
       const nFrames = Math.round(o.fps * o.seconds);
-      const [sw, sh] = o.scale.split('x').map(Number);
+      // libx264 + yuv420p needs even dimensions
+      const [sw, sh] = o.scale.split('x').map((v) => Math.round(Number(v) / 2) * 2);
       const ff = spawn(process.env.FFMPEG || 'ffmpeg', [
         '-y', '-f', 'image2pipe', '-framerate', String(o.fps), '-c:v', 'png', '-i', '-',
         '-vf', `scale=${sw}:${sh}:flags=lanczos`,

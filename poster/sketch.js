@@ -34,7 +34,7 @@ const PRESETS = {
   tabloid: {
     w: 3300, h: 5100, layout: 'portrait',
     ring: { cx: 0.500, cy: 0.360, r: 0.392, of: 'w' },
-    hero: { base: 0.822, wf: 0.860 },
+    hero: { base: 0.822, wf: 1.000 },
     detail: 'full',
   },
   ig: {
@@ -45,20 +45,20 @@ const PRESETS = {
   },
   igsq: {
     w: 1080, h: 1080, layout: 'square',
-    ring: { cx: 0.500, cy: 0.392, r: 0.310, of: 'w' },
-    hero: { base: 0.795, wf: 0.680 },
+    ring: { cx: 0.500, cy: 0.360, r: 0.285, of: 'w' },
+    hero: { base: 0.800, wf: 0.620 },
     detail: 'mini',
   },
   linkedin: {
     w: 1200, h: 627, layout: 'wide',
-    ring: { cx: 0.715, cy: 0.500, r: 0.415, of: 'h' },
-    hero: { base: 0.560, wf: 0.460 },
+    ring: { cx: 0.730, cy: 0.500, r: 0.400, of: 'h' },
+    hero: { base: 0.560, wf: 0.400 },
     detail: 'wide',
   },
   livideo: {
     w: 1920, h: 1080, layout: 'wide',
-    ring: { cx: 0.705, cy: 0.500, r: 0.415, of: 'h' },
-    hero: { base: 0.560, wf: 0.440 },
+    ring: { cx: 0.735, cy: 0.500, r: 0.400, of: 'h' },
+    hero: { base: 0.560, wf: 0.400 },
     detail: 'wide',
   },
   story: {
@@ -140,8 +140,9 @@ function buildSystem(p) {
       segs.push([0, TAU]);
     } else {
       const cell = TAU / seg;
+      const phase0 = rng() * cell;         // de-align dash columns across rings
       for (let i = 0; i < seg; i++) {
-        const a0 = i * cell;
+        const a0 = i * cell + phase0;
         const d = duty * (0.92 + 0.16 * rng());
         // service gap: skip cells inside the wedge
         const mid = a0 + cell * d / 2;
@@ -420,12 +421,14 @@ function drawPaper(ctx, sys) {
 
 function drawBeamAxis(ctx, sys, u) {
   const { ring, hl, w } = sys;
+  // in wide layouts the beam line stays behind the ring, off the text block
+  const x0 = PRE.layout === 'wide' ? 0.40 * w : 0;
   ctx.save();
   ctx.setLineDash([hl * 6, hl * 6]);
   ctx.lineWidth = hl;
   inkA(ctx, 0.22);
   ctx.beginPath();
-  ctx.moveTo(0, ring.cy); ctx.lineTo(w, ring.cy);
+  ctx.moveTo(x0, ring.cy); ctx.lineTo(w, ring.cy);
   ctx.stroke();
   ctx.setLineDash([]);
   // beam arrows pointing toward the IP, just outside the orbit
@@ -589,8 +592,8 @@ function drawFeynman(ctx, sys, x, y, sc, u, labels) {
   ctx.lineCap = 'round';
   ctx.lineWidth = hl;
   inkA(ctx, 0.9);
-  const v1 = [x, y], v2 = [x + sc * 0.42, y];
-  const leg = sc * 0.30;
+  const v1 = [x, y], v2 = [x + sc * 0.44, y];
+  const leg = sc * 0.34;
   // incoming legs
   for (const s of [-1, 1]) {
     ctx.beginPath();
@@ -615,7 +618,7 @@ function drawFeynman(ctx, sys, x, y, sc, u, labels) {
   for (let i = 0; i <= steps; i++) {
     const f = i / steps;
     const px = v1[0] + (v2[0] - v1[0]) * f;
-    const py = y + Math.sin(TAU * (nW * f + u)) * sc * 0.045 * Math.sin(Math.PI * f);
+    const py = y + Math.sin(TAU * (nW * f + u)) * sc * 0.058 * Math.sin(Math.PI * f);
     if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
   }
   ctx.stroke();
@@ -727,10 +730,10 @@ function layoutPortrait(ctx, sys, u) {
     // Feynman footnote at left, physics caption at right
     const ringBottom = sys.ring.cy + sys.orbitR;
     const heroTop = baseY - 0.560 * heroSize;
-    const bandY = (ringBottom + heroTop) / 2;
-    const sc = 0.100 * w;
-    drawFeynman(ctx, sys, m + 0.52 * sc, bandY, sc, u, true);
-    physicsCaption(ctx, sys, w - m, bandY + 0.017 * S, 0.0122 * S, 'right');
+    const bandY = (ringBottom + heroTop) / 2 - 0.007 * h;
+    const sc = 0.084 * w;
+    drawFeynman(ctx, sys, m + 0.56 * sc, bandY, sc, u, true);
+    physicsCaption(ctx, sys, w - m, bandY + 0.015 * S, 0.0122 * S, 'right');
 
     // three info columns under the hero
     const gy = 0.902 * h;
@@ -744,9 +747,9 @@ function layoutPortrait(ctx, sys, u) {
     ruleLine(ctx, sys, m, w - m, fy, 0.9);
     drawType(ctx, COPY.footL, m, fy + 0.017 * S, { size: 0.0100 * S, weight: 500, tracking: 0.18, color: rgba(INK, 0.9) });
     drawType(ctx, COPY.footR, w - m, fy + 0.017 * S, { size: 0.0100 * S, weight: 500, tracking: 0.18, color: rgba(INK, 0.9), align: 'right' });
-    // printer's mark
+    // printer's mark, sitting on the info-label row
     ctx.fillStyle = RED;
-    ctx.fillRect(w - m - 0.012 * S, fy - 0.024 * S, 0.012 * S, 0.012 * S);
+    ctx.fillRect(w - m - 0.0115 * S, gy - 0.0095 * S, 0.0115 * S, 0.0115 * S);
   } else {
     // compact: two info lines + mini program
     const gy = 0.905 * h;
@@ -794,9 +797,13 @@ function layoutWide(ctx, sys, u) {
   drawType(ctx, COPY.title, m + dx, baseY + dy, { ...o, size, color: rgba(RED, 0.9) });
   drawType(ctx, COPY.title, m, baseY, { ...o, size, color: INK });
 
-  // info lines
+  // info lines, sized to stay clear of the ring
+  const infoStr = 'SUN DEC 13 2026 · 5:00 PM · STANFORD CAMPUS';
+  const ringLeft = sys.ring.cx * w - sys.orbitR - 0.022 * w;
+  let infoSize = 0.030 * h;
+  while (typeWidth(ctx, infoStr, { weight: 600, tracking: 0.10, size: infoSize }) > ringLeft - m && infoSize > 0.016 * h) infoSize *= 0.96;
   let yy = baseY + 0.118 * h;
-  drawType(ctx, 'SUN DEC 13 2026 · 5:00 PM · STANFORD CAMPUS', m, yy, { size: 0.030 * h, weight: 600, tracking: 0.10, color: INK });
+  drawType(ctx, infoStr, m, yy, { size: infoSize, weight: 600, tracking: 0.10, color: INK });
   yy += 0.052 * h;
   drawType(ctx, COPY.progMini, m, yy, { size: 0.0235 * h, weight: 400, mono: true, tracking: 0.04, color: rgba(INK, 0.9) });
 
