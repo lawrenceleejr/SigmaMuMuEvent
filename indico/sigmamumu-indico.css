@@ -1,0 +1,456 @@
+@import url("https://hepalumni.muoncollider.us/fonts/fonts.css");
+
+/* ==========================================================================
+   σμμ — a skin for the Indico event page
+   A Particle Physics Alumni Reunion · USMCC annual meeting · Stanford
+
+   Install: Event Management → Layout → Custom CSS → upload this file.
+   Written against Indico 3.3.12, conference-type event.
+
+   It dresses Indico in the identity used by the poster and by
+   hepalumni.muoncollider.us: cream stock, warm near-black ink, one vermillion
+   accent, Archivo for the voice, and the Feynman network behind frosted glass.
+
+   Indico's layout mechanics are left alone — only surfaces, type, spacing and
+   colour change — so an upgrade should not break the page; it would just show
+   a little unstyled furniture wherever new markup appears.
+
+   Fonts and the background image come from the event site. If that host is
+   unreachable the page falls back to a system grotesque on plain cream, which
+   still reads correctly.
+
+   Two notes on things CSS cannot fix:
+     · The event title is stored as "\sigma_{\mu\mu}: ..." and Indico does not
+       run MathJax over the header, so it shows the raw LaTeX. Rename the event
+       to "σμμ: A Particle Physics Alumni Reunion" with real Unicode characters.
+     · Indico only offers custom CSS on conference-type events. This is one.
+   ========================================================================== */
+
+:root {
+  --smm-paper: #f5f0e1;
+  --smm-ink: #201e1d;
+  --smm-accent: #ec3013;
+  --smm-muted: #605d5d;
+  --smm-rule: rgba(32, 30, 29, 0.18);
+  --smm-hair: rgba(32, 30, 29, 0.1);
+  --smm-glass: rgba(245, 240, 225, 0.62);
+  --smm-glass-solid: rgba(245, 240, 225, 0.95);
+  --smm-sans: Archivo, "Helvetica Neue", Arial, sans-serif;
+  --smm-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset,
+                0 18px 50px -30px rgba(32, 30, 29, 0.45);
+  /* How much cream sits over the field. Raise toward 1 for a quieter page. */
+  --smm-veil: 0.38;
+}
+
+/* ---- the page ----------------------------------------------------------- */
+/* The field is fixed behind everything, knocked back under a cream veil so it
+   reads as texture rather than as content. The panels frost what they pass. */
+html {
+  background-color: var(--smm-paper);
+  background-image:
+    linear-gradient(rgba(245, 240, 225, var(--smm-veil)),
+                    rgba(245, 240, 225, var(--smm-veil))),
+    url("https://hepalumni.muoncollider.us/img/field-still.png");
+  background-repeat: no-repeat, no-repeat;
+  background-position: center center, center center;
+  background-size: cover, cover;
+  background-attachment: fixed, fixed;
+}
+body { background: transparent; color: var(--smm-ink); }
+body,
+.conference-page, .conferenceDetails, .i-box, .ui.form,
+input, select, textarea, button, .i-button {
+  font-family: var(--smm-sans);
+}
+/* iOS ignores background-attachment: fixed and stretches a cover image over
+   the whole scroll height instead. Let it scroll at a sane size there. */
+@supports (-webkit-touch-callout: none) {
+  html { background-attachment: scroll, scroll; background-size: cover, 200vw auto; }
+}
+
+/* ---- make Indico fluid -------------------------------------------------- */
+/* The conference theme hard-codes pixel widths (950px on the title and the
+   section box, 700px on the dateline, 200px on the menu), so a phone gets a
+   983px document in a 390px viewport and everything spills. Unpin them once,
+   here, rather than patching it inside a media query. */
+.confTitle,
+.confTitle h1,
+.confTitle a,
+.conference-title-link,
+.confSubTitleContent,
+.confSubTitle,
+.datePlace,
+.datePlace .date,
+#confSectionsBox,
+.confBodyBox,
+.mainContent,
+.col2 {
+  width: auto !important;
+  max-width: 100% !important;
+}
+.confTitle, .confTitle h1 { overflow-wrap: anywhere; }
+#session-bar, #session-bar .toolbar, #session-bar .group,
+.main-action-bar, .footer .flexrow {
+  max-width: 100%;
+  flex-wrap: wrap;
+}
+
+/* ---- the bar across the top --------------------------------------------- */
+.header,
+.page-header,
+.page-header-dark,
+.event-page-header {
+  background: var(--smm-ink) !important;
+  border: 0;
+  box-shadow: none;
+}
+.page-header a, .page-header .i-button, .page-header .text-color,
+#session-bar a, #session-bar .i-button {
+  color: var(--smm-paper) !important;
+  background: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.page-header a:hover, .page-header .i-button:hover, #session-bar a:hover {
+  color: var(--smm-accent) !important;
+}
+.page-header .separator { border-color: rgba(245, 240, 225, 0.25); }
+
+/* ---- masthead ----------------------------------------------------------- */
+/* One frosted pane carrying the title and the dateline, on the same column
+   Indico already centres its content in. */
+.conf { background: transparent !important; }
+.confheader {
+  max-width: 1000px !important;
+  margin: clamp(1.5rem, 4vh, 3rem) auto clamp(1rem, 3vh, 1.75rem);
+  padding: clamp(1.5rem, 4vw, 2.75rem) clamp(1.25rem, 3vw, 2rem) clamp(1.25rem, 3vw, 1.75rem);
+  background: var(--smm-glass) !important;
+  -webkit-backdrop-filter: blur(15px) saturate(1.25);
+  backdrop-filter: blur(15px) saturate(1.25);
+  border: 1px solid var(--smm-hair) !important;
+  box-shadow: var(--smm-shadow) !important;
+}
+.confTitleBox,
+.confSubTitleBox,
+.confSubTitleContent {
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+/* The text lives in an h1 that Indico colours directly, so inheriting from
+   .confTitle never reaches it — every descendant has to be named. */
+.confTitle,
+.confTitle h1,
+.confTitle a,
+.confTitleBox * {
+  color: var(--smm-ink) !important;
+  font-family: var(--smm-sans);
+  text-decoration: none;
+}
+.confTitle,
+.confTitle h1 {
+  margin: 0;
+  max-width: none;
+  font-size: clamp(1.7rem, 4vw, 2.9rem);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  /* never uppercase: it would set σμμ as ΣΜΜ */
+  text-transform: none;
+}
+.confSubTitleBox { margin-top: 1.1rem !important; }
+.confSubTitle,
+.confSubTitle * {
+  color: var(--smm-ink) !important;
+  font-size: clamp(0.9rem, 2.2vw, 1.15rem);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.35;
+}
+.confSubTitle .timezone-label,
+.confSubTitle .timezone,
+.confSubTitleBox .timezone-label,
+.confSubTitleBox .timezone {
+  color: var(--smm-muted) !important;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+#event-search-box input { border-radius: 0 !important; }
+
+/* ---- the two columns ---------------------------------------------------- */
+#confSectionsBox { max-width: 1000px !important; margin: 0 auto 3rem; }
+.confBodyBox,
+.conf_leftMenu {
+  background: var(--smm-glass) !important;
+  -webkit-backdrop-filter: blur(15px) saturate(1.25);
+  backdrop-filter: blur(15px) saturate(1.25);
+  border: 1px solid var(--smm-hair) !important;
+  border-radius: 0 !important;
+  box-shadow: var(--smm-shadow) !important;
+}
+.confBodyBox {
+  padding: clamp(1.25rem, 3vw, 2.25rem) !important;
+  min-height: 16rem;
+}
+.conf_leftMenu { padding: 1rem !important; }
+/* Indico floats a fixed-width column inside the body box; with padding added
+   that would overflow, so let it size to the box instead. */
+.confBodyBox .col2,
+.confBodyBox .mainContent {
+  float: none !important;
+  width: auto !important;
+  margin: 0 !important;
+}
+/* Panels inside the frosted panel would frost twice and go milky. */
+.confBodyBox .i-box,
+.confBodyBox .page-content,
+.confBodyBox .conference-page {
+  background: transparent !important;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .confheader, .confBodyBox, .conf_leftMenu { background: var(--smm-glass-solid) !important; }
+}
+
+/* ---- the event menu ----------------------------------------------------- */
+.conf_leftMenu nav,
+.conf_leftMenu ul,
+.conf_leftMenu #outer {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+.conf_leftMenu li, .conf_leftMenu .menuConfTitle {
+  background: none !important;
+  border: 0 !important;
+  border-top: 1px solid var(--smm-rule) !important;
+  margin: 0;
+}
+.conf_leftMenu li:first-child { border-top: 0 !important; }
+.conf_leftMenu li a, .conf_leftMenu .menuConfTitle a {
+  display: block;
+  padding: 0.65rem 0.2rem;
+  background: none !important;
+  color: var(--smm-ink) !important;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.conf_leftMenu li a:hover { color: var(--smm-accent) !important; }
+.conf_leftMenu .menuConfSelected,
+.conf_leftMenu li.selected {
+  border-left: 3px solid var(--smm-accent) !important;
+  padding-left: 0.55rem;
+}
+.conf_leftMenu .menuConfSelected > a,
+.conf_leftMenu li.selected > a { color: var(--smm-accent) !important; font-weight: 700; }
+
+/* ---- headings and copy -------------------------------------------------- */
+.confBodyBox h2, .page-content h2, .conferenceDetails h2 {
+  margin: 0 0 1.2rem;
+  padding: 0;
+  color: var(--smm-accent) !important;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  border: 0;
+  background: none;
+}
+.confBodyBox h3, .page-content h3 {
+  color: var(--smm-ink);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+}
+.description, .editor-output, .confBodyBox p {
+  max-width: 36rem;
+  color: var(--smm-ink);
+  font-size: 1rem;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+.confBodyBox a, .description a { color: var(--smm-accent); text-underline-offset: 0.18em; }
+.confBodyBox a:hover { text-decoration: underline; }
+
+/* ---- the date / location grid ------------------------------------------- */
+/* Indico lays these out as side-by-side columns; stacking them full width
+   turns them into the poster's ruled rows. */
+.infogrid {
+  display: block !important;
+  margin-top: 1.75rem;
+  border: 0;
+  background: none;
+}
+.infoline {
+  float: none !important;
+  width: auto !important;
+  display: flex;
+  gap: clamp(0.9rem, 3vw, 1.6rem);
+  align-items: baseline;
+  padding: 0.95rem 0;
+  border-top: 1px solid var(--smm-rule);
+  background: none !important;
+}
+.infoline:last-child { border-bottom: 1px solid var(--smm-rule); }
+.infoline h3, .infoline > .icon {
+  flex: 0 0 auto;
+  min-width: 1.5rem;
+  margin: 0;
+  color: var(--smm-muted) !important;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.infoline .text, .infoline .place { font-size: 1.02rem; font-weight: 500; }
+.infoline .label { font-weight: 700; }
+.infoline .timezone-label, .infoline .timezone {
+  color: var(--smm-muted) !important;
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* ---- buttons ------------------------------------------------------------ */
+/* Ink block, vermillion on hover: the poster's one loud move. */
+.confBodyBox .i-button, .conference-page .i-button, button.i-button,
+.ui.button, .ui.primary.button, input[type="submit"] {
+  display: inline-block;
+  padding: 0.7em 1.5em;
+  background: var(--smm-ink) !important;
+  background-image: none !important;
+  color: var(--smm-paper) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  font-family: var(--smm-sans);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  text-shadow: none;
+  transition: background 0.15s ease;
+}
+.confBodyBox .i-button:hover, .conference-page .i-button:hover, button.i-button:hover,
+.ui.button:hover, .ui.primary.button:hover, input[type="submit"]:hover {
+  background: var(--smm-accent) !important;
+  color: var(--smm-paper) !important;
+}
+.confBodyBox .i-button.subtle, .ui.basic.button {
+  background: none !important;
+  color: var(--smm-ink) !important;
+  border: 1px solid rgba(32, 30, 29, 0.35) !important;
+}
+
+/* ---- registration form -------------------------------------------------- */
+.regform-section, .regform-done, .i-form .form-group, .ui.form .field {
+  background: none;
+  border-color: var(--smm-rule);
+}
+.regform-section-title, .i-form .form-group .form-label, .ui.form label {
+  color: var(--smm-ink) !important;
+  font-family: var(--smm-sans);
+  font-weight: 700;
+}
+.i-form input[type="text"], .i-form input[type="email"], .i-form input[type="number"],
+.i-form textarea, .i-form select,
+.ui.form input, .ui.form textarea, .ui.form select, .ui.input > input {
+  background: rgba(255, 255, 255, 0.55) !important;
+  color: var(--smm-ink) !important;
+  border: 1px solid var(--smm-rule) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  font-family: var(--smm-sans);
+  font-size: 1rem;
+}
+.i-form input:focus, .ui.form input:focus, .ui.form textarea:focus, .ui.input > input:focus {
+  border-color: var(--smm-accent) !important;
+  outline: 2px solid var(--smm-accent);
+  outline-offset: 1px;
+}
+.regform-section .i-box-header {
+  background: none !important;
+  border-bottom: 1px solid var(--smm-rule) !important;
+}
+
+/* ---- tables, timetable, lists ------------------------------------------- */
+.i-table, table.infoTable, .timetable-item, .contribution-list .list-item {
+  background: none !important;
+  border-color: var(--smm-rule) !important;
+}
+.i-table thead th, .confBodyBox table thead th {
+  background: none !important;
+  color: var(--smm-muted) !important;
+  border-bottom: 1px solid var(--smm-rule) !important;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.i-table tbody tr, .confBodyBox table tbody tr { border-top: 1px solid var(--smm-hair); }
+
+/* ---- messages ----------------------------------------------------------- */
+.flashed-messages .message-box, .i-message {
+  background: rgba(245, 240, 225, 0.9) !important;
+  border: 1px solid var(--smm-rule) !important;
+  border-left: 3px solid var(--smm-accent) !important;
+  border-radius: 0 !important;
+  color: var(--smm-ink) !important;
+}
+
+/* ---- footer ------------------------------------------------------------- */
+.footer, .footer .flexrow {
+  background: var(--smm-ink) !important;
+  color: rgba(245, 240, 225, 0.75);
+  border: 0;
+}
+.footer a, .footer-links a { color: rgba(245, 240, 225, 0.75) !important; }
+.footer a:hover { color: var(--smm-accent) !important; }
+.footer, .footer-links {
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ---- focus, selection --------------------------------------------------- */
+:focus-visible { outline: 2px solid var(--smm-accent); outline-offset: 3px; }
+::selection { background: var(--smm-accent); color: var(--smm-paper); }
+
+/* ---- narrow screens ----------------------------------------------------- */
+@media (max-width: 900px) {
+  .confheader, #confSectionsBox { margin-left: 1rem; margin-right: 1rem; }
+  .conf_leftMenu {
+    float: none !important;
+    width: auto !important;
+    margin: 0 0 1rem !important;
+  }
+  .confBodyBox { margin-left: 0 !important; padding: 1.1rem !important; }
+  .infoline { display: block; }
+  .infoline h3, .infoline > .icon { margin-bottom: 0.25rem; }
+}
+
+/* ---- print -------------------------------------------------------------- */
+@media print {
+  html { background: #fff !important; }
+  .confheader, .confBodyBox, .conf_leftMenu {
+    background: #fff !important;
+    backdrop-filter: none;
+    box-shadow: none !important;
+  }
+  .header, .page-header, .footer { background: #fff !important; color: #000 !important; }
+}

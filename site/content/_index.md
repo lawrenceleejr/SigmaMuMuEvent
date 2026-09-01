@@ -79,7 +79,8 @@ help. Your physics brain misses you.
 ## Donations, sponsorship, recruiting
 
 Donations are warmly welcomed at registration, and sponsorship keeps the
-evening open to every guest. If your organization would like to support the reunion — or to talk about
+evening open to every guest, enables student travel support, and helps make a
+muon collider a reality. If your organization would like to support the reunion — or to talk about
 recruiting from a room full of people who know how to build hard things — please
 get in touch:
 
