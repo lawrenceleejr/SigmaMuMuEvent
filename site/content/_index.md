@@ -26,13 +26,13 @@ text = "Want to help build or fund tomorrow's energy frontier?"
 
 [[params.programme]]
 time = "4:45"
-name = "Come hear the physics case for a 10 TeV muon collider"
-note = "A short talk on why this machine, and why now."
+name = "The physics case for a 10 TeV muon collider"
+note = "Learn about what lies ahead at the 10 TeV interaction scale, and why we need to use unstable particles to get there."
 
 [[params.programme]]
 time = "5:15"
 name = "Research fair"
-note = "Students and researchers present work in progress, over drinks."
+note = "Students and researchers present work in progress. Find out where you can contribute."
 
 # Alphabetical by surname.
 [[params.organizers]]
@@ -72,11 +72,12 @@ url = "https://www.linkedin.com/company/muoncollider-us"
 ## About the evening
 
 The US Muon Collider Collaboration is hosting an evening for physicists who
-left high-energy physics for industry — and for the teams they build with now.
-It runs alongside the USMCC annual meeting at Stanford University.
+left high-energy physics for industry and their new colleagues, to reconnect
+with old friends and New Physics.
 
 Come for the cocktail hour, hear the physics case for a 10 TeV muon collider,
-then let students and researchers show you what building one actually takes.
+and let our community show you what building one actually takes and how you can
+help. Your physics brain misses you.
 
 ## Donations, sponsorship, recruiting
 

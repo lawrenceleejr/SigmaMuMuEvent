@@ -18,7 +18,7 @@ reconnect with the friends and physics of your HEP days? Curious about the
 Come for the cocktail hour, hear the physics case for a 10 TeV muon collider,
 then let students and researchers show you what building one actually takes.
 
-Contribute to tomorrow's collider, today. RSVP → [link]
+Contribute to tomorrow's collider, today. RSVP → hepalumni.muoncollider.us
 
 `#muoncollider #particlephysics #HEP #USMCC #Stanford #acceleratorphysics #energyfrontier`
 
@@ -40,7 +40,7 @@ Sponsorship keeps the mixer free for every industry guest, and puts your team
 in a room full of people who know how to build hard things. Get in touch about
 sponsorship and recruiting.
 
-RSVP → [link]
+RSVP → hepalumni.muoncollider.us
 
 ---
 

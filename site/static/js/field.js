@@ -32,6 +32,8 @@
   var TAIL_TOP = 0.18;       // tail as a fraction of the flood, at the top
   var TAIL_BOTTOM = 1.3;     // at the bottom: longer than the flood, nothing dies
   var FADE = 0.34;           // fraction of the tail spent fading out
+  var ZOOM = 0.14;           // how far the field pushes in by the foot of the page
+  var ZOOM_EASE = 3.5;       // per second: how fast the zoom chases the scroll
 
   var cv = document.getElementById('field');
   if (!cv || !window.SMMNet) return;
@@ -43,6 +45,7 @@
 
   var W = 0, H = 0, net = null, walkers = [], maxArrival = 1, raf = null;
   var scrollP = 0;
+  var zoom = 1;              // eased toward the scroll target, so it never steps
 
   /* ---- the mesh ---------------------------------------------------------- */
   // The canvas is sized in CSS with lvh, which stays put while a mobile URL
@@ -61,7 +64,7 @@
     // measuring it back still reports the viewport rather than what we set.
     cv.width = Math.round(W * DPR);
     cv.height = Math.round(H * DPR);
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    applyZoom();
 
     net = window.SMMNet.build({
       w: W, h: H, zones: [], seed: (Math.random() * 1e9) | 0,
@@ -159,6 +162,14 @@
   }
 
   /* ---- drawing ----------------------------------------------------------- */
+  // Scroll pushes the field in a little. Scaling about the canvas centre keeps
+  // the mesh registered with the panes; the mesh already runs off every edge,
+  // so pushing in never exposes a border.
+  function applyZoom() {
+    var k = DPR * zoom;
+    ctx.setTransform(k, 0, 0, k, DPR * (W / 2) * (1 - zoom), DPR * (H / 2) * (1 - zoom));
+  }
+
   function drawWalker(w, tail) {
     var edges = net.edges;
     var lo = w.head - tail;
@@ -186,7 +197,13 @@
     // Tail and speed both scale with the walker's own flood, so the animation
     // behaves the same however dense the mesh is.
     var frac = TAIL_TOP + (TAIL_BOTTOM - TAIL_TOP) * Math.pow(scrollP, 1.25);
-    ctx.clearRect(0, 0, W, H);
+
+    // Chase the scroll target rather than snap to it: touch scroll arrives in
+    // lumps, and a lerp turns those into a smooth push.
+    zoom += ((1 + ZOOM * scrollP) - zoom) * Math.min(1, dt * ZOOM_EASE);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    applyZoom();
     for (var k = 0; k < walkers.length; k++) {
       var w = walkers[k];
       if (!reduced) w.head += (w.far / TRAVERSE) * dt;

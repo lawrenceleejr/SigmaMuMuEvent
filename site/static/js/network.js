@@ -758,8 +758,9 @@
     // running its own traversal (the website's flood) arrives from either end
     // and says which with `rev`. Reversing the points strokes the identical
     // path backwards, so nothing shifts when the line completes.
+    const rev = !!o.rev;
     const base = pathPoints(net, e);
-    const pts = o.rev ? (e.__ptsR || (e.__ptsR = base.slice().reverse())) : base;
+    const pts = rev ? (e.__ptsR || (e.__ptsR = base.slice().reverse())) : base;
     let dash = null, color, lw;
     if (e.type === 'h') {
       dash = [6.5 * s, 6.5 * s];
@@ -778,22 +779,23 @@
     stroke(ctx, pts, frac);
     ctx.setLineDash([]);
 
-    if (frac >= 1) {
-      const rr = 1.8 * (0.72 + 0.5 * s);
-      const q = 3.4 * (0.72 + 0.5 * s);
-      ctx.fillStyle = rgba(INK, 0.92 * t);
-      ctx.strokeStyle = rgba(INK, 0.88 * t);
-      ctx.lineWidth = 1.3 * lwf;
-      const dot = r => { ctx.beginPath(); ctx.arc(r[0], r[1], rr, 0, Math.PI * 2); ctx.fill(); };
-      const cross = r => {
-        ctx.beginPath();
-        ctx.moveTo(r[0] - q, r[1] - q); ctx.lineTo(r[0] + q, r[1] + q);
-        ctx.moveTo(r[0] + q, r[1] - q); ctx.lineTo(r[0] - q, r[1] + q);
-        ctx.stroke();
-      };
-      if (e.xa) cross(net.verts[e.a]); else dot(net.verts[e.a]);
-      if (e.xb) cross(net.verts[e.b]); else dot(net.verts[e.b]);
-    }
+    const rr = 1.8 * (0.72 + 0.5 * s);
+    const q = 3.4 * (0.72 + 0.5 * s);
+    ctx.fillStyle = rgba(INK, 0.92 * t);
+    ctx.strokeStyle = rgba(INK, 0.88 * t);
+    ctx.lineWidth = 1.3 * lwf;
+    const dot = r => { ctx.beginPath(); ctx.arc(r[0], r[1], rr, 0, Math.PI * 2); ctx.fill(); };
+    const cross = r => {
+      ctx.beginPath();
+      ctx.moveTo(r[0] - q, r[1] - q); ctx.lineTo(r[0] + q, r[1] + q);
+      ctx.moveTo(r[0] + q, r[1] - q); ctx.lineTo(r[0] - q, r[1] + q);
+      ctx.stroke();
+    };
+    const mark = (vi, isX) => { if (isX) cross(net.verts[vi]); else dot(net.verts[vi]); };
+    // The vertex a line grows out of is already there before the line is, so its
+    // mark goes down from the first frame. The far end appears on arrival.
+    mark(rev ? e.b : e.a, rev ? e.xb : e.xa);
+    if (frac >= 1) mark(rev ? e.a : e.b, rev ? e.xa : e.xb);
   }
 
   window.SMMNet = { INK: INK, rgba: rgba, rng: rng, build: build, drawEdge: drawEdge };

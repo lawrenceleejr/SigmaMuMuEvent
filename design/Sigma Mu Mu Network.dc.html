@@ -62,7 +62,7 @@ a:hover { color: var(--color-accent); }
 <div style="margin-top:16px;font-size:12px;line-height:1.5;font-weight:500;color:var(--color-neutral-700);max-width:700px;text-wrap:pretty">Donations are warmly welcomed, and sponsorship keeps the evening open to every guest. Contact Lawrence Lee (LLee@utk.edu) or Kiley Kennedy about donations, sponsorship and recruiting.</div>
 </div>
 
-<div data-zone="text" style="position:absolute;left:874px;top:1502px;width:168px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;z-index:2">RSVP · [link]</div>
+<div data-zone="text" style="position:absolute;left:874px;top:1502px;width:200px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;z-index:2">RSVP<br><span style="font-size:10px;letter-spacing:.02em;text-transform:none">hepalumni.muoncollider.us</span></div>
 <div style="position:absolute;inset:0;z-index:2;pointer-events:none"><canvas id="t-qr" style="position:absolute;left:0;top:0;width:100%;height:100%"></canvas></div>
 <div style="position:absolute;inset:0;z-index:4;pointer-events:none;mix-blend-mode:multiply;opacity:.62;background:url('paper-grain.png') center/cover no-repeat"></div>
 <canvas id="t-top" style="position:absolute;left:0;top:0;width:1100px;height:1700px;mix-blend-mode:multiply;z-index:3;pointer-events:none"></canvas>
@@ -100,7 +100,7 @@ a:hover { color: var(--color-accent); }
 <div style="margin-top:22px;font-size:32px;font-weight:800;letter-spacing:-.01em;color:var(--color-accent)">Contribute to tomorrow's collider, today.</div>
 </div>
 
-<div data-zone="text" style="position:absolute;left:866px;top:1210px;width:170px;font-size:15px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;z-index:2">RSVP · [link]</div>
+<div data-zone="text" style="position:absolute;left:866px;top:1210px;width:200px;font-size:15px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;z-index:2">RSVP<br><span style="font-size:12px;letter-spacing:.02em;text-transform:none">hepalumni.muoncollider.us</span></div>
 <div style="position:absolute;inset:0;z-index:2;pointer-events:none"><canvas id="i-qr" style="position:absolute;left:0;top:0;width:100%;height:100%"></canvas></div>
 <div style="position:absolute;inset:0;z-index:4;pointer-events:none;mix-blend-mode:multiply;opacity:.62;background:url('paper-grain.png') center/cover no-repeat"></div>
 <canvas id="i-top" style="position:absolute;left:0;top:0;width:1080px;height:1350px;mix-blend-mode:multiply;z-index:3;pointer-events:none"></canvas>
@@ -110,6 +110,40 @@ a:hover { color: var(--color-accent); }
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;animated&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Motion&quot;},&quot;density&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1,&quot;min&quot;:0.4,&quot;max&quot;:1.6,&quot;step&quot;:0.1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Network&quot;},&quot;inkBite&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0,&quot;min&quot;:0,&quot;max&quot;:1.4,&quot;step&quot;:0.05,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Paper&quot;},&quot;lineTone&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0.82,&quot;min&quot;:0.4,&quot;max&quot;:1,&quot;step&quot;:0.02,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Network&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#ec3013&quot;,&quot;options&quot;:[&quot;#ec3013&quot;,&quot;#b8240e&quot;,&quot;#201e1d&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Colour&quot;}}">
+// A real QR for https://hepalumni.muoncollider.us, generated with segno (version 3,
+// error correction M). Regenerate it if the address ever changes.
+const QR = [
+  '11111110100101110011101111111',
+  '10000010101011001000101000001',
+  '10111010010000001010101011101',
+  '10111010111000110101001011101',
+  '10111010011110101001001011101',
+  '10000010000001011111101000001',
+  '11111110101010101010101111111',
+  '00000000110110011111000000000',
+  '10110111001111011110001001011',
+  '01000001001111110111111110001',
+  '01000110011011000110011000110',
+  '00100001111110001001101000001',
+  '01101110111010110100100001100',
+  '10000001010100100001011000111',
+  '00111010110111000011111000111',
+  '00111100100010100010100010010',
+  '10010010010110101011110011010',
+  '01101000111100110100100101110',
+  '10011111110001111010001110100',
+  '00010101100001101111010000100',
+  '01101110011101100110111111100',
+  '00000000111110001010100011111',
+  '11111110100110100111101011010',
+  '10000010101101110001100011011',
+  '10111010010000000100111110110',
+  '10111010101000010101110111001',
+  '10111010100101001011100100101',
+  '10000010010101000000101011010',
+  '11111110110010001011101110010',
+];
+
 const SHEETS = [
   {
     key: 't', w: 1100, h: 1700, still: true, spacing: 33, keep: 0.72, speed: 180,
@@ -229,7 +263,11 @@ class Component extends DCLogic {
                width: r.width * 0.78, height: r.height * 0.235 });
       }
     }
-    out.push({ x: cfg.qr.x - 6, y: cfg.qr.y - 6, w: cfg.qr.s + 12, h: cfg.qr.s + 12 });
+    // A QR needs four clear modules around it to scan, so the mesh is held
+    // off that margin rather than off the code alone.
+    const qz = (cfg.qr.s / QR.length) * 4 + 6;
+    out.push({ x: cfg.qr.x - qz, y: cfg.qr.y - qz,
+               w: cfg.qr.s + qz * 2, h: cfg.qr.s + qz * 2 });
     return out.length > 5 ? out : null;
   }
 
@@ -333,22 +371,14 @@ class Component extends DCLogic {
     const qctx = this.ctxFor(cfg.key + '-qr', W, H, this.dpr());
     if (!qctx) return;
     qctx.clearRect(0, 0, W, H);
-    const q = cfg.qr, N = 25, m = q.s / N;
+    const q = cfg.qr, N = QR.length, m = q.s / N;
     qctx.fillStyle = '#201e1d';
-    const Q = window.SMMNet.rng(71);
-    for (let a = 0; a < N; a++) {
-      for (let b = 0; b < N; b++) {
-        const inF = (a < 8 && b < 8) || (a > N - 9 && b < 8) || (a < 8 && b > N - 9);
-        if (inF || Q() > 0.48) continue;
-        qctx.fillRect(q.x + a * m, q.y + b * m, m, m);
+    for (let b = 0; b < N; b++) {
+      const row = QR[b];
+      for (let a = 0; a < N; a++) {
+        if (row.charCodeAt(a) === 49) qctx.fillRect(q.x + a * m, q.y + b * m, m, m);
       }
     }
-    const finder = (gx, gy) => {
-      qctx.fillRect(q.x + gx * m, q.y + gy * m, 7 * m, 7 * m);
-      qctx.clearRect(q.x + (gx + 1) * m, q.y + (gy + 1) * m, 5 * m, 5 * m);
-      qctx.fillRect(q.x + (gx + 2) * m, q.y + (gy + 2) * m, 3 * m, 3 * m);
-    };
-    finder(0, 0); finder(N - 7, 0); finder(0, N - 7);
   }
 
   commitAll(s, o) {
