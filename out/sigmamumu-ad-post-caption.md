@@ -15,9 +15,8 @@ Were you a particle physicist in a previous career? Work in tech and want to
 reconnect with the friends and physics of your HEP days? Curious about the
 10 TeV muon collider renaissance?
 
-Come for the cocktail hour, circulate the industry µBooths, then let students
-and researchers show you what a muon collider actually takes to build. Cash bar
-with a sponsored drink-ticket pool.
+Come for the cocktail hour, hear the physics case for a 10 TeV muon collider,
+then let students and researchers show you what building one actually takes.
 
 Contribute to tomorrow's collider, today. RSVP → [link]
 
@@ -33,8 +32,6 @@ Sunday 13 December 2026 · 4:30–6:30 p.m. · Stanford University
 The US Muon Collider Collaboration is hosting an evening for physicists who
 left the field for industry — and for the teams they build with now.
 
-- **Industry µBooths** — meet companies working in accelerators, magnets,
-  semiconductors, computing and advanced manufacturing
 - **The physics case for a 10 TeV muon collider** — a short talk on why this
   machine, and why now
 - **Research fair** — students and researchers present the work in progress

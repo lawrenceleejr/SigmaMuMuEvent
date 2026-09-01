@@ -5,8 +5,11 @@
   <section class="pane pane--hero">
     <div class="meta">
       <span>{{ $p.meeting }}</span>
-      <img class="logo" src="{{ "img/usmcc-logo-black.png" | relURL }}"
-           alt="US Muon Collider Collaboration" width="180" height="180">
+      <a class="logo-link" href="{{ $p.usmcc_url }}" rel="noopener"
+         aria-label="US Muon Collider Collaboration">
+        <img class="logo" src="{{ "img/usmcc-logo-black.png" | relURL }}"
+             alt="US Muon Collider Collaboration" width="180" height="180">
+      </a>
     </div>
 
     <h1 class="lockup" aria-label="sigma mu mu"><span class="sig">σ</span><span class="mumu">μμ</span></h1>
@@ -29,11 +32,18 @@
 
     <p class="cta">{{ $p.cta }}</p>
 
-    {{ if $p.rsvp_url }}
-      <p><a class="button" href="{{ $p.rsvp_url }}">{{ $p.rsvp_label }}</a></p>
-    {{ else }}
-      <p class="rsvp-pending">{{ $p.rsvp_label }} — link to follow</p>
-    {{ end }}
+    <p class="actions">
+      {{ if $p.rsvp_url }}
+        <a class="button" href="{{ $p.rsvp_url }}">{{ $p.rsvp_label }}</a>
+      {{ else }}
+        <span class="pending">{{ $p.rsvp_label }} — link to follow</span>
+      {{ end }}
+      {{ if $p.agenda_url }}
+        <a class="button button--quiet" href="{{ $p.agenda_url }}">{{ $p.agenda_label }}</a>
+      {{ else }}
+        <span class="pending">{{ $p.agenda_label }} — link to follow</span>
+      {{ end }}
+    </p>
   </section>
 
   {{ with $p.programme }}
@@ -59,7 +69,19 @@
 
   <footer class="pane pane--foot">
     <p>US Muon Collider Collaboration · <span class="keep">σμμ</span> · {{ $p.dateline }}</p>
-    <p class="fine">Alongside the USMCC annual meeting at Stanford University.</p>
+    {{ with $p.social }}
+    <ul class="social">
+      {{ range . }}
+        {{ if .url }}
+          <li><a href="{{ .url }}" rel="noopener">{{ .name }}</a></li>
+        {{ else }}
+          <li><span class="pending">{{ .name }}</span></li>
+        {{ end }}
+      {{ end }}
+    </ul>
+    {{ end }}
+    <p class="fine">Alongside the USMCC annual meeting at Stanford University.
+      <a href="{{ $p.usmcc_url }}" rel="noopener">muoncollider.us</a></p>
   </footer>
 
 </main>

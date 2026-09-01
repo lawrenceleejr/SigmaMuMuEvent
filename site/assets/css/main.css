@@ -183,14 +183,37 @@ main {
 }
 .button:hover, .button:focus-visible { background: var(--accent); }
 
-.rsvp-pending {
-  margin: 1rem 0 0;
+.button--quiet {
+  background: none;
+  color: var(--ink);
+  border: 1px solid rgba(32, 30, 29, 0.35);
+}
+.button--quiet:hover, .button--quiet:focus-visible {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+/* Anything not yet linked reads as pending rather than as a dead link. */
+.pending {
   font-family: var(--mono);
   font-size: 0.78rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--muted);
 }
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.9rem 1.6rem;
+  margin: 1.2rem 0 0;
+}
+
+.logo-link { display: block; line-height: 0; }
+.logo-link:hover .logo, .logo-link:focus-visible .logo { opacity: 0.72; }
+.logo { transition: opacity 0.15s ease; }
 
 /* ---- programme ---------------------------------------------------------- */
 h2 {
@@ -228,6 +251,9 @@ h2 {
 .prose p { max-width: var(--measure); text-wrap: pretty; }
 .prose h2:not(:first-child) { margin-top: 2.2rem; }
 .prose a { color: var(--accent); text-underline-offset: 0.18em; }
+.prose ul { max-width: var(--measure); padding-left: 1.1rem; }
+.prose li { margin: 0.35rem 0; }
+.prose li::marker { color: var(--accent); }
 
 /* ---- footer ------------------------------------------------------------- */
 .pane--foot {
@@ -237,9 +263,21 @@ h2 {
   text-transform: uppercase;
 }
 .pane--foot p { margin: 0; }
+.pane--foot a { color: var(--accent); }
 /* Greek inside an uppercased line has to opt out, or σμμ sets as ΣΜΜ */
 .keep { text-transform: none; font-family: var(--math); font-size: 1.15em; }
-.fine { margin-top: 0.5rem; color: var(--muted); text-transform: none; letter-spacing: 0; }
+.social {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.4rem;
+  margin: 1rem 0 0.35rem;
+  padding: 0;
+  list-style: none;
+}
+.social a { color: var(--ink); text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+.social a:hover { color: var(--accent); }
+
+.fine { margin-top: 0.9rem; color: var(--muted); text-transform: none; letter-spacing: 0; }
 
 /* ---- fallbacks and motion ---------------------------------------------- */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
