@@ -35,9 +35,15 @@ files are earlier explorations from the same canvas.
 Fonts, the USMCC logo and the DC runtime's React build are vendored under
 `design/assets/`, so a sheet renders identically with no network access.
 
+The sheet is cream (`--color-bg: #f5f0e1` in the design system) with
+`design/paper-grain.png` laid over the whole board on a multiply layer at 62%
+— mottling, fibres and creases, so the ground reads as stock rather than a
+flat fill. That texture shipped in the original canvas export and was never
+wired up; using it avoids sourcing one with unclear licensing.
+
 Canvas controls (Claude Design's properties panel): `density`, `accent`,
-`animated`, and `inkBite` — a paper-texture pass, off by default; raise it if
-you ever want the sheet roughed up again.
+`animated`, and `inkBite` — a procedural speckle pass, off by default and
+largely superseded by the paper overlay.
 
 ### Every vertex is a real Standard Model vertex
 
