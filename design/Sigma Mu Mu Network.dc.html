@@ -126,6 +126,7 @@ a:hover { color: var(--color-accent); }
 </div>
 
 <div data-zone="text" style="position:absolute;left:874px;top:1502px;width:168px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;z-index:2;filter:url(#ink-fine)">RSVP · [link]</div>
+<div style="position:absolute;inset:0;filter:url(#ink-fine);z-index:2;pointer-events:none"><canvas id="t-qr" style="position:absolute;left:0;top:0;width:100%;height:100%"></canvas></div>
 <canvas id="t-top" style="position:absolute;left:0;top:0;width:1100px;height:1700px;mix-blend-mode:multiply;z-index:3;pointer-events:none"></canvas>
 </div>
 </div>
@@ -163,6 +164,7 @@ a:hover { color: var(--color-accent); }
 </div>
 
 <div data-zone="text" style="position:absolute;left:866px;top:1210px;width:170px;font-size:15px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;z-index:2;filter:url(#ink-fine)">RSVP · [link]</div>
+<div style="position:absolute;inset:0;filter:url(#ink-fine);z-index:2;pointer-events:none"><canvas id="i-qr" style="position:absolute;left:0;top:0;width:100%;height:100%"></canvas></div>
 <canvas id="i-top" style="position:absolute;left:0;top:0;width:1080px;height:1350px;mix-blend-mode:multiply;z-index:3;pointer-events:none"></canvas>
 </div>
 </div>
@@ -196,6 +198,7 @@ a:hover { color: var(--color-accent); }
 </div>
 
 <div data-zone="text" style="position:absolute;left:872px;top:944px;width:160px;font-size:14px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;z-index:2;filter:url(#ink-fine)">RSVP · [link]</div>
+<div style="position:absolute;inset:0;filter:url(#ink-fine);z-index:2;pointer-events:none"><canvas id="a-qr" style="position:absolute;left:0;top:0;width:100%;height:100%"></canvas></div>
 <canvas id="a-top" style="position:absolute;left:0;top:0;width:1080px;height:1080px;mix-blend-mode:multiply;z-index:3;pointer-events:none"></canvas>
 </div>
 </div>
@@ -393,20 +396,23 @@ class Component extends DCLogic {
       ctx.lineTo(fx + Math.cos(a) * L, fy + Math.sin(a) * L);
       ctx.stroke();
     }
+    const qctx = this.ctxFor(cfg.key + '-qr', W, H, 1.5);
+    if (!qctx) return;
+    qctx.clearRect(0, 0, W, H);
     const q = cfg.qr, N = 25, m = q.s / N;
-    ctx.fillStyle = '#201e1d';
+    qctx.fillStyle = '#201e1d';
     const Q = window.SMMNet.rng(71);
     for (let a = 0; a < N; a++) {
       for (let b = 0; b < N; b++) {
         const inF = (a < 8 && b < 8) || (a > N - 9 && b < 8) || (a < 8 && b > N - 9);
         if (inF || Q() > 0.48) continue;
-        ctx.fillRect(q.x + a * m, q.y + b * m, m, m);
+        qctx.fillRect(q.x + a * m, q.y + b * m, m, m);
       }
     }
     const finder = (gx, gy) => {
-      ctx.fillRect(q.x + gx * m, q.y + gy * m, 7 * m, 7 * m);
-      ctx.clearRect(q.x + (gx + 1) * m, q.y + (gy + 1) * m, 5 * m, 5 * m);
-      ctx.fillRect(q.x + (gx + 2) * m, q.y + (gy + 2) * m, 3 * m, 3 * m);
+      qctx.fillRect(q.x + gx * m, q.y + gy * m, 7 * m, 7 * m);
+      qctx.clearRect(q.x + (gx + 1) * m, q.y + (gy + 1) * m, 5 * m, 5 * m);
+      qctx.fillRect(q.x + (gx + 2) * m, q.y + (gy + 2) * m, 3 * m, 3 * m);
     };
     finder(0, 0); finder(N - 7, 0); finder(0, N - 7);
   }

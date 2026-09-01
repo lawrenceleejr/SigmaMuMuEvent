@@ -5,9 +5,9 @@ mixer — Sunday 13 December 2026, 4:30–6:30 p.m., Stanford campus.
 
 The poster is a Feynman network printed letterpress-style: blue-noise vertices
 triangulated into a planar mesh, thinned into fermion, boson and Higgs lines,
-and grown outward from two seed points. Every stroke wanders slightly, wicks a
-soft halo into the paper and pools where legs meet, so the sheet reads as
-pressed rather than plotted.
+and grown outward from two seed points. Nothing on the sheet is left crisp —
+type, logo, QR and network all take the same ink treatment, so the whole page
+reads as pressed rather than plotted.
 
 ## Deliverables (`out/`)
 
@@ -35,6 +35,25 @@ Fonts, the USMCC logo and the DC runtime's React build are vendored under
 Canvas controls (Claude Design's properties panel): `density`, `inkBite`
 (paper texture), `inkBleed` (how far the ink wicks), `accent`, `animated`.
 
+### How the ink works
+
+Bleed and pooling come from a filter stack rather than per-shape tricks. Each
+inked layer is roughened against fractal noise, blurred, then thresholded on
+alpha so the edge snaps back hard — shapes that come within a blur radius of
+each other fuse, which is what pools the junctions and fills tight counters.
+A wider, softer copy of the same alpha rides underneath as the wick into paper.
+
+Three strengths, because one threshold cannot serve 560px and 11px type:
+
+| Filter | Applied to |
+|---|---|
+| `#ink-type` | display type — the σμμ lockup, the headlines |
+| `#ink-fine` | body copy, small caps, the logo, the QR |
+| `#ink-line` | the network canvases, tuned so hairlines survive the threshold |
+
+Paper texture (uneven inking, tooth and fibres) sits above everything on an
+unfiltered multiply layer — that is paper, not ink.
+
 ### House rules the generator enforces
 
 These are checked, not eyeballed — run `node render/verify_network.mjs`:
@@ -42,7 +61,9 @@ These are checked, not eyeballed — run `node render/verify_network.mjs`:
 - **at most four legs per vertex**
 - **no two legs of one vertex closer than 30°**
 - every component large enough to read as a diagram (no floating stubs)
-- points confined to a rounded rectangle, so the corners of the sheet breathe
+- points confined to a rounded rectangle whose radius wobbles around the arc,
+  so the corner reads struck by hand — a small nick, with the mesh running
+  right up into it
 
 ## Rendering
 
