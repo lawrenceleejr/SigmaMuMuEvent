@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/modernist-5373e003-9a82-41d2-b26a-771ed760b25f/styles.css">
+<script src="_ds/modernist-5373e003-9a82-41d2-b26a-771ed760b25f/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Libertinus+Math&family=Source+Code+Pro:wght@500;600&display=swap">
+<script src="network.js"></script>
+<style>
+@font-face {
+  font-family: 'KaTeX Math';
+  src: url(https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/fonts/KaTeX_Math-Italic.woff2) format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+}
+body { margin: 0; background: var(--color-neutral-300); }
+a { color: var(--color-accent); text-decoration: none; }
+a:hover { color: var(--color-accent); }
+</style>
+</helmet>
+
+<div style="display:flex;flex-direction:row;align-items:flex-start;gap:96px;padding:72px;background:var(--color-neutral-300);font-family:Archivo,sans-serif">
+
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--color-neutral-700)">Tabloid 11 × 17 in · print master</div>
+<div id="t-sheet" data-screen-label="TABLOID" style="position:relative;width:1100px;height:1700px;background:var(--color-bg);overflow:hidden;color:var(--color-text)">
+<canvas id="t-grow" style="position:absolute;left:0;top:0;width:1100px;height:1700px;z-index:1"></canvas>
+<canvas id="t-front" style="position:absolute;left:0;top:0;width:1100px;height:1700px;z-index:1"></canvas>
+
+<div data-zone="text" style="position:absolute;left:64px;top:48px;width:972px;display:flex;justify-content:space-between;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;z-index:2">
+<span>USMCC Annual Meeting · Stanford</span>
+<img id="t-logo" src="https://www.muoncollider.us/resources/USMCCLogo_color_black.png" alt="US Muon Collider Collaboration" style="height:220px;width:auto;display:block">
+</div>
+
+<div style="position:absolute;left:60px;top:104px;width:1000px;line-height:.8;font-family:'Libertinus Math','KaTeX Math',serif;font-weight:400;letter-spacing:0;z-index:2">
+<span id="t-sigma" style="font-size:560px">σ</span><span id="t-mumu" style="position:relative;top:66px;left:6px;font-size:270px">μμ</span>
+</div>
+
+<div data-zone="text" style="position:absolute;left:64px;top:664px;font-size:50px;font-weight:800;letter-spacing:-.015em;text-transform:uppercase;z-index:2">A Physics × Industry Mixer</div>
+<div data-zone="text" style="position:absolute;left:64px;top:748px;font-size:18px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent);z-index:2">Cocktail hour · Research fair</div>
+
+<div data-zone="text" style="position:absolute;left:64px;top:822px;width:532px;display:flex;flex-direction:column;gap:16px;z-index:2">
+<div style="display:flex;gap:16px;align-items:baseline"><span style="flex:0 0 auto;font-family:'Source Code Pro',monospace;font-size:14px;font-weight:600;letter-spacing:0;color:var(--color-accent)">if</span><span style="font-size:21px;line-height:1.16;font-weight:500;text-wrap:pretty">Were you a particle physicist in your previous career?</span></div>
+<div style="display:flex;gap:16px;align-items:baseline"><span style="flex:0 0 auto;font-family:'Source Code Pro',monospace;font-size:14px;font-weight:600;letter-spacing:0;color:var(--color-accent)">&&</span><span style="font-size:21px;line-height:1.16;font-weight:500;text-wrap:pretty">Work in tech and want to reconnect with your HEP PhD?</span></div>
+<div style="display:flex;gap:16px;align-items:baseline"><span style="flex:0 0 auto;font-family:'Source Code Pro',monospace;font-size:14px;font-weight:600;letter-spacing:0;color:var(--color-accent)">&&</span><span style="font-size:21px;line-height:1.16;font-weight:500;text-wrap:pretty">Curious about the 10 TeV muon collider renaissance?</span></div>
+<div style="display:flex;gap:16px;align-items:baseline"><span style="flex:0 0 auto;font-family:'Source Code Pro',monospace;font-size:14px;font-weight:600;letter-spacing:0;color:var(--color-accent)">&&</span><span style="font-size:21px;line-height:1.16;font-weight:500;text-wrap:pretty">Want to help build or fund tomorrow's energy frontier?</span></div>
+</div>
+
+<div data-zone="text" style="position:absolute;left:64px;top:1306px;width:782px;z-index:2">
+<div style="font-size:50px;line-height:1;font-weight:800;letter-spacing:-.015em;text-transform:uppercase">Sunday 13 December 2026</div>
+<div style="margin-top:12px;font-size:18px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700)">4:30 – 6:30 p.m. · Stanford Campus</div>
+<div style="margin-top:26px;font-size:28px;font-weight:800;letter-spacing:-.01em;color:var(--color-accent)">Contribute to tomorrow's collider, today.</div>
+<div style="margin-top:16px;font-size:12px;line-height:1.5;font-weight:500;color:var(--color-neutral-700);max-width:700px;text-wrap:pretty">Cash bar with a sponsored drink-ticket program. Sponsorship keeps the mixer free for every industry guest — get in touch about sponsorship and recruiting opportunities.</div>
+</div>
+
+<div data-zone="text" style="position:absolute;left:874px;top:1502px;width:168px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;z-index:2">RSVP · [link]</div>
+<canvas id="t-top" style="position:absolute;left:0;top:0;width:1100px;height:1700px;mix-blend-mode:multiply;z-index:3;pointer-events:none"></canvas>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--color-neutral-700)">Instagram 1080 × 1350</div>
+<div id="i-sheet" data-screen-label="INSTAGRAM" style="position:relative;width:1080px;height:1350px;background:var(--color-bg);overflow:hidden;color:var(--color-text)">
+<canvas id="i-grow" style="position:absolute;left:0;top:0;width:1080px;height:1350px;z-index:1"></canvas>
+<canvas id="i-front" style="position:absolute;left:0;top:0;width:1080px;height:1350px;z-index:1"></canvas>
+
+<div data-zone="text" style="position:absolute;left:56px;top:44px;width:968px;display:flex;justify-content:space-between;align-items:flex-start;font-size:20px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;z-index:2">
+<span>USMCC Annual Meeting · Stanford</span>
+<img id="i-logo" src="https://www.muoncollider.us/resources/USMCCLogo_color_black.png" alt="US Muon Collider Collaboration" style="height:184px;width:auto;display:block">
+</div>
+
+<div style="position:absolute;left:52px;top:110px;width:1000px;line-height:.8;font-family:'Libertinus Math','KaTeX Math',serif;font-weight:400;letter-spacing:0;z-index:2">
+<span id="i-sigma" style="font-size:400px">σ</span><span id="i-mumu" style="position:relative;top:50px;left:4px;font-size:195px">μμ</span>
+</div>
+
+<div data-zone="text" style="position:absolute;left:56px;top:522px;font-size:52px;font-weight:800;letter-spacing:-.015em;text-transform:uppercase;z-index:2">A Physics × Industry Mixer</div>
+<div data-zone="text" style="position:absolute;left:56px;top:600px;font-size:22px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent);z-index:2">Cocktail hour · Research fair</div>
+
+<div data-zone="text" style="position:absolute;left:56px;top:668px;width:740px;display:flex;flex-direction:column;gap:18px;z-index:2">
+<div style="display:flex;gap:18px;align-items:baseline"><span style="flex:0 0 auto;font-family:'Source Code Pro',monospace;font-size:19px;font-weight:600;letter-spacing:0;color:var(--color-accent)">if</span><span style="font-size:27px;line-height:1.16;font-weight:500;text-wrap:pretty">Were you a particle physicist in your previous career?</span></div>
+<div style="display:flex;gap:18px;align-items:baseline"><span style="flex:0 0 auto;font-family:'Source Code Pro',monospace;font-size:19px;font-weight:600;letter-spacing:0;color:var(--color-accent)">&&</span><span style="font-size:27px;line-height:1.16;font-weight:500;text-wrap:pretty">Work in tech and want to reconnect with your HEP PhD?</span></div>
+<div style="display:flex;gap:18px;align-items:baseline"><span style="flex:0 0 auto;font-family:'Source Code Pro',monospace;font-size:19px;font-weight:600;letter-spacing:0;color:var(--color-accent)">&&</span><span style="font-size:27px;line-height:1.16;font-weight:500;text-wrap:pretty">Curious about the 10 TeV muon collider renaissance?</span></div>
+<div style="display:flex;gap:18px;align-items:baseline"><span style="flex:0 0 auto;font-family:'Source Code Pro',monospace;font-size:19px;font-weight:600;letter-spacing:0;color:var(--color-accent)">&&</span><span style="font-size:27px;line-height:1.16;font-weight:500;text-wrap:pretty">Want to help build or fund tomorrow's energy frontier?</span></div>
+</div>
+
+<div data-zone="text" style="position:absolute;left:56px;top:1040px;width:780px;z-index:2">
+<div style="font-size:52px;line-height:1;font-weight:800;letter-spacing:-.015em;text-transform:uppercase">Sunday 13 December 2026</div>
+<div style="margin-top:12px;font-size:22px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700)">4:30 – 6:30 p.m. · Stanford Campus</div>
+<div style="margin-top:22px;font-size:32px;font-weight:800;letter-spacing:-.01em;color:var(--color-accent)">Contribute to tomorrow's collider, today.</div>
+</div>
+
+<div data-zone="text" style="position:absolute;left:866px;top:1210px;width:170px;font-size:15px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;z-index:2">RSVP · [link]</div>
+<canvas id="i-top" style="position:absolute;left:0;top:0;width:1080px;height:1350px;mix-blend-mode:multiply;z-index:3;pointer-events:none"></canvas>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;animated&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Motion&quot;},&quot;density&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1,&quot;min&quot;:0.4,&quot;max&quot;:1.6,&quot;step&quot;:0.1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Network&quot;},&quot;inkBite&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0.35,&quot;min&quot;:0,&quot;max&quot;:1.4,&quot;step&quot;:0.05,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Letterpress&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#ec3013&quot;,&quot;options&quot;:[&quot;#ec3013&quot;,&quot;#b8240e&quot;,&quot;#201e1d&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Letterpress&quot;}}">
+const SHEETS = [
+  {
+    key: 't', w: 1100, h: 1700, marks: true, still: true, spacing: 40, keep: 0.72, speed: 135,
+    qr: { x: 874, y: 1326, s: 168 },
+    mark: [['t-sigma', 560], ['t-mumu', 270]], logo: 't-logo',
+    seeds: [
+      { x: 862, y: 300 },
+      { x: 250, y: 1120 }
+    ],
+    bands: [620, 1180, 1.5, 0.95, 0.5]
+  },
+  {
+    key: 'i', w: 1080, h: 1350, marks: false, spacing: 38, keep: 0.72, speed: 125,
+    qr: { x: 866, y: 1040, s: 158 },
+    mark: [['i-sigma', 400], ['i-mumu', 195]], logo: 'i-logo',
+    seeds: [
+      { x: 858, y: 250 },
+      { x: 210, y: 890 }
+    ],
+    bands: [470, 940, 1.3, 0.85, 0.45]
+  }
+];
+
+class Component extends DCLogic {
+  componentDidMount() { this.state1 = {}; this.wait(0); }
+  componentDidUpdate() { this.boot(); }
+  componentWillUnmount() { this.dead = true; if (this.raf) cancelAnimationFrame(this.raf); }
+
+  wait(n) {
+    if (this.dead) return;
+    if (window.SMMNet) {
+      const go = () => { if (!this.dead) this.boot(); };
+      const imgs = Array.prototype.slice.call(document.querySelectorAll('img')).map(im =>
+        im.complete ? Promise.resolve() : new Promise(res => { im.onload = res; im.onerror = res; }));
+      if (document.fonts && document.fonts.load) {
+        Promise.all(imgs.concat([
+          document.fonts.load('400 560px "Libertinus Math"'),
+          document.fonts.load('400 560px "KaTeX Math"'),
+          document.fonts.ready
+        ])).then(go, go);
+      } else go();
+      return;
+    }
+    if (n > 80) return;
+    setTimeout(() => this.wait(n + 1), 80);
+  }
+
+  opts() {
+    return {
+      accent: this.props.accent ?? '#ec3013',
+      bite: this.props.inkBite ?? 0.35,
+      density: this.props.density ?? 1,
+      anim: this.props.animated !== false
+    };
+  }
+
+  measureZones(cfg) {
+    const sheet = document.getElementById(cfg.key + '-sheet');
+    if (!sheet) return null;
+    const sr = sheet.getBoundingClientRect();
+    const k = sr.width / cfg.w || 1;
+    const out = [];
+    const push = r => {
+      if (!r || r.width < 3 || r.height < 3) return;
+      out.push({ x: (r.left - sr.left) / k, y: (r.top - sr.top) / k, w: r.width / k, h: r.height / k });
+    };
+    sheet.querySelectorAll('[data-zone="text"]').forEach(el => {
+      const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
+      let n;
+      while ((n = walk.nextNode())) {
+        if (!n.nodeValue || !n.nodeValue.trim()) continue;
+        const rg = document.createRange();
+        rg.selectNodeContents(n);
+        const rects = rg.getClientRects();
+        for (let i = 0; i < rects.length; i++) push(rects[i]);
+      }
+    });
+    const probe = document.createElement('canvas').getContext('2d');
+    cfg.mark.forEach(pair => {
+      const el = document.getElementById(pair[0]);
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      probe.font = '400 ' + pair[1] + 'px "Libertinus Math", "KaTeX Math", serif';
+      const m = probe.measureText(el.textContent);
+      if (m.actualBoundingBoxAscent == null || m.fontBoundingBoxAscent == null) { push(r); return; }
+      const x0 = (r.left - sr.left) / k, y0 = (r.top - sr.top) / k;
+      const baseline = y0 + m.fontBoundingBoxAscent;
+      out.push({
+        x: x0 - m.actualBoundingBoxLeft,
+        y: baseline - m.actualBoundingBoxAscent,
+        w: m.actualBoundingBoxRight + m.actualBoundingBoxLeft,
+        h: m.actualBoundingBoxAscent + m.actualBoundingBoxDescent
+      });
+    });
+    if (cfg.logo) {
+      const lg = document.getElementById(cfg.logo);
+      if (lg) {
+        const r = lg.getBoundingClientRect();
+        const inx = r.width * 0.1, iny = r.height * 0.06;
+        push({ left: r.left + inx, top: r.top + iny, width: r.width - inx * 2, height: r.height - iny * 2 });
+      }
+    }
+    out.push({ x: cfg.qr.x - 6, y: cfg.qr.y - 6, w: cfg.qr.s + 12, h: cfg.qr.s + 12 });
+    return out.length > 5 ? out : null;
+  }
+
+  ctxFor(id, w, h, dpr) {
+    const c = document.getElementById(id);
+    if (!c) return null;
+    const pw = Math.round(w * dpr), ph = Math.round(h * dpr);
+    if (c.width !== pw || c.height !== ph) { c.width = pw; c.height = ph; }
+    const ctx = c.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return ctx;
+  }
+
+  boot() {
+    const o = this.opts();
+    this.sheets = SHEETS.map(cfg => {
+      const b = cfg.bands;
+      const scaleAt = y => (y < b[0] ? b[2] : y < b[1] ? b[3] : b[4]);
+      const net = window.SMMNet.build({
+        w: cfg.w, h: cfg.h, zones: this.measureZones(cfg) || [], seeds: cfg.seeds, seed: 7,
+        spacing: cfg.spacing / Math.max(0.5, o.density), keep: cfg.keep, speed: cfg.speed,
+        clearance: 6, clearanceAt: y => (y < cfg.h * 0.66 ? 18 : 6), scaleAt: scaleAt, higgsQuads: 5
+      });
+      const s = {
+        cfg: cfg, net: net, drawn: new Uint8Array(net.edges.length), head: 0, cycle: -1,
+        grow: this.ctxFor(cfg.key + '-grow', cfg.w, cfg.h, 1.5),
+        front: this.ctxFor(cfg.key + '-front', cfg.w, cfg.h, 1.5)
+      };
+      if (s.grow) s.grow.clearRect(0, 0, cfg.w, cfg.h);
+      if (s.front) s.front.clearRect(0, 0, cfg.w, cfg.h);
+      this.drawTop(cfg, o);
+      return s;
+    });
+    this.t0 = performance.now();
+    this.sheets.forEach(s => { if (!o.anim || s.cfg.still) this.commitAll(s, o); });
+    if (o.anim && !this.raf) this.raf = requestAnimationFrame(t => this.loop(t));
+  }
+
+  drawTop(cfg, o) {
+    const ctx = this.ctxFor(cfg.key + '-top', cfg.w, cfg.h, 1.5);
+    if (!ctx) return;
+    const W = cfg.w, H = cfg.h;
+    ctx.clearRect(0, 0, W, H);
+    const R = window.SMMNet.rng(91), rgba = window.SMMNet.rgba;
+    const n = Math.floor((W * H) / 1600 * o.bite);
+    for (let i = 0; i < n; i++) {
+      ctx.fillStyle = rgba('#201e1d', 0.03 + R() * 0.08);
+      ctx.fillRect(Math.floor(R() * W), Math.floor(R() * H), R() < 0.12 ? 2 : 1, 1);
+    }
+    if (cfg.marks) {
+      ctx.strokeStyle = rgba(o.accent, 0.9);
+      ctx.lineWidth = 1;
+      [[27, 27], [W - 27, 27], [27, H - 27], [W - 27, H - 27]].forEach(c => {
+        ctx.beginPath();
+        ctx.moveTo(c[0] - 22, c[1]); ctx.lineTo(c[0] + 22, c[1]);
+        ctx.moveTo(c[0], c[1] - 22); ctx.lineTo(c[0], c[1] + 22);
+        ctx.stroke();
+        ctx.beginPath(); ctx.arc(c[0], c[1], 8, 0, Math.PI * 2); ctx.stroke();
+      });
+    }
+    const q = cfg.qr, N = 25, m = q.s / N;
+    ctx.fillStyle = '#201e1d';
+    const Q = window.SMMNet.rng(71);
+    for (let a = 0; a < N; a++) {
+      for (let b = 0; b < N; b++) {
+        const inF = (a < 8 && b < 8) || (a > N - 9 && b < 8) || (a < 8 && b > N - 9);
+        if (inF || Q() > 0.48) continue;
+        ctx.fillRect(q.x + a * m, q.y + b * m, m, m);
+      }
+    }
+    const finder = (gx, gy) => {
+      ctx.fillRect(q.x + gx * m, q.y + gy * m, 7 * m, 7 * m);
+      ctx.clearRect(q.x + (gx + 1) * m, q.y + (gy + 1) * m, 5 * m, 5 * m);
+      ctx.fillRect(q.x + (gx + 2) * m, q.y + (gy + 2) * m, 3 * m, 3 * m);
+    };
+    finder(0, 0); finder(N - 7, 0); finder(0, N - 7);
+  }
+
+  commitAll(s, o) {
+    if (!s.grow) return;
+    s.grow.clearRect(0, 0, s.cfg.w, s.cfg.h);
+    s.net.edges.forEach((e, i) => {
+      window.SMMNet.drawEdge(s.grow, s.net, e, 1, o);
+      s.drawn[i] = 1;
+    });
+    s.head = s.net.edges.length;
+    this.setOpacity(s, 1);
+  }
+
+  setOpacity(s, v) {
+    [s.cfg.key + '-grow', s.cfg.key + '-front'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.opacity = v;
+    });
+  }
+
+  loop(ts) {
+    this.raf = requestAnimationFrame(t => this.loop(t));
+    const o = this.opts();
+    if (!o.anim || !this.sheets) return;
+    if (this.last && ts - this.last < 34) return;
+    this.last = ts;
+    const el = (ts - this.t0) / 1000;
+    this.sheets.forEach(s => { if (!s.cfg.still) this.step(s, el, o); });
+  }
+
+  step(s, el, o) {
+    if (!s.grow) return;
+    const D = s.net.duration, hold = 30, fade = 2, gap = 0.6;
+    const P = D + hold + fade + gap;
+    const cyc = Math.floor(el / P);
+    const u = el - cyc * P;
+    const W = s.cfg.w, H = s.cfg.h;
+
+    if (cyc !== s.cycle) {
+      s.cycle = cyc;
+      s.drawn.fill(0);
+      s.head = 0;
+      s.grow.clearRect(0, 0, W, H);
+      this.setOpacity(s, 1);
+    }
+    if (u > D + hold) {
+      this.setOpacity(s, Math.max(0, 1 - (u - D - hold) / fade));
+      return;
+    }
+
+    const edges = s.net.edges;
+    s.front.clearRect(0, 0, W, H);
+    let j = s.head;
+    while (j < edges.length && edges[j].t0 <= u) {
+      if (!s.drawn[j]) {
+        const e = edges[j];
+        if (e.t1 <= u) {
+          window.SMMNet.drawEdge(s.grow, s.net, e, 1, o);
+          s.drawn[j] = 1;
+        } else {
+          const lin = Math.min(1, (u - e.t0) / Math.max(0.001, e.t1 - e.t0));
+          const f = Math.max(0.02, 1 - Math.pow(1 - lin, 5.5));
+          window.SMMNet.drawEdge(s.front, s.net, e, f, o);
+        }
+      }
+      j++;
+    }
+    while (s.head < edges.length && s.drawn[s.head]) s.head++;
+  }
+
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

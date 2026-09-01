@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/modernist-5373e003-9a82-41d2-b26a-771ed760b25f/styles.css">
+<script src="_ds/modernist-5373e003-9a82-41d2-b26a-771ed760b25f/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Sans:wght@600;700&display=swap">
+<style>
+body { margin: 0; background: var(--color-neutral-300); }
+a { color: var(--color-accent); text-decoration: none; }
+a:hover { color: #b8240e; }
+</style>
+</helmet>
+
+<div style="display:flex;flex-direction:column;gap:80px;padding:80px 80px 140px;background:var(--color-neutral-300);font-family:Archivo,'IBM Plex Sans',sans-serif;align-items:flex-start">
+
+<section data-screen-label="TABLOID" style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;gap:18px;align-items:baseline;font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--color-neutral-700)">
+<span>Tabloid · 11 × 17 in</span><span style="color:var(--color-neutral-700)">print master</span>
+</div>
+<div style="position:relative;width:1100px;height:1700px;background:var(--color-bg);border:1px solid var(--color-neutral-300);overflow:hidden;color:var(--color-text)">
+<canvas id="base-tabloid" style="position:absolute;left:0;top:0;width:1100px;height:1700px"></canvas>
+<canvas id="tracks-tabloid" style="position:absolute;left:0;top:596px;width:1100px;height:470px"></canvas>
+
+<div style="position:absolute;left:64px;top:56px;width:972px;display:flex;justify-content:space-between;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;z-index:2">
+<span>USMCC Annual Meeting · Stanford</span>
+<span>Muon Collider · 10 TeV</span>
+</div>
+<div style="position:absolute;left:64px;top:86px;width:972px;height:2px;background:var(--color-text);z-index:2"></div>
+
+<div style="position:absolute;left:56px;top:112px;width:1000px;z-index:2">
+<div style="position:relative;font-size:380px;line-height:.85;font-weight:900;letter-spacing:-.035em">
+<span style="position:absolute;left:5px;top:6px;color:var(--color-accent);mix-blend-mode:multiply;opacity:.9">σμμ</span>
+<span style="position:relative">σμμ</span>
+</div>
+</div>
+<div style="position:absolute;left:64px;top:466px;font-size:30px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent);z-index:2">Muon Interaction Cross Sections</div>
+<div style="position:absolute;left:64px;top:556px;width:972px;height:2px;background:var(--color-text);z-index:2"></div>
+
+<div style="position:absolute;left:0;top:1066px;width:1100px;height:2px;background:var(--color-text);z-index:2"></div>
+
+<div style="position:absolute;left:64px;top:1104px;width:584px;display:flex;flex-direction:column;gap:18px;z-index:2">
+<div style="display:flex;gap:18px;align-items:baseline">
+<span style="flex:0 0 auto;font-size:13px;font-weight:700;letter-spacing:.1em;color:var(--color-accent-700)">01</span>
+<span style="font-size:24px;line-height:1.16;font-weight:500;text-wrap:pretty">Work in tech and want to reconnect with particle physics?</span>
+</div>
+<div style="display:flex;gap:18px;align-items:baseline">
+<span style="flex:0 0 auto;font-size:13px;font-weight:700;letter-spacing:.1em;color:var(--color-accent-700)">02</span>
+<span style="font-size:24px;line-height:1.16;font-weight:500;text-wrap:pretty">Were you a particle physicist in a past life?</span>
+</div>
+<div style="display:flex;gap:18px;align-items:baseline">
+<span style="flex:0 0 auto;font-size:13px;font-weight:700;letter-spacing:.1em;color:var(--color-accent-700)">03</span>
+<span style="font-size:24px;line-height:1.16;font-weight:500;text-wrap:pretty">Curious about the muon collider renaissance?</span>
+</div>
+<div style="display:flex;gap:18px;align-items:baseline">
+<span style="flex:0 0 auto;font-size:13px;font-weight:700;letter-spacing:.1em;color:var(--color-accent-700)">04</span>
+<span style="font-size:24px;line-height:1.16;font-weight:500;text-wrap:pretty">Want to help build — or fund — tomorrow's energy frontier?</span>
+</div>
+</div>
+
+<div style="position:absolute;left:700px;top:1104px;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-700);z-index:2">μμ cross section · s-channel</div>
+
+<div style="position:absolute;left:0;top:1424px;width:1100px;height:2px;background:var(--color-text);z-index:2"></div>
+
+<div style="position:absolute;left:64px;top:1452px;width:760px;z-index:2">
+<div style="font-size:54px;line-height:1;font-weight:800;letter-spacing:-.015em;text-transform:uppercase">Sunday 13 December 2026</div>
+<div style="margin-top:12px;font-size:19px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700)">16:45 – 19:15 · Stanford Campus</div>
+<div style="margin-top:26px;font-size:28px;font-weight:800;letter-spacing:-.01em;color:var(--color-accent)">Contribute to tomorrow's collider, today.</div>
+<div style="margin-top:16px;font-size:13px;line-height:1.5;font-weight:500;color:var(--color-neutral-700);max-width:700px;text-wrap:pretty">Sponsorship keeps the mixer free for every industry guest. Supporter $500 · Recruiter $1,500 · Partner $3,000 · Headline / Reception $6,000.</div>
+</div>
+<div style="position:absolute;left:868px;top:1620px;width:168px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;z-index:2">RSVP · [link]</div>
+
+<canvas id="grain-tabloid" style="position:absolute;left:0;top:0;width:1100px;height:1700px;mix-blend-mode:multiply;z-index:3;pointer-events:none"></canvas>
+</div>
+</section>
+
+<section data-screen-label="IG-PORTRAIT" style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;gap:18px;align-items:baseline;font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--color-neutral-700)">
+<span>Instagram · 1080 × 1350</span>
+</div>
+<div style="position:relative;width:1080px;height:1350px;background:var(--color-bg);border:1px solid var(--color-neutral-300);overflow:hidden;color:var(--color-text)">
+<canvas id="base-igp" style="position:absolute;left:0;top:0;width:1080px;height:1350px"></canvas>
+<canvas id="tracks-igp" style="position:absolute;left:0;top:470px;width:1080px;height:430px"></canvas>
+
+<div style="position:absolute;left:56px;top:48px;width:968px;display:flex;justify-content:space-between;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;z-index:2">
+<span>USMCC Annual Meeting · Stanford</span>
+<span>10 TeV</span>
+</div>
+<div style="position:absolute;left:56px;top:76px;width:968px;height:2px;background:var(--color-text);z-index:2"></div>
+
+<div style="position:absolute;left:50px;top:104px;width:1000px;z-index:2">
+<div style="position:relative;font-size:300px;line-height:.85;font-weight:900;letter-spacing:-.035em">
+<span style="position:absolute;left:4px;top:5px;color:var(--color-accent);mix-blend-mode:multiply;opacity:.9">σμμ</span>
+<span style="position:relative">σμμ</span>
+</div>
+</div>
+<div style="position:absolute;left:56px;top:384px;font-size:22px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent);z-index:2">Muon Interaction Cross Sections</div>
+<div style="position:absolute;left:56px;top:440px;width:968px;height:2px;background:var(--color-text);z-index:2"></div>
+
+<div style="position:absolute;left:0;top:900px;width:1080px;height:2px;background:var(--color-text);z-index:2"></div>
+
+<div style="position:absolute;left:56px;top:936px;width:620px;display:flex;flex-direction:column;gap:16px;z-index:2">
+<div style="display:flex;gap:16px;align-items:baseline">
+<span style="flex:0 0 auto;font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--color-accent-700)">01</span>
+<span style="font-size:23px;line-height:1.16;font-weight:500;text-wrap:pretty">Were you a particle physicist in a past life?</span>
+</div>
+<div style="display:flex;gap:16px;align-items:baseline">
+<span style="flex:0 0 auto;font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--color-accent-700)">02</span>
+<span style="font-size:23px;line-height:1.16;font-weight:500;text-wrap:pretty">Curious about the muon collider renaissance?</span>
+</div>
+</div>
+
+<div style="position:absolute;left:736px;top:936px;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-700);z-index:2">μμ cross section</div>
+
+<div style="position:absolute;left:56px;top:1174px;width:800px;z-index:2">
+<div style="font-size:38px;line-height:1;font-weight:800;letter-spacing:-.015em;text-transform:uppercase">Sunday 13 December 2026</div>
+<div style="margin-top:10px;font-size:15px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700)">16:45 · Stanford Campus</div>
+<div style="margin-top:18px;font-size:21px;font-weight:800;letter-spacing:-.01em;color:var(--color-accent)">Contribute to tomorrow's collider, today.</div>
+</div>
+<div style="position:absolute;left:928px;top:1284px;width:120px;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;z-index:2">RSVP · [link]</div>
+
+<canvas id="grain-igp" style="position:absolute;left:0;top:0;width:1080px;height:1350px;mix-blend-mode:multiply;z-index:3;pointer-events:none"></canvas>
+</div>
+</section>
+
+<section data-screen-label="LINKEDIN" style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;gap:18px;align-items:baseline;font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--color-neutral-700)">
+<span>LinkedIn · 1200 × 1200</span>
+</div>
+<div style="position:relative;width:1200px;height:1200px;background:var(--color-bg);border:1px solid var(--color-neutral-300);overflow:hidden;color:var(--color-text)">
+<canvas id="base-lis" style="position:absolute;left:0;top:0;width:1200px;height:1200px"></canvas>
+<canvas id="tracks-lis" style="position:absolute;left:0;top:450px;width:1200px;height:350px"></canvas>
+
+<div style="position:absolute;left:60px;top:48px;width:1080px;display:flex;justify-content:space-between;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;z-index:2">
+<span>USMCC Annual Meeting · Stanford</span>
+<span>A Muon Collider Mixer</span>
+</div>
+<div style="position:absolute;left:60px;top:76px;width:1080px;height:2px;background:var(--color-text);z-index:2"></div>
+
+<div style="position:absolute;left:54px;top:98px;width:1100px;z-index:2">
+<div style="position:relative;font-size:290px;line-height:.85;font-weight:900;letter-spacing:-.035em">
+<span style="position:absolute;left:4px;top:5px;color:var(--color-accent);mix-blend-mode:multiply;opacity:.9">σμμ</span>
+<span style="position:relative">σμμ</span>
+</div>
+</div>
+<div style="position:absolute;left:60px;top:368px;font-size:22px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent);z-index:2">Muon Interaction Cross Sections</div>
+<div style="position:absolute;left:60px;top:424px;width:1080px;height:2px;background:var(--color-text);z-index:2"></div>
+
+<div style="position:absolute;left:0;top:800px;width:1200px;height:2px;background:var(--color-text);z-index:2"></div>
+
+<div style="position:absolute;left:60px;top:832px;width:620px;display:flex;flex-direction:column;gap:14px;z-index:2">
+<div style="display:flex;gap:16px;align-items:baseline">
+<span style="flex:0 0 auto;font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--color-accent-700)">01</span>
+<span style="font-size:21px;line-height:1.16;font-weight:500;text-wrap:pretty">Were you a particle physicist in a past life?</span>
+</div>
+<div style="display:flex;gap:16px;align-items:baseline">
+<span style="flex:0 0 auto;font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--color-accent-700)">02</span>
+<span style="font-size:21px;line-height:1.16;font-weight:500;text-wrap:pretty">Want to help build — or fund — tomorrow's energy frontier?</span>
+</div>
+</div>
+
+<div style="position:absolute;left:760px;top:806px;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-700);z-index:2">μμ cross section</div>
+
+<div style="position:absolute;left:60px;top:1038px;width:480px;z-index:2">
+<div style="font-size:30px;line-height:1;font-weight:800;letter-spacing:-.015em;text-transform:uppercase">Sunday 13 December 2026</div>
+<div style="margin-top:10px;font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700)">16:45 · Stanford Campus</div>
+</div>
+<div style="position:absolute;left:600px;top:1038px;width:400px;font-size:22px;line-height:1.1;font-weight:800;letter-spacing:-.01em;color:var(--color-accent);z-index:2">Contribute to tomorrow's collider, today.</div>
+<div style="position:absolute;left:1042px;top:1030px;width:120px;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;z-index:2">RSVP · [link]</div>
+
+<canvas id="grain-lis" style="position:absolute;left:0;top:0;width:1200px;height:1200px;mix-blend-mode:multiply;z-index:3;pointer-events:none"></canvas>
+</div>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1260,&quot;height&quot;:1900},&quot;animated&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Motion&quot;},&quot;inkBite&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0.7,&quot;min&quot;:0,&quot;max&quot;:1.6,&quot;step&quot;:0.1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Letterpress&quot;},&quot;fieldDensity&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1,&quot;min&quot;:0.4,&quot;max&quot;:1.6,&quot;step&quot;:0.1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Letterpress&quot;},&quot;showGrid&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Letterpress&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#ec3013&quot;,&quot;options&quot;:[&quot;#ec3013&quot;,&quot;#b8240e&quot;,&quot;#201e1d&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Letterpress&quot;}}">
+const INK = '#201e1d';
+
+function rand(seed) {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6D2B79F5) >>> 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function rgba(hex, a) {
+  const h = hex.replace('#', '');
+  const n = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : h, 16);
+  return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
+}
+
+const FORMATS = [
+  { id: 'tabloid', w: 1100, h: 1700, m: 64, cols: 12, marks: true,
+    rings: { x: 640, y: 96, w: 460, h: 470 },
+    tracks: { x: 0, y: 596, w: 1100, h: 470 },
+    web: { x: 64, y: 1096, w: 584, h: 300 },
+    sigma: { x: 700, y: 1130, w: 336, h: 264 },
+    lattice: { x: 0, y: 1338, w: 1100, h: 66 },
+    qr: { x: 868, y: 1452, s: 156 } },
+  { id: 'igp', w: 1080, h: 1350, m: 56, cols: 10, marks: false,
+    rings: { x: 620, y: 84, w: 460, h: 400 },
+    tracks: { x: 0, y: 470, w: 1080, h: 430 },
+    web: { x: 56, y: 928, w: 620, h: 200 },
+    sigma: { x: 736, y: 958, w: 288, h: 170 },
+    lattice: { x: 0, y: 1094, w: 1080, h: 54 },
+    qr: { x: 928, y: 1174, s: 100 } },
+  { id: 'lis', w: 1200, h: 1200, m: 60, cols: 12, marks: false,
+    rings: { x: 720, y: 90, w: 480, h: 380 },
+    tracks: { x: 0, y: 450, w: 1200, h: 350 },
+    web: { x: 60, y: 824, w: 620, h: 180 },
+    sigma: { x: 760, y: 826, w: 300, h: 176 },
+    lattice: { x: 0, y: 964, w: 1200, h: 48 },
+    qr: { x: 1042, y: 1042, s: 96 } }
+];
+
+class Component extends DCLogic {
+  componentDidMount() {
+    this.t0 = performance.now();
+    this.cache = {};
+    const go = () => { if (!this.dead) { this.setupAll(); this.observe(); this.loop(this.t0); } };
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(go); else go();
+  }
+  componentDidUpdate() { this.cache = {}; this.setupAll(); }
+  componentWillUnmount() {
+    this.dead = true;
+    if (this.raf) cancelAnimationFrame(this.raf);
+    if (this.io) this.io.disconnect();
+  }
+
+  opts() {
+    return {
+      accent: this.props.accent ?? '#ec3013',
+      bite: this.props.inkBite ?? 0.7,
+      dens: this.props.fieldDensity ?? 1,
+      grid: this.props.showGrid !== false,
+      anim: this.props.animated !== false
+    };
+  }
+
+  observe() {
+    this.vis = {};
+    FORMATS.forEach(f => { this.vis[f.id] = true; });
+    if (typeof IntersectionObserver === 'undefined') return;
+    this.io = new IntersectionObserver(es => {
+      es.forEach(e => { this.vis[e.target.id.replace('tracks-', '')] = e.isIntersecting; });
+    }, { rootMargin: '200px' });
+    FORMATS.forEach(f => {
+      const el = document.getElementById('tracks-' + f.id);
+      if (el) this.io.observe(el);
+    });
+  }
+
+  ctxFor(id, w, h, dpr) {
+    const c = document.getElementById(id);
+    if (!c) return null;
+    const pw = Math.round(w * dpr), ph = Math.round(h * dpr);
+    if (c.width !== pw || c.height !== ph) { c.width = pw; c.height = ph; }
+    const ctx = c.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return ctx;
+  }
+
+  setupAll() {
+    const o = this.opts();
+    FORMATS.forEach(f => {
+      const b = this.ctxFor('base-' + f.id, f.w, f.h, 2);
+      if (b) { b.clearRect(0, 0, f.w, f.h); this.drawBase(b, f, o); }
+      const g = this.ctxFor('grain-' + f.id, f.w, f.h, 1);
+      if (g) { g.clearRect(0, 0, f.w, f.h); this.drawGrain(g, f, o); }
+      if (!o.anim) {
+        const t = this.ctxFor('tracks-' + f.id, f.tracks.w, f.tracks.h, 2);
+        if (t) { t.clearRect(0, 0, f.tracks.w, f.tracks.h); t.globalAlpha = 1; this.drawTracks(t, f, o, 1); }
+      }
+    });
+  }
+
+  loop(ts) {
+    this.raf = requestAnimationFrame(t => this.loop(t));
+    const o = this.opts();
+    if (!o.anim) return;
+    if (this.last && ts - this.last < 42) return;
+    this.last = ts;
+    const T = 16000, u = ((ts - this.t0) % T) / T;
+    let p = 1, a = 1;
+    if (u < 0.44) { const x = u / 0.44; p = 1 - Math.pow(1 - x, 2.6); }
+    else if (u < 0.82) { p = 1; }
+    else if (u < 0.95) { a = 1 - (u - 0.82) / 0.13; }
+    else { a = 0; }
+    FORMATS.forEach(f => {
+      if (this.vis && !this.vis[f.id]) return;
+      const ctx = this.ctxFor('tracks-' + f.id, f.tracks.w, f.tracks.h, 1.5);
+      if (!ctx) return;
+      ctx.clearRect(0, 0, f.tracks.w, f.tracks.h);
+      if (a <= 0) return;
+      ctx.globalAlpha = a;
+      this.drawTracks(ctx, f, o, p);
+    });
+  }
+
+  // ---------- static plates ----------
+  drawBase(ctx, f, o) {
+    if (o.grid) {
+      ctx.strokeStyle = rgba(INK, 0.075);
+      ctx.lineWidth = 1;
+      const iw = f.w - f.m * 2, cw = iw / f.cols;
+      for (let i = 0; i <= f.cols; i++) {
+        const x = Math.round(f.m + i * cw) + 0.5;
+        ctx.beginPath(); ctx.moveTo(x, f.m * 0.5); ctx.lineTo(x, f.h - f.m * 0.5); ctx.stroke();
+      }
+    }
+    this.drawRings(ctx, f.rings, o, 11);
+    this.drawWeb(ctx, f.web, o, 23);
+    this.drawSigma(ctx, f.sigma, o, 37);
+    this.drawLattice(ctx, f.lattice, o, 53);
+    this.drawQR(ctx, f.qr, o, 71);
+    this.drawDetector(ctx, f, o);
+  }
+
+  drawRings(ctx, r, o, seed) {
+    const R = rand(seed);
+    ctx.save();
+    ctx.beginPath(); ctx.rect(r.x, r.y, r.w, r.h); ctx.clip();
+    const cx = r.x + r.w * 0.62, cy = r.y + r.h * 0.58;
+    const max = Math.hypot(r.w, r.h) * 0.95;
+    for (let rad = 46; rad < max; rad += 30) {
+      const a0 = -Math.PI * (0.15 + R() * 0.5), sweep = Math.PI * (0.55 + R() * 1.1);
+      const hot = R() < 0.14;
+      ctx.strokeStyle = hot ? rgba(o.accent, 0.85) : rgba(INK, 0.42);
+      ctx.lineWidth = hot ? 2.4 : (R() < 0.18 ? 2.2 : 1);
+      ctx.beginPath(); ctx.arc(cx, cy, rad, a0, a0 + sweep); ctx.stroke();
+    }
+    ctx.strokeStyle = rgba(INK, 0.22); ctx.lineWidth = 1;
+    for (let i = 0; i < 7; i++) {
+      const a = R() * Math.PI * 2;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(a) * max, cy + Math.sin(a) * max);
+      ctx.lineTo(cx - Math.cos(a) * max, cy - Math.sin(a) * max);
+      ctx.stroke();
+    }
+    ctx.strokeStyle = o.accent; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(cx, cy, 13, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx - 30, cy); ctx.lineTo(cx + 30, cy);
+    ctx.moveTo(cx, cy - 30); ctx.lineTo(cx, cy + 30);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  drawDetector(ctx, f, o) {
+    const t = f.tracks;
+    const cx = t.x + t.w * 0.13, cy = t.y + t.h * 0.93;
+    ctx.save();
+    ctx.beginPath(); ctx.rect(t.x, t.y, t.w, t.h); ctx.clip();
+    for (let i = 1; i <= 6; i++) {
+      const rad = i * (t.h * 0.19);
+      ctx.strokeStyle = rgba(INK, i % 3 === 0 ? 0.2 : 0.1);
+      ctx.lineWidth = i % 3 === 0 ? 2 : 1;
+      ctx.setLineDash(i % 2 ? [] : [3, 6]);
+      ctx.beginPath(); ctx.arc(cx, cy, rad, -Math.PI, 0.02); ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+
+  tracksFor(f, o) {
+    const key = f.id + '|' + o.dens;
+    if (this.cache[key]) return this.cache[key];
+    const t = f.tracks, R = rand(97 + f.w);
+    const ip = { x: t.w * 0.13, y: t.h * 0.93 };
+    const n = Math.round(30 * o.dens);
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      const mom = 0.1 + Math.pow(R(), 1.8) * 0.9;
+      let a = -Math.PI * (0.03 + R() * 0.94);
+      const k = (R() < 0.5 ? -1 : 1) * (0.0022 + 0.03 * Math.pow(1 - mom, 2.2));
+      const step = 5, pts = [[ip.x, ip.y]];
+      let x = ip.x, y = ip.y;
+      const maxLen = 260 + mom * (t.w * 1.15);
+      for (let s = 0; s < maxLen; s += step) {
+        x += Math.cos(a) * step; y += Math.sin(a) * step; a += k * step;
+        if (x < -40 || x > t.w + 40 || y < -40 || y > t.h + 40) break;
+        pts.push([x, y]);
+      }
+      out.push({ pts: pts, lw: 0.55 + mom * 2.3, hot: i % 8 === 3, mom: mom, off: (i * 0.031) % 0.46 });
+    }
+    this.cache[key] = out;
+    return out;
+  }
+
+  drawTracks(ctx, f, o, p) {
+    const t = f.tracks;
+    const tr = this.tracksFor(f, o);
+    ctx.save();
+    ctx.beginPath(); ctx.rect(0, 0, t.w, t.h); ctx.clip();
+    ctx.lineCap = 'round';
+    tr.forEach(k => {
+      const local = Math.max(0, Math.min(1, (p - k.off) / 0.54));
+      if (local <= 0) return;
+      const eased = 1 - Math.pow(1 - local, 2);
+      const nMax = Math.max(2, Math.floor(k.pts.length * eased));
+      ctx.strokeStyle = k.hot ? rgba(o.accent, 0.9) : rgba(INK, 0.34 + k.mom * 0.5);
+      ctx.lineWidth = k.lw;
+      ctx.beginPath();
+      ctx.moveTo(k.pts[0][0], k.pts[0][1]);
+      for (let i = 1; i < nMax; i++) ctx.lineTo(k.pts[i][0], k.pts[i][1]);
+      ctx.stroke();
+      if (k.hot && nMax > 4) {
+        const e = k.pts[nMax - 1];
+        ctx.fillStyle = o.accent;
+        ctx.beginPath(); ctx.arc(e[0], e[1], 3, 0, Math.PI * 2); ctx.fill();
+      }
+    });
+    const ip = { x: t.w * 0.13, y: t.h * 0.93 };
+    ctx.fillStyle = o.accent;
+    ctx.beginPath(); ctx.arc(ip.x, ip.y, 5.5, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = INK; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(0, ip.y); ctx.lineTo(t.w, ip.y); ctx.stroke();
+    ctx.restore();
+  }
+
+  drawSigma(ctx, r, o, seed) {
+    const R = rand(seed);
+    const padL = 34, padB = 30, padT = 26;
+    const px = r.x + padL, pw = r.w - padL, py = r.y + padT, ph = r.h - padT - padB;
+    ctx.save();
+    ctx.strokeStyle = rgba(INK, 0.75); ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(px + 0.5, py); ctx.lineTo(px + 0.5, py + ph); ctx.lineTo(px + pw, py + ph);
+    ctx.stroke();
+    ctx.strokeStyle = rgba(INK, 0.5);
+    for (let i = 1; i <= 5; i++) {
+      const x = px + (pw * i) / 5;
+      ctx.beginPath(); ctx.moveTo(x, py + ph); ctx.lineTo(x, py + ph + 5); ctx.stroke();
+    }
+    for (let i = 0; i < 4; i++) {
+      const y = py + (ph * i) / 4;
+      ctx.beginPath(); ctx.moveTo(px - 5, y); ctx.lineTo(px, y); ctx.stroke();
+    }
+    for (let j = 0; j < 5; j++) {
+      const x0 = 0.16 + j * 0.17, g = 0.018 + R() * 0.05, amp = 0.35 + R() * 0.9;
+      const top = j === 0;
+      ctx.strokeStyle = top ? o.accent : rgba(INK, 0.5);
+      ctx.lineWidth = top ? 2 : 0.8;
+      ctx.beginPath();
+      for (let i = 0; i <= 220; i++) {
+        const u = i / 220;
+        const v = 0.1 / (0.08 + u) + amp * (g * g) / ((u - x0) * (u - x0) + g * g);
+        const y = py + ph - Math.min(1, v / 1.5) * ph * 0.94;
+        const x = px + u * pw;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+    ctx.fillStyle = rgba(INK, 0.7);
+    ctx.font = '700 9px Archivo, sans-serif';
+    ctx.fillText('σ [pb]', r.x, py - 8);
+    ctx.textAlign = 'right';
+    ctx.fillText('Ecm [TeV]', r.x + r.w, py + ph + 20);
+    ctx.restore();
+  }
+
+  drawWeb(ctx, r, o, seed) {
+    const R = rand(seed);
+    const n = Math.round(26 * o.dens), pts = [];
+    for (let i = 0; i < n; i++) pts.push([r.x + R() * r.w, r.y + R() * r.h]);
+    ctx.save();
+    ctx.globalAlpha = 0.2;
+    ctx.strokeStyle = INK; ctx.lineWidth = 0.8;
+    pts.forEach((a, i) => {
+      const near = pts.map((b, j) => [j, Math.hypot(a[0] - b[0], a[1] - b[1])])
+        .filter(d => d[0] !== i).sort((x, y) => x[1] - y[1]).slice(0, 2);
+      near.forEach(d => {
+        const b = pts[d[0]];
+        if (R() < 0.35) {
+          const len = d[1], steps = Math.max(6, Math.floor(len / 5));
+          const nx = -(b[1] - a[1]) / len, ny = (b[0] - a[0]) / len;
+          ctx.beginPath();
+          for (let s = 0; s <= steps; s++) {
+            const u = s / steps;
+            const w = Math.sin(u * Math.PI * 6) * 4;
+            const x = a[0] + (b[0] - a[0]) * u + nx * w, y = a[1] + (b[1] - a[1]) * u + ny * w;
+            if (s === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+        } else {
+          ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+        }
+      });
+    });
+    pts.forEach((a, i) => {
+      ctx.fillStyle = i % 9 === 4 ? o.accent : INK;
+      ctx.beginPath(); ctx.arc(a[0], a[1], 2.2, 0, Math.PI * 2); ctx.fill();
+    });
+    ctx.restore();
+  }
+
+  drawLattice(ctx, r, o, seed) {
+    const R = rand(seed);
+    const cell = 30, cols = Math.ceil(r.w / cell), rows = Math.max(1, Math.floor(r.h / cell));
+    const weights = [400, 500, 600, 700, 800, 900];
+    ctx.save();
+    ctx.beginPath(); ctx.rect(r.x, r.y, r.w, r.h); ctx.clip();
+    ctx.textBaseline = 'alphabetic';
+    for (let ry = 0; ry < rows; ry++) {
+      for (let cxi = 0; cxi < cols; cxi++) {
+        const w = weights[Math.floor(R() * weights.length)];
+        const size = 20 + Math.floor(R() * 12);
+        const x = r.x + cxi * cell + 3, y = r.y + (ry + 1) * (r.h / rows) - 6;
+        ctx.font = w + ' ' + size + 'px Archivo, sans-serif';
+        if (R() < 0.26) { ctx.fillStyle = rgba(o.accent, 0.28); ctx.fillText('μ', x + 1.6, y + 1.6); }
+        ctx.fillStyle = R() < 0.08 ? rgba(o.accent, 0.9) : rgba(INK, 0.72);
+        ctx.fillText('μ', x, y);
+      }
+    }
+    ctx.restore();
+  }
+
+  drawQR(ctx, q, o, seed) {
+    const R = rand(seed);
+    const N = 25, m = q.s / N;
+    ctx.save();
+    ctx.fillStyle = INK;
+    const finder = (gx, gy) => {
+      ctx.fillRect(q.x + gx * m, q.y + gy * m, 7 * m, 7 * m);
+      ctx.clearRect(q.x + (gx + 1) * m, q.y + (gy + 1) * m, 5 * m, 5 * m);
+      ctx.fillRect(q.x + (gx + 2) * m, q.y + (gy + 2) * m, 3 * m, 3 * m);
+    };
+    for (let a = 0; a < N; a++) {
+      for (let b = 0; b < N; b++) {
+        const inF = (a < 8 && b < 8) || (a > N - 9 && b < 8) || (a < 8 && b > N - 9);
+        if (inF || R() > 0.48) continue;
+        ctx.fillRect(q.x + a * m, q.y + b * m, m, m);
+      }
+    }
+    finder(0, 0); finder(N - 7, 0); finder(0, N - 7);
+    ctx.restore();
+  }
+
+  drawGrain(ctx, f, o) {
+    const R = rand(5 + f.w);
+    const n = Math.floor((f.w * f.h) / 1500 * o.bite);
+    ctx.save();
+    for (let i = 0; i < n; i++) {
+      ctx.fillStyle = rgba(INK, 0.03 + R() * 0.09);
+      const s = R() < 0.12 ? 2 : 1;
+      ctx.fillRect(Math.floor(R() * f.w), Math.floor(R() * f.h), s, s);
+    }
+    if (f.marks) {
+      ctx.strokeStyle = rgba(o.accent, 0.9); ctx.lineWidth = 1;
+      const d = 26, off = f.m * 0.42;
+      [[off, off], [f.w - off, off], [off, f.h - off], [f.w - off, f.h - off]].forEach(c => {
+        ctx.beginPath();
+        ctx.moveTo(c[0] - d, c[1]); ctx.lineTo(c[0] + d, c[1]);
+        ctx.moveTo(c[0], c[1] - d); ctx.lineTo(c[0], c[1] + d);
+        ctx.stroke();
+        ctx.beginPath(); ctx.arc(c[0], c[1], 9, 0, Math.PI * 2); ctx.stroke();
+      });
+    }
+    ctx.restore();
+  }
+
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
