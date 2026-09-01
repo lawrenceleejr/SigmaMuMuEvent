@@ -90,13 +90,20 @@ input, select, textarea, button, .i-button {
 }
 .confTitle, .confTitle h1 { overflow-wrap: anywhere; }
 #session-bar, #session-bar .toolbar, #session-bar .group,
-.main-action-bar, .footer .flexrow {
+.main-action-bar, .footer > .flexrow {
   max-width: 100%;
   flex-wrap: wrap;
 }
 
 /* ---- the bar across the top --------------------------------------------- */
-.header,
+/* Scoped deliberately. Indico also uses a bare .header inside the
+   registration form for every section title, so styling .header on its own
+   painted each of those an ink block. Only the wrapper that actually holds
+   the page header counts; :has is the precise form, body > .header the
+   fallback for browsers without it. Either way the inner .page-header below
+   carries the colour, so nothing looks broken if both miss. */
+body > .header,
+.header:has(> .page-header),
 .page-header,
 .page-header-dark,
 .event-page-header {
@@ -126,9 +133,6 @@ input, select, textarea, button, .i-button {
   max-width: 1000px !important;
   margin: clamp(1.5rem, 4vh, 3rem) auto clamp(1rem, 3vh, 1.75rem);
   padding: clamp(1.5rem, 4vw, 2.75rem) clamp(1.25rem, 3vw, 2rem) clamp(1.25rem, 3vw, 1.75rem);
-  background: var(--smm-glass) !important;
-  -webkit-backdrop-filter: blur(15px) saturate(1.25);
-  backdrop-filter: blur(15px) saturate(1.25);
   border: 1px solid var(--smm-hair) !important;
   box-shadow: var(--smm-shadow) !important;
 }
@@ -187,12 +191,35 @@ input, select, textarea, button, .i-button {
 #confSectionsBox { max-width: 1000px !important; margin: 0 auto 3rem; }
 .confBodyBox,
 .conf_leftMenu {
-  background: var(--smm-glass) !important;
-  -webkit-backdrop-filter: blur(15px) saturate(1.25);
-  backdrop-filter: blur(15px) saturate(1.25);
   border: 1px solid var(--smm-hair) !important;
   border-radius: 0 !important;
   box-shadow: var(--smm-shadow) !important;
+}
+
+/* The frost lives on a pseudo-element, not on the pane.
+   An element with backdrop-filter becomes the containing block for its
+   position: fixed descendants, and Indico positions pop-ups — the consent
+   dropdown on the registration form, for one — in viewport coordinates. With
+   the filter on the pane those coordinates resolved against the pane and the
+   menu opened hundreds of pixels away. Putting the filter on ::before keeps
+   the look and leaves the pane an ordinary box: position: relative is a
+   containing block for absolute descendants only, never for fixed ones. */
+.confheader,
+.confBodyBox,
+.conf_leftMenu {
+  position: relative;
+  background: transparent !important;
+}
+.confheader::before,
+.confBodyBox::before,
+.conf_leftMenu::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--smm-glass);
+  -webkit-backdrop-filter: blur(15px) saturate(1.25);
+  backdrop-filter: blur(15px) saturate(1.25);
 }
 .confBodyBox {
   padding: clamp(1.25rem, 3vw, 2.25rem) !important;
@@ -218,7 +245,9 @@ input, select, textarea, button, .i-button {
   box-shadow: none !important;
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .confheader, .confBodyBox, .conf_leftMenu { background: var(--smm-glass-solid) !important; }
+  .confheader::before, .confBodyBox::before, .conf_leftMenu::before {
+    background: var(--smm-glass-solid);
+  }
 }
 
 /* ---- the event menu ----------------------------------------------------- */
@@ -383,9 +412,32 @@ input, select, textarea, button, .i-button {
   outline: 2px solid var(--smm-accent);
   outline-offset: 1px;
 }
-.regform-section .i-box-header {
+.regform-section,
+.regform-section .i-box-header,
+.confBodyBox .i-box-header {
   background: none !important;
+  border-color: var(--smm-rule) !important;
+}
+.regform-section .i-box-header,
+.confBodyBox .i-box-header {
   border-bottom: 1px solid var(--smm-rule) !important;
+}
+/* Indico titles these in blue Roboto; bring them into the palette. */
+.i-box-title,
+.regform-section .header,
+.confBodyBox .i-box-title {
+  color: var(--smm-ink) !important;
+  background: none !important;
+  font-family: var(--smm-sans) !important;
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.2em !important;
+  text-transform: uppercase !important;
+}
+.regform-section .field label,
+.regform-section .header + p,
+.regform-section .description {
+  font-family: var(--smm-sans);
 }
 
 /* ---- tables, timetable, lists ------------------------------------------- */
@@ -404,6 +456,28 @@ input, select, textarea, button, .i-button {
 }
 .i-table tbody tr, .confBodyBox table tbody tr { border-top: 1px solid var(--smm-hair); }
 
+/* Semantic UI renders each registration section as a pale-blue "info message",
+   and everything inside inherits that blue. Recolour the box and the blue goes
+   with it, without having to name each descendant. */
+.confBodyBox .ui.message,
+.confBodyBox .ui.info.message {
+  background: rgba(245, 240, 225, 0.55) !important;
+  color: var(--smm-ink) !important;
+  border: 1px solid var(--smm-rule) !important;
+  border-left: 3px solid var(--smm-accent) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+.confBodyBox .ui.message > .header {
+  color: var(--smm-ink) !important;
+  font-family: var(--smm-sans) !important;
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.2em !important;
+  text-transform: uppercase !important;
+  margin-bottom: 0.5rem !important;
+}
+
 /* ---- messages ----------------------------------------------------------- */
 .flashed-messages .message-box, .i-message {
   background: rgba(245, 240, 225, 0.9) !important;
@@ -414,7 +488,7 @@ input, select, textarea, button, .i-button {
 }
 
 /* ---- footer ------------------------------------------------------------- */
-.footer, .footer .flexrow {
+.footer, .footer > .flexrow {
   background: var(--smm-ink) !important;
   color: rgba(245, 240, 225, 0.75);
   border: 0;
