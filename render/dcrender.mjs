@@ -14,6 +14,7 @@ import { readFile } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import { extname, join, resolve } from 'node:path';
+import { writeFile } from 'node:fs/promises';
 import pw from 'playwright-core';
 const { chromium } = pw;
 
@@ -93,10 +94,29 @@ export async function open(o, port, browser) {
   page.on('console', (m) => { if (m.type() === 'error') errs.push(m.text()); });
   await page.goto(`http://127.0.0.1:${port}/${encodeURI(o.file)}`, { waitUntil: 'load' });
   await page.waitForSelector(`[data-screen-label="${o.screen}"]`, { timeout: 30000 });
+  // a clip never reaches past the viewport, so make the viewport fit the sheet
+  const size = await page.locator(`[data-screen-label="${o.screen}"]`)
+    .evaluate((el) => ({ w: el.offsetWidth, h: el.offsetHeight }));
+  await page.setViewportSize({ width: size.w + 400, height: size.h + 400 });
   // Real time still passes while the clock is frozen, so fonts load and the
   // sketch boots without the animation advancing a single frame.
   await page.waitForTimeout(o.settle);
   return { page, errs };
+}
+
+/* crop a PNG buffer to exactly w x h (the compositor can hand back a stray
+   half pixel on fractional layouts) */
+function exact(buf, w, h) {
+  return new Promise((res, rej) => {
+    const ff = spawn(process.env.FFMPEG || 'ffmpeg', [
+      '-loglevel', 'error', '-i', '-', '-vf', `crop=${w}:${h}:0:0`,
+      '-frames:v', '1', '-f', 'image2pipe', '-c:v', 'png', '-',
+    ], { stdio: ['pipe', 'pipe', 'inherit'] });
+    const out = [];
+    ff.stdout.on('data', (d) => out.push(d));
+    ff.on('close', (c) => (c === 0 ? res(Buffer.concat(out)) : rej(new Error(`crop exited ${c}`))));
+    ff.stdin.end(buf);
+  });
 }
 
 async function main() {
@@ -113,11 +133,16 @@ async function main() {
     const { page, errs } = await open(o, port, browser);
     const art = page.locator(`[data-screen-label="${o.screen}"]`);
     const box = await art.boundingBox();
-    console.log(`[dc] ${o.screen} box ${box.width}x${box.height} @${o.scale}x`);
+    // the element box carries sub-pixel offsets; the artboard's own CSS size is
+    // the true page size, so clip to that and a 3x tabloid lands on 3300x5100
+    const css = await art.evaluate((el) => ({ w: el.offsetWidth, h: el.offsetHeight }));
+    if (!box) throw new Error('artboard has no box');
+    console.log(`[dc] ${o.screen} ${css.w}x${css.h} css @${o.scale}x -> ${css.w * o.scale}x${css.h * o.scale}`);
     if (errs.length) console.log('[dc] page errors:', errs.slice(0, 5).join(' | '));
 
     if (o.mode === 'shot') {
-      await art.screenshot({ path: o.out, type: 'png', timeout: 180000 });
+      const buf = await art.screenshot({ type: 'png', timeout: 180000 });
+      await writeFile(o.out, await exact(buf, css.w * o.scale, css.h * o.scale));
       console.log(`[dc] wrote ${o.out} in ${((Date.now() - t0) / 1000).toFixed(1)}s`);
     } else if (o.mode === 'video') {
       const n = Math.round(o.fps * o.seconds);
@@ -125,8 +150,8 @@ async function main() {
       // the sketch throttles its own redraw at ~34ms, so a step below that
       // would repeat frames; 25fps keeps playback at the designed speed
       if (stepMs < 36) console.log(`[dc] warning: ${o.fps}fps steps ${stepMs.toFixed(1)}ms, below the sketch's 34ms redraw throttle`);
-      const w = Math.round(box.width * o.scale / 2) * 2;
-      const h = Math.round(box.height * o.scale / 2) * 2;
+      const w = Math.round(css.w * o.scale / 2) * 2;
+      const h = Math.round(css.h * o.scale / 2) * 2;
       const ff = spawn(process.env.FFMPEG || 'ffmpeg', [
         '-y', '-f', 'image2pipe', '-framerate', String(o.fps), '-c:v', 'png', '-i', '-',
         '-vf', `scale=${w}:${h}:flags=lanczos`, '-c:v', 'libx264', '-preset', 'slow',
@@ -135,7 +160,8 @@ async function main() {
       ], { stdio: ['pipe', 'inherit', 'inherit'] });
       for (let i = 0; i < n; i++) {
         if (i) await page.clock.runFor(stepMs);
-        const buf = await art.screenshot({ type: 'png', timeout: 120000 });
+        const raw = await art.screenshot({ type: 'png', timeout: 120000 });
+        const buf = await exact(raw, w, h);
         if (!ff.stdin.write(buf)) await once(ff.stdin, 'drain');
         if (i % 30 === 0 || i === n - 1) {
           const el = (Date.now() - t0) / 1000;
