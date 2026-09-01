@@ -67,6 +67,20 @@
     {{ .Content }}
   </section>
 
+  {{ with $p.organizers }}
+  <section class="pane">
+    <h2>Organizers</h2>
+    <ul class="people">
+      {{ range . }}
+      <li>
+        <span class="who">{{ .name }}</span>
+        <span class="where">{{ .affiliation }}</span>
+      </li>
+      {{ end }}
+    </ul>
+  </section>
+  {{ end }}
+
   <footer class="pane pane--foot">
     <p>US Muon Collider Collaboration · <span class="keep">σμμ</span> · {{ $p.dateline }}</p>
     {{ with $p.social }}

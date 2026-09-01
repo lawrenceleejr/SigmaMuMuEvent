@@ -45,13 +45,22 @@
   var scrollP = 0;
 
   /* ---- the mesh ---------------------------------------------------------- */
+  // The canvas is sized in CSS with lvh, which stays put while a mobile URL
+  // bar shows and hides; window.innerHeight does not, and rebuilding the mesh
+  // on that change is what made the field jump about on scroll.
+  function viewport() {
+    var r = cv.getBoundingClientRect();
+    return { w: Math.max(320, Math.round(r.width)), h: Math.max(320, Math.round(r.height)) };
+  }
+
   function build() {
-    W = Math.max(320, window.innerWidth);
-    H = Math.max(320, window.innerHeight);
+    var v = viewport();
+    W = v.w;
+    H = v.h;
+    // Only the backing store: the element's own box stays CSS-driven, so
+    // measuring it back still reports the viewport rather than what we set.
     cv.width = Math.round(W * DPR);
     cv.height = Math.round(H * DPR);
-    cv.style.width = W + 'px';
-    cv.style.height = H + 'px';
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 
     net = window.SMMNet.build({
@@ -82,6 +91,7 @@
   function flood(startVertex) {
     var n = net.edges.length;
     var arrive = new Float64Array(n);
+    var rev = new Uint8Array(n);   // 1 = the flood reached this edge at its b end
     for (var i = 0; i < n; i++) arrive[i] = Infinity;
     var seen = new Float64Array(net.verts.length);
     for (var v = 0; v < seen.length; v++) seen[v] = Infinity;
@@ -112,7 +122,7 @@
         var phi = Math.atan2(ay, ax);
         var bias = 1 + 2.6 * (1 - Math.cos(phi - heading(d)));
         var nd = d + e.len * bias;
-        if (nd < arrive[ei]) arrive[ei] = nd;
+        if (nd < arrive[ei]) { arrive[ei] = nd; rev[ei] = e.b === u ? 1 : 0; }
         if (nd < seen[o] - 1e-9) {
           seen[o] = nd;
           heap.push([nd, o]);
@@ -120,7 +130,7 @@
         }
       }
     }
-    return { arrive: arrive, far: far || 1 };
+    return { arrive: arrive, rev: rev, far: far || 1 };
   }
   function up(h, i) {
     while (i > 0) {
@@ -145,7 +155,7 @@
     var start = used.length ? used[(Math.random() * used.length) | 0] : 0;
     var f = flood(start);
     maxArrival = Math.max(maxArrival, f.far);
-    return { arrive: f.arrive, far: f.far, head: phase * f.far };
+    return { arrive: f.arrive, rev: f.rev, far: f.far, head: phase * f.far };
   }
 
   /* ---- drawing ----------------------------------------------------------- */
@@ -155,12 +165,15 @@
     for (var i = 0; i < edges.length; i++) {
       var a = w.arrive[i];
       if (!isFinite(a) || a > w.head || a < lo) continue;
-      // the head end draws part-grown; the tail end fades out
-      var grow = Math.min(1, (w.head - a) / (edges[i].len * 2.2) + 0.05);
+      // The head end draws part-grown, on the poster's own growth curve: a
+      // quintic ease-out, so each line leaps out and then creeps to length.
+      var lin = Math.min(1, (w.head - a) / (edges[i].len * 2.2));
+      var grow = Math.max(0.02, 1 - Math.pow(1 - lin, 5.5));
       var age = (w.head - a) / tail;                 // 0 at the head, 1 at the tail
       var tone = age > 1 - FADE ? Math.max(0, (1 - age) / FADE) : 1;
       if (tone <= 0.01) continue;
-      window.SMMNet.drawEdge(ctx, net, edges[i], grow, { accent: accent, tone: tone });
+      window.SMMNet.drawEdge(ctx, net, edges[i], grow,
+        { accent: accent, tone: tone, rev: !!w.rev[i] });
     }
   }
 
@@ -183,13 +196,17 @@
   }
 
   function onScroll() {
-    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var max = document.documentElement.scrollHeight - H;
     scrollP = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
     document.documentElement.style.setProperty('--scroll', scrollP.toFixed(4));
   }
 
   var rt = null;
   function onResize() {
+    var v = viewport();
+    // Only a genuine resize or a rotation earns a new mesh. Small height-only
+    // changes are the mobile browser chrome, and rebuilding on those is a jump.
+    if (v.w === W && Math.abs(v.h - H) < H * 0.2) { onScroll(); return; }
     clearTimeout(rt);
     rt = setTimeout(function () { build(); onScroll(); }, 200);
   }

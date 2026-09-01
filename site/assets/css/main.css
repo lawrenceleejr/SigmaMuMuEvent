@@ -1,6 +1,8 @@
 /* σμμ — the poster's identity, on screen.
    Cream stock, warm near-black ink, one vermillion accent. Archivo for the
-   voice, Libertinus Math for the σμμ lockup, Source Code Pro for the operators.
+   voice, Libertinus Math for the σμμ lockup. Source Code Pro is used for the
+   if / && operators and nothing else, so they set to one width and the
+   questions line up in a column.
    The Feynman field is fixed behind everything; the panes scroll over it and
    frost whatever they pass. Single committed light theme: this is printed
    matter that happens to be on a screen. */
@@ -13,8 +15,8 @@
   --rule: rgba(32, 30, 29, 0.18);
   --glass: rgba(245, 240, 225, 0.56);
   --sans: Archivo, "Helvetica Neue", Arial, sans-serif;
-  --math: "Libertinus Math", Cambria, Georgia, serif;
   --mono: "Source Code Pro", ui-monospace, "Courier New", monospace;
+  --math: "Libertinus Math", Cambria, Georgia, serif;
   --measure: 34rem;
   --scroll: 0;
 }
@@ -34,9 +36,16 @@ body {
 }
 
 /* ---- the field ---------------------------------------------------------- */
+/* CSS owns this box; the script only sizes the backing store. A canvas is a
+   replaced element, so giving it a height without an explicit width lets it
+   resolve width from its intrinsic 2:1 ratio instead of from the viewport. */
 #field {
   position: fixed;
-  inset: 0;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100lvh;   /* constant while a mobile URL bar shows and hides */
   z-index: 0;
   display: block;
   pointer-events: none;
@@ -68,8 +77,8 @@ main {
 .pane {
   padding: clamp(1.5rem, 4vw, 2.75rem);
   background: var(--glass);
-  backdrop-filter: blur(15px) saturate(1.25);
-  -webkit-backdrop-filter: blur(15px) saturate(1.25);
+  backdrop-filter: blur(10.5px) saturate(1.25);
+  -webkit-backdrop-filter: blur(10.5px) saturate(1.25);
   border: 1px solid rgba(32, 30, 29, 0.1);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset,
               0 18px 50px -30px rgba(32, 30, 29, 0.45);
@@ -196,8 +205,8 @@ main {
 
 /* Anything not yet linked reads as pending rather than as a dead link. */
 .pending {
-  font-family: var(--mono);
   font-size: 0.78rem;
+  font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--muted);
@@ -235,14 +244,28 @@ h2 {
 .programme li:last-child { border-bottom: 1px solid var(--rule); }
 .time {
   flex: 0 0 3.4rem;
-  font-family: var(--mono);
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-size: 0.92rem;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
 }
 .slot { display: flex; flex-direction: column; gap: 0.3rem; }
 .name { font-size: 1.06rem; font-weight: 700; letter-spacing: -0.005em; }
 .note { font-size: 0.92rem; color: var(--muted); text-wrap: pretty; }
+
+/* ---- organizers --------------------------------------------------------- */
+.people { margin: 0; padding: 0; list-style: none; }
+.people li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 1rem;
+  align-items: baseline;
+  padding: 0.7rem 0;
+  border-top: 1px solid var(--rule);
+}
+.people li:last-child { border-bottom: 1px solid var(--rule); }
+.who { flex: 0 0 auto; font-size: 1.06rem; font-weight: 700; letter-spacing: -0.005em; }
+.where { font-size: 0.92rem; color: var(--muted); }
 
 /* ---- prose -------------------------------------------------------------- */
 .prose { max-width: none; }
@@ -257,9 +280,9 @@ h2 {
 
 /* ---- footer ------------------------------------------------------------- */
 .pane--foot {
-  font-family: var(--mono);
   font-size: 0.74rem;
-  letter-spacing: 0.08em;
+  font-weight: 600;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
 }
 .pane--foot p { margin: 0; }
@@ -283,6 +306,12 @@ h2 {
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   /* no frosting available: make the pane opaque so the type stays readable */
   .pane { background: rgba(245, 240, 225, 0.94); }
+}
+
+/* Phones: pull the panes in off the edges so the field is visible around them. */
+@media (max-width: 640px) {
+  main { padding-left: 1.6rem; padding-right: 1.6rem; }
+  .pane { padding: 1.4rem 1.25rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -754,7 +754,13 @@
     // `tone` sits the whole network back or brings it forward without touching
     // the type: 1 is full strength, lower is lighter
     const t = o.tone == null ? 1 : o.tone;
-    const pts = pathPoints(net, e);
+    // A part-drawn line has to grow *out* of the vertex the animation reached
+    // first. build() orients every edge so that vertex is `a`, but a consumer
+    // running its own traversal (the website's flood) arrives from either end
+    // and says which with `rev`. Reversing the points strokes the identical
+    // path backwards, so nothing shifts when the line completes.
+    const base = pathPoints(net, e);
+    const pts = o.rev ? (e.__ptsR || (e.__ptsR = base.slice().reverse())) : base;
     let dash = null, color, lw;
     if (e.type === 'h') {
       dash = [6.5 * s, 6.5 * s];

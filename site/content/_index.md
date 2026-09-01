@@ -34,18 +34,39 @@ time = "5:15"
 name = "Research fair"
 note = "Students and researchers present work in progress, over drinks."
 
+# Alphabetical by surname.
+[[params.organizers]]
+name = "Kathy Copic"
+affiliation = "Fieldwork Partners"
+
+[[params.organizers]]
+name = "Kiley Kennedy"
+affiliation = "Tufts University"
+
+[[params.organizers]]
+name = "Lawrence Lee"
+affiliation = "University of Tennessee, Knoxville"
+
+[[params.organizers]]
+name = "Toyoko Orimoto"
+affiliation = "Northeastern University"
+
+[[params.organizers]]
+name = "Lauren Tompkins"
+affiliation = "Stanford University"
+
 # Fill in a url and the label below becomes a link.
 [[params.social]]
 name = "Instagram"
-url = ""
+url = "https://www.instagram.com/muoncollider.us"
 
 [[params.social]]
 name = "TikTok"
-url = ""
+url = "https://www.tiktok.com/@muoncollider.us"
 
 [[params.social]]
 name = "LinkedIn"
-url = ""
+url = "https://www.linkedin.com/company/muoncollider-us"
 +++
 
 ## About the evening
