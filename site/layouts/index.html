@@ -1,0 +1,66 @@
+{{ define "main" }}
+{{ $p := .Params }}
+<main>
+
+  <section class="pane pane--hero">
+    <div class="meta">
+      <span>{{ $p.meeting }}</span>
+      <img class="logo" src="{{ "img/usmcc-logo-black.png" | relURL }}"
+           alt="US Muon Collider Collaboration" width="180" height="180">
+    </div>
+
+    <h1 class="lockup" aria-label="sigma mu mu"><span class="sig">σ</span><span class="mumu">μμ</span></h1>
+
+    <p class="subtitle">{{ $p.subtitle }}</p>
+    <p class="tagline">{{ $p.tagline }}</p>
+
+    {{ with $p.questions }}
+    <ul class="questions">
+      {{ range . }}
+      <li><span class="op">{{ .op }}</span><span>{{ .text }}</span></li>
+      {{ end }}
+    </ul>
+    {{ end }}
+
+    <div class="when">
+      <p class="dateline">{{ $p.dateline }}</p>
+      <p class="timeline">{{ $p.timeline }}</p>
+    </div>
+
+    <p class="cta">{{ $p.cta }}</p>
+
+    {{ if $p.rsvp_url }}
+      <p><a class="button" href="{{ $p.rsvp_url }}">{{ $p.rsvp_label }}</a></p>
+    {{ else }}
+      <p class="rsvp-pending">{{ $p.rsvp_label }} — link to follow</p>
+    {{ end }}
+  </section>
+
+  {{ with $p.programme }}
+  <section class="pane">
+    <h2>Programme</h2>
+    <ol class="programme">
+      {{ range . }}
+      <li>
+        <span class="time">{{ .time }}</span>
+        <span class="slot">
+          <span class="name">{{ .name }}</span>
+          {{ with .note }}<span class="note">{{ . }}</span>{{ end }}
+        </span>
+      </li>
+      {{ end }}
+    </ol>
+  </section>
+  {{ end }}
+
+  <section class="pane prose">
+    {{ .Content }}
+  </section>
+
+  <footer class="pane pane--foot">
+    <p>US Muon Collider Collaboration · <span class="keep">σμμ</span> · {{ $p.dateline }}</p>
+    <p class="fine">Alongside the USMCC annual meeting at Stanford University.</p>
+  </footer>
+
+</main>
+{{ end }}

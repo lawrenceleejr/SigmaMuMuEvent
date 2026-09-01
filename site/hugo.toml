@@ -1,0 +1,13 @@
+baseURL = "https://lawrenceleejr.github.io/SigmaMuMuEvent/"
+languageCode = "en-gb"
+title = "σμμ — A Particle Physics Alumni Reunion"
+
+# The poster's own artwork is the identity; no theme.
+disableKinds = ["taxonomy", "term", "RSS"]
+enableRobotsTXT = true
+
+[markup.goldmark.renderer]
+  unsafe = true
+
+[params]
+  description = "An evening for physicists who left the field for industry, and the teams they build with now. Sunday 13 December 2026, Stanford University."

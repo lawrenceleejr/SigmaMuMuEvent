@@ -1,1 +1,7 @@
 node_modules/
+
+# hugo site build outputs
+site/public/
+site/.hugo_build.lock
+site/resources/_gen/
+site/.docker-build-hash

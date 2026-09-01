@@ -1,0 +1,73 @@
+# Build the σμμ Hugo site (in site/) on every push and PR; deploy to GitHub
+# Pages only from main.
+#
+# One repo setting is required and cannot be done from here:
+#   Settings -> Pages -> Source: GitHub Actions
+name: pages
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  HUGO_VERSION: 0.140.0
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Install Hugo (extended)
+        run: |
+          curl -fSL "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.tar.gz" \
+            | sudo tar -xz -C /usr/local/bin hugo
+          hugo version
+
+      - uses: actions/configure-pages@v5
+        id: pages
+
+      # The generator's own rules are the site's rules too: the background is
+      # drawn by design/network.js, so a change that breaks the physics would
+      # break the site as well. Cheap to check, so check it.
+      - name: Check the network generator
+        run: |
+          node render/verify_network.mjs
+          node render/audit_vertices.mjs
+
+      - name: Confirm the site ships the same generator as the poster
+        run: diff -q design/network.js site/static/js/network.js
+
+      - name: Build
+        working-directory: site
+        # Pages hands us the right base URL for a project site (/<repo>/).
+        run: hugo --minify --baseURL "${{ steps.pages.outputs.base_url }}/"
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./site/public
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,254 @@
+/* σμμ — the poster's identity, on screen.
+   Cream stock, warm near-black ink, one vermillion accent. Archivo for the
+   voice, Libertinus Math for the σμμ lockup, Source Code Pro for the operators.
+   The Feynman field is fixed behind everything; the panes scroll over it and
+   frost whatever they pass. Single committed light theme: this is printed
+   matter that happens to be on a screen. */
+
+:root {
+  --paper: #f5f0e1;
+  --ink: #201e1d;
+  --accent: #ec3013;
+  --muted: #605d5d;
+  --rule: rgba(32, 30, 29, 0.18);
+  --glass: rgba(245, 240, 225, 0.56);
+  --sans: Archivo, "Helvetica Neue", Arial, sans-serif;
+  --math: "Libertinus Math", Cambria, Georgia, serif;
+  --mono: "Source Code Pro", ui-monospace, "Courier New", monospace;
+  --measure: 34rem;
+  --scroll: 0;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- the field ---------------------------------------------------------- */
+#field {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  pointer-events: none;
+}
+
+/* paper tooth over the whole window, field included */
+#grain {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  opacity: 0.55;
+  background: url("../img/paper-grain.png") center / cover no-repeat;
+}
+
+/* ---- panes -------------------------------------------------------------- */
+main {
+  position: relative;
+  z-index: 2;
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: clamp(3rem, 9vh, 7rem) clamp(1rem, 4vw, 2rem) 6rem;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.5rem, 4vh, 2.5rem);
+}
+
+.pane {
+  padding: clamp(1.5rem, 4vw, 2.75rem);
+  background: var(--glass);
+  backdrop-filter: blur(15px) saturate(1.25);
+  -webkit-backdrop-filter: blur(15px) saturate(1.25);
+  border: 1px solid rgba(32, 30, 29, 0.1);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset,
+              0 18px 50px -30px rgba(32, 30, 29, 0.45);
+}
+
+/* ---- hero --------------------------------------------------------------- */
+.meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.meta span { padding-top: 0.6rem; max-width: 22rem; }
+.logo { width: clamp(84px, 15vw, 132px); height: auto; }
+
+.lockup {
+  margin: 0.1em 0 0;
+  font-family: var(--math);
+  font-weight: 400;
+  line-height: 0.8;
+  letter-spacing: 0;
+}
+.lockup .sig { font-size: clamp(6.5rem, 26vw, 15rem); }
+.lockup .mumu {
+  font-size: clamp(3.2rem, 12.6vw, 7.3rem);
+  position: relative;
+  top: -0.06em;
+  left: 0.02em;
+}
+
+.subtitle {
+  margin: 0.4em 0 0;
+  font-size: clamp(1.35rem, 4.6vw, 2.3rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.tagline {
+  margin: 0.55em 0 0;
+  font-size: clamp(0.82rem, 2.4vw, 1.05rem);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.questions {
+  margin: 2rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  max-width: var(--measure);
+}
+.questions li { display: flex; gap: 0.85rem; align-items: baseline; }
+.questions span:last-child { font-size: 1.06rem; font-weight: 500; text-wrap: pretty; }
+.op {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.when { margin-top: 2.4rem; }
+.dateline {
+  margin: 0;
+  font-size: clamp(1.5rem, 5vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+}
+.timeline {
+  margin: 0.25rem 0 0;
+  font-size: clamp(0.82rem, 2.4vw, 1.1rem);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.cta {
+  margin: 1.6rem 0 0;
+  font-size: clamp(1.05rem, 3.2vw, 1.45rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--accent);
+  text-wrap: balance;
+}
+
+.button {
+  display: inline-block;
+  margin-top: 0.9rem;
+  padding: 0.7em 1.5em;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.button:hover, .button:focus-visible { background: var(--accent); }
+
+.rsvp-pending {
+  margin: 1rem 0 0;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ---- programme ---------------------------------------------------------- */
+h2 {
+  margin: 0 0 1.4rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.programme { margin: 0; padding: 0; list-style: none; }
+.programme li {
+  display: flex;
+  gap: clamp(0.9rem, 3vw, 1.6rem);
+  padding: 0.95rem 0;
+  border-top: 1px solid var(--rule);
+}
+.programme li:last-child { border-bottom: 1px solid var(--rule); }
+.time {
+  flex: 0 0 3.4rem;
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.slot { display: flex; flex-direction: column; gap: 0.3rem; }
+.name { font-size: 1.06rem; font-weight: 700; letter-spacing: -0.005em; }
+.note { font-size: 0.92rem; color: var(--muted); text-wrap: pretty; }
+
+/* ---- prose -------------------------------------------------------------- */
+.prose { max-width: none; }
+.prose h2 { margin-top: 0; }
+.prose h2 + p { margin-top: 0; }
+.prose p { max-width: var(--measure); text-wrap: pretty; }
+.prose h2:not(:first-child) { margin-top: 2.2rem; }
+.prose a { color: var(--accent); text-underline-offset: 0.18em; }
+
+/* ---- footer ------------------------------------------------------------- */
+.pane--foot {
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.pane--foot p { margin: 0; }
+/* Greek inside an uppercased line has to opt out, or σμμ sets as ΣΜΜ */
+.keep { text-transform: none; font-family: var(--math); font-size: 1.15em; }
+.fine { margin-top: 0.5rem; color: var(--muted); text-transform: none; letter-spacing: 0; }
+
+/* ---- fallbacks and motion ---------------------------------------------- */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  /* no frosting available: make the pane opaque so the type stays readable */
+  .pane { background: rgba(245, 240, 225, 0.94); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
