@@ -112,7 +112,7 @@ a:hover { color: var(--color-accent); }
 <script type="text/x-dc" data-dc-script data-props="{&quot;animated&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Motion&quot;},&quot;density&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1,&quot;min&quot;:0.4,&quot;max&quot;:1.6,&quot;step&quot;:0.1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Network&quot;},&quot;inkBite&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0,&quot;min&quot;:0,&quot;max&quot;:1.4,&quot;step&quot;:0.05,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Paper&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#ec3013&quot;,&quot;options&quot;:[&quot;#ec3013&quot;,&quot;#b8240e&quot;,&quot;#201e1d&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Colour&quot;}}">
 const SHEETS = [
   {
-    key: 't', w: 1100, h: 1700, still: true, spacing: 33, keep: 0.72, speed: 180,
+    key: 't', w: 1100, h: 1700, still: true, spacing: 30, keep: 0.72, speed: 180,
     qr: { x: 874, y: 1326, s: 168 },
     mark: [['t-sigma', 560], ['t-mumu', 270]], logo: 't-logo',
     seeds: [
@@ -122,7 +122,7 @@ const SHEETS = [
     bands: [[0, 0.72], [225, 1.12], [560, 1.32], [700, 0.86], [1180, 0.74], [1700, 0.5]]
   },
   {
-    key: 'i', w: 1080, h: 1350, spacing: 31, keep: 0.72, speed: 175,
+    key: 'i', w: 1080, h: 1350, spacing: 28, keep: 0.72, speed: 175,
     qr: { x: 866, y: 1040, s: 158 },
     mark: [['i-sigma', 400], ['i-mumu', 195]], logo: 'i-logo',
     seeds: [
@@ -276,7 +276,9 @@ class Component extends DCLogic {
         clearance: 5, clearanceAt: y => (y < cfg.h * 0.66 ? 11 : 5), scaleAt: scaleAt, higgsQuads: 5,
         pad: 8,
         cornerR: Math.min(cfg.w, cfg.h) * 0.05, cornerWobble: 0.34,
-        maxLegs: 4, minSep: 0.42, minComponent: 8, fermionOptOut: 0.12
+        maxLegs: 4, minSep: 0.42, minSepHard: 0.25, minComponent: 8,
+        fermionShare: 0.5, higgsShare: 0.18, splitQuads: false,
+        higgsPure: 16, higgsQuartics: 2
       });
       const s = {
         cfg: cfg, net: net, drawn: new Uint8Array(net.edges.length), head: 0, cycle: -1,

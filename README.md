@@ -49,43 +49,45 @@ largely superseded by the paper overlay.
 
 `node render/audit_vertices.mjs` classifies every vertex by the multiset of
 line styles meeting at it, and fails if any is not an SM interaction. The
-legal list is **ffV**, **ffh**, **VVV**, **VVVV**, **hVV**, **hhVV**, **hhh**,
-**hhhh**. Two rules do most of the work:
+legal list is **ffV**, **ffh**, **ffVV**, **VVV**, **VVVV**, **hVV**, **hhVV**,
+**hhh**, **hhhh**. One rule does most of the work: a fermion line is
+continuous, so a vertex carries 0 or 2 fermion legs, never an odd number — no
+`fff`, no line stopping mid-diagram, and never four at one vertex.
 
-- a fermion line is continuous, so a vertex carries 0 or 2 fermion legs, never
-  an odd number — no `fff`, no line stopping mid-diagram;
-- the SM has no tree-level 4-point vertex involving fermions, so a fermion pair
-  only ever meets one boson. Fermion lines therefore run through three-legged
-  vertices only, which is why the mesh is biased trivalent.
+**ffVV is included at the client's request and is not a tree-level SM vertex** —
+the SM Lagrangian has no such term, the seagull belongs to scalar QED — but it
+is a familiar contact term in HEFT and other effective descriptions. It earns
+its place structurally too: with a fermion pair able to sit on a four-legged
+vertex, the mesh no longer has to be forced trivalent to carry fermion line,
+which is what was stranding loose ends all over the sheet.
 
 **hhV is excluded on purpose.** For two identical neutral scalars it vanishes —
 the h∂h current is antisymmetric under swapping the legs, so hhZ and hhγ are
 zero. It exists only for *distinct* scalars (γH⁺H⁻, ZhG⁰, ZhA), which a single
 dash style cannot express, so the generator never produces it.
 
-**Getting enough fermion line into the picture takes some work.** A fermion
-pair only meets one boson, so fermion lines need three-legged vertices — and a
-mesh full of four-legged ones leaves them nowhere to run. Deleting a leg to
-force trivalence cuts the mesh apart, so instead every four-legged vertex is
-**split** into two three-legged ones: its legs are dealt out two and two across
-the widest pair of gaps between them, joined by a short new edge. Nothing is
-disconnected and the sheet gets denser.
+**Order matters.** Scalars go down first — pure Higgs vertices (`hhhh` from a
+four-legged vertex, `hhh` from a three-legged one), then pairs and singles to
+reach `higgsShare`. Placing them after the fermion lines meant nearly every
+candidate was blocked by a neighbour already committed to ffVV, and the Higgs
+vertices never appeared at all.
 
-On a three-legged vertex, hosting a fermion pair means choosing which single
-leg is *not* fermion — so choosing one leg per vertex, no vertex twice, is a
-**matching**, and every edge outside it is free to be fermion. The generator
-takes a greedy matching, improves it with short augmenting paths, then pairs
-off whatever it missed by walking the shortest route through the mesh and
-flipping edges along it. How much of the sheet carries fermion line is set by
-standing a share of vertices down before any of that (`fermionOptOut`), which
-is what balances solid against wavy.
+Fermion lines are then laid as **closed loops**, which makes "two legs at every
+vertex it touches" true by construction, with no parity to repair afterwards.
+Cycles are searched depth-first from the most constrained vertices outward.
+
+`splitQuads` (splitting four-legged vertices into two three-legged ones) is off:
+it improves the solid-to-wavy ratio but leaves no four-legged vertices, and
+`hhhh` needs one.
 
 ### House rules the generator enforces
 
 These are checked, not eyeballed — run `node render/verify_network.mjs`:
 
 - **at most four legs per vertex**
-- **no two legs of one vertex closer than 30°**
+- **no two legs of one vertex closer than 14°**, and no closer than the
+  preferred 24° wherever the mesh can spare the edge — in a tight spot a
+  pinched angle beats a hole
 - every component large enough to read as a diagram (no floating stubs)
 - points confined to a rounded rectangle whose radius wobbles around the arc,
   so the corner reads struck by hand — a small nick, with the mesh running

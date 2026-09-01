@@ -9,6 +9,9 @@
  * A vertex is legal if its multiset of legs is an SM interaction:
  *
  *   ffV      gauge coupling      (QED / QCD / weak)
+ *   ffVV     contact term — NOT a tree-level SM vertex (no such term in the SM
+ *            Lagrangian; the seagull is scalar QED). Allowed here by request,
+ *            as it appears in HEFT and other effective descriptions.
  *   ffh      Yukawa
  *   VVV      triple gauge        (WWγ, WWZ, ggg)
  *   VVVV     quartic gauge       (WWWW, WWγγ, WWZZ, gggg)
@@ -40,6 +43,7 @@ new Function('window', readFileSync(resolve(ROOT, 'design/network.js'), 'utf8'))
 
 const LEGAL = new Map([
   ['bff', 'ffV — gauge coupling'],
+  ['bbff', 'ffVV — contact term (not tree-level SM; HEFT/EFT), allowed by request'],
   ['ffh', 'ffh — Yukawa'],
   ['bbb', 'VVV — triple gauge'],
   ['bbbb', 'VVVV — quartic gauge'],
@@ -58,10 +62,10 @@ const WHY = {
 };
 
 const CASES = [
-  { name: 'tabloid', w: 1100, h: 1700, spacing: 33, keep: 0.72, speed: 180,
+  { name: 'tabloid', w: 1100, h: 1700, spacing: 30, keep: 0.72, speed: 180,
     seeds: [{ x: 862, y: 300 }, { x: 250, y: 1120 }],
     bands: [[0, 0.72], [225, 1.12], [560, 1.32], [700, 0.86], [1180, 0.74], [1700, 0.5]] },
-  { name: 'instagram', w: 1080, h: 1350, spacing: 31, keep: 0.72, speed: 175,
+  { name: 'instagram', w: 1080, h: 1350, spacing: 28, keep: 0.72, speed: 175,
     seeds: [{ x: 858, y: 250 }, { x: 210, y: 890 }],
     bands: [[0, 0.7], [185, 1.08], [430, 1.28], [560, 0.84], [940, 0.72], [1350, 0.48]] },
 ];
@@ -92,8 +96,9 @@ for (const c of CASES) {
       }
       return b[b.length - 1][1];
     },
-    higgsQuads: 5, cornerR: Math.min(c.w, c.h) * 0.05, cornerWobble: 0.34,
-    maxLegs: 4, minSep: 0.42, minComponent: 8, fermionOptOut: 0.12,
+    cornerR: Math.min(c.w, c.h) * 0.05, cornerWobble: 0.34,
+    maxLegs: 4, minSep: 0.42, minSepHard: 0.25, minComponent: 8,
+    fermionShare: 0.5, higgsShare: 0.18, splitQuads: false, higgsPure: 16, higgsQuartics: 2,
   });
 
   const legs = net.verts.map(() => []);

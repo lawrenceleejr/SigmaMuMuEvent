@@ -11,14 +11,14 @@ new Function('window', readFileSync(resolve(ROOT, 'design/network.js'), 'utf8'))
 
 // mirrors the SHEETS config in design/Sigma Mu Mu Network.dc.html
 const CASES = [
-  { name: 'tabloid', w: 1100, h: 1700, spacing: 33, keep: 0.72, speed: 180,
+  { name: 'tabloid', w: 1100, h: 1700, spacing: 30, keep: 0.72, speed: 180,
     seeds: [{ x: 862, y: 300 }, { x: 250, y: 1120 }],
     bands: [[0, 0.72], [225, 1.12], [560, 1.32], [700, 0.86], [1180, 0.74], [1700, 0.5]] },
-  { name: 'instagram', w: 1080, h: 1350, spacing: 31, keep: 0.72, speed: 175,
+  { name: 'instagram', w: 1080, h: 1350, spacing: 28, keep: 0.72, speed: 175,
     seeds: [{ x: 858, y: 250 }, { x: 210, y: 890 }],
     bands: [[0, 0.7], [185, 1.08], [430, 1.28], [560, 0.84], [940, 0.72], [1350, 0.48]] },
 ];
-const MAX_LEGS = 4, MIN_SEP = 0.42, MIN_COMP = 8;
+const MAX_LEGS = 4, MIN_SEP = 0.42, MIN_HARD = 0.25, MIN_COMP = 8;
 const angDiff = (a, b) => { let d = Math.abs(a - b) % (Math.PI * 2); return d > Math.PI ? Math.PI * 2 - d : d; };
 
 let bad = 0;
@@ -78,12 +78,12 @@ for (const c of CASES) {
     used.forEach(v => { corner = Math.min(corner, Math.hypot(net.verts[v][0] - cx, net.verts[v][1] - cy)); });
   });
 
-  const ok = maxDeg <= MAX_LEGS && minAng >= MIN_SEP - 1e-9 && minComp >= MIN_COMP;
+  const ok = maxDeg <= MAX_LEGS && minAng >= MIN_HARD - 1e-9 && minComp >= MIN_COMP;
   if (!ok) bad++;
   console.log(
     `${ok ? 'PASS' : 'FAIL'} ${c.name.padEnd(10)} edges ${String(net.edges.length).padStart(4)}` +
     `  maxLegs ${maxDeg}/${MAX_LEGS}` +
-    `  minAngle ${(minAng * 180 / Math.PI).toFixed(1)}deg (>= ${(MIN_SEP * 180 / Math.PI).toFixed(0)})` +
+    `  minAngle ${(minAng * 180 / Math.PI).toFixed(1)}deg (floor ${(MIN_HARD * 180 / Math.PI).toFixed(0)}, prefer ${(MIN_SEP * 180 / Math.PI).toFixed(0)})` +
     `  smallestComponent ${minComp} (>= ${MIN_COMP})` +
     `  cornerClearance ${corner.toFixed(0)}px`);
 }

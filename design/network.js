@@ -81,7 +81,11 @@
     const clear = cfg.clearance == null ? 6 : cfg.clearance;
     const speed = cfg.speed || 200;
     const scaleAt = cfg.scaleAt || function () { return 1; };
-    const minSep = cfg.minSep == null ? 0.52 : cfg.minSep;   // ~30 degrees
+    const minSep = cfg.minSep == null ? 0.52 : cfg.minSep;      // preferred
+    // In a tight spot a pinched angle beats a hole, so the preferred figure is
+    // only enforced where the mesh can spare the edge; below the floor it goes
+    // regardless.
+    const minSepHard = cfg.minSepHard == null ? minSep * 0.6 : cfg.minSepHard;
     const maxLegs = cfg.maxLegs == null ? 4 : cfg.maxLegs;
     const spacing = cfg.spacing || 42;
     // just knock the sharp point off each corner -- a small radius that breathes
@@ -243,17 +247,18 @@
         }
         // 2. open out tight angles, dropping the costlier of the offending pair
         for (let guard = 0; guard < maxLegs * 2; guard++) {
-          let hit = null;
+          let hit = null, hitAng = 0;
           for (let i = 0; i < list.length && !hit; i++) {
             for (let j = i + 1; j < list.length; j++) {
-              if (angDiff(dirFrom(v, list[i]), dirFrom(v, list[j])) < minSep) {
-                hit = [list[i], list[j]];
-                break;
-              }
+              const a = angDiff(dirFrom(v, list[i]), dirFrom(v, list[j]));
+              if (a < minSep) { hit = [list[i], list[j]]; hitAng = a; break; }
             }
           }
           if (!hit) break;
           const drop = cost(hit[0]) >= cost(hit[1]) ? hit[0] : hit[1];
+          const de = cand[drop];
+          const spare = deg[de.a] > 3 && deg[de.b] > 3;
+          if (hitAng >= minSepHard && !spare) break;   // squeezed: keep the edge
           kill(drop);
           list = list.filter(ei => ei !== drop);
           changed++;
@@ -499,15 +504,13 @@
     }
 
     // ---- line types, constrained to Standard Model vertices ----------------
-    // The legal list is ffV, ffh, VVV, VVVV, hVV, hhVV, hhh, hhhh. Two rules
-    // follow from it and do all the work here:
-    //   a fermion line is continuous, so a vertex carries 0 or 2 fermion legs,
-    //   never an odd number; and no SM 4-point vertex involves fermions, so a
-    //   fermion pair only ever meets one boson -- fermion lines therefore run
-    //   through degree-3 vertices only.
-    // hhV is deliberately absent: for two identical neutral scalars the vertex
-    // vanishes (the h∂h current is antisymmetric), and it exists only for
-    // distinct scalars, which one dash style cannot express.
+    // Legal here: ffV, ffh, ffVV, VVV, VVVV, hVV, hhVV, hhh, hhhh.
+    // ffVV is not a tree-level SM vertex -- the SM Lagrangian has no such term,
+    // the seagull belongs to scalar QED -- but it is a familiar contact term in
+    // effective descriptions, and it is included at the client's request. It
+    // also lets fermion lines run through four-legged vertices, which is what
+    // keeps the mesh whole instead of forcing it trivalent.
+    // hhV stays out: it vanishes for two identical scalars.
     const vdeg = new Array(pts.length).fill(0);
     edges.forEach(e => { vdeg[e.a]++; vdeg[e.b]++; });
     const vinc = pts.map(() => []);
@@ -515,10 +518,6 @@
     edges.forEach(e => { e.type = null; e.special = false; });
 
     const other = (ei, v) => (edges[ei].a === v ? edges[ei].b : edges[ei].a);
-    const dirOf = (v, ei) => {
-      const o = other(ei, v);
-      return Math.atan2(pts[o][1] - pts[v][1], pts[o][0] - pts[v][0]);
-    };
     const shuffled = (arr) => {
       for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(R() * (i + 1));
@@ -526,177 +525,146 @@
       }
       return arr;
     };
+    const loose = v => vdeg[v] === 1;
 
-    const fermionAt = new Uint8Array(pts.length);       // hosts a fermion pair
-    const loose = v => vdeg[v] === 1;                   // external end, no parity rule
-    {
-      // How much of the mesh carries fermion lines is set here, by standing a
-      // share of the vertices down before any matching happens. Trimming
-      // afterwards does not work: the fermion set is a 2-factor, so it comes
-      // out as a handful of enormous cycles and dropping even one overshoots.
-      const stand = cfg.fermionOptOut == null ? 0.36 : cfg.fermionOptOut;
-      const off = new Uint8Array(pts.length);
-      for (let v = 0; v < pts.length; v++) {
-        if (!loose(v) && R() < stand) off[v] = 1;
-      }
-      const eligible = [];
-      edges.forEach((e, i) => {
-        if (off[e.a] || off[e.b]) return;
-        const a = vdeg[e.a], b2 = vdeg[e.b];
-        if ((a === 3 || a === 1) && (b2 === 3 || b2 === 1)) eligible.push(i);
-      });
-
-      // On a three-legged vertex, hosting a fermion pair means picking which
-      // single leg is *not* fermion. Picking one leg per vertex, no vertex
-      // twice, is a matching -- and every edge outside it is then free to be
-      // fermion. So: greedy matching, then improve it with short augmenting
-      // paths, because every vertex the matching misses is a vertex that has
-      // to drop out of the fermion structure entirely.
-      const cutE = new Uint8Array(edges.length);
-      const matched = new Uint8Array(pts.length);
-      for (const ei of shuffled(eligible.slice())) {
-        const e = edges[ei];
-        if (loose(e.a) || loose(e.b) || matched[e.a] || matched[e.b]) continue;
-        if (off[e.a] || off[e.b]) continue;
-        cutE[ei] = 1; matched[e.a] = 1; matched[e.b] = 1;
-      }
-      for (let pass = 0; pass < 8; pass++) {
-        let gain = 0;
-        for (let u = 0; u < pts.length; u++) {
-          if (loose(u) || matched[u] || vdeg[u] !== 3 || off[u]) continue;
-          let done = false;
-          for (const e1 of vinc[u]) {
-            if (done) break;
-            const x = other(e1, u);
-            if (loose(x) || !matched[x] || off[x]) continue;
-            let f = -1;
-            for (const ei of vinc[x]) if (cutE[ei]) { f = ei; break; }
-            if (f < 0) continue;
-            const y = other(f, x);
-            for (const g of vinc[y]) {
-              const z = other(g, y);
-              if (z === u || z === x || loose(z) || matched[z] || vdeg[z] !== 3 || off[z]) continue;
-              cutE[f] = 0; cutE[e1] = 1; cutE[g] = 1;
-              matched[u] = 1; matched[z] = 1;
-              gain++; done = true; break;
-            }
-          }
-        }
-        if (!gain) break;
-      }
-
-      const inF = new Uint8Array(edges.length);
-      eligible.forEach(ei => { if (!cutE[ei]) inF[ei] = 1; });
-      const fdeg = new Array(pts.length).fill(0);
-      edges.forEach((e, i) => { if (inF[i]) { fdeg[e.a]++; fdeg[e.b]++; } });
-      const odd = v => !loose(v) && (fdeg[v] % 2) === 1;
-      const cut = ei => {
-        inF[ei] = 0;
-        fdeg[edges[ei].a]--; fdeg[edges[ei].b]--;
-      };
-
-      // Whatever the matching missed is still odd, and has to be paired off.
-      // Walk the shortest route through the *whole* mesh to the nearest other
-      // odd vertex and flip every edge along it in or out of the fermion set:
-      // the two ends change parity, each vertex in between sees two flips and
-      // keeps its own. Routing through the fermion lines instead means going
-      // the long way around whole cycles, which strips out most of the content.
-      const toggle = ei => {
-        const d = inF[ei] ? -1 : 1;
-        inF[ei] = inF[ei] ? 0 : 1;
-        fdeg[edges[ei].a] += d; fdeg[edges[ei].b] += d;
-      };
-      for (let guard = 0; guard < 20000; guard++) {
-        let src = -1;
-        for (let v = 0; v < pts.length && src < 0; v++) if (odd(v)) src = v;
-        if (src < 0) break;
-        const via = new Int32Array(pts.length).fill(-1);
-        const seen = new Uint8Array(pts.length);
-        const q = [src];
-        seen[src] = 1;
-        let found = -1;
-        for (let qi = 0; qi < q.length && found < 0; qi++) {
-          const v = q[qi];
-          for (const ei of vinc[v]) {
-            const o = other(ei, v);
-            if (seen[o] || off[o]) continue;
-            seen[o] = 1; via[o] = ei; q.push(o);
-            if (odd(o)) { found = o; break; }
-          }
-        }
-        if (found < 0) {                       // nothing left to pair with
-          for (const ei of vinc[src]) if (inF[ei]) { toggle(ei); break; }
-          continue;
-        }
-        let cur = found;
-        while (cur !== src) {
-          const ei = via[cur];
-          const nxt = other(ei, cur);
-          toggle(ei);
-          cur = nxt;
-        }
-      }
-
-      edges.forEach((e, i) => { if (inF[i]) e.type = 'f'; });
-      for (let v = 0; v < pts.length; v++) if (!loose(v) && fdeg[v] === 2) fermionAt[v] = 1;
-    }
-
-    // ---- everything else is a vector, with scalars flipped in only where the
-    //      vertex stays legal ----
-    edges.forEach(e => { if (e.type === null) e.type = 'b'; });
-
+    // ---- scalars go down first ----
+    // Placing them after the fermion lines meant almost every candidate was
+    // blocked by a neighbour already committed to ffVV, and the Higgs vertices
+    // never appeared. Reserving them up front is the whole difference.
     const hAt = new Array(pts.length).fill(0);
-    const legalH = (v, n) => {
-      if (vdeg[v] < 3) return true;                       // external end
-      if (fermionAt[v]) return n <= 1;                   // ffV or ffh
+    const hOk = (v, n) => {
+      if (vdeg[v] < 3) return true;
       if (vdeg[v] === 3) return n === 0 || n === 1 || n === 3;   // VVV, hVV, hhh
-      return n === 0 || n === 2 || n === 4;              // VVVV, hhVV, hhhh
+      return n === 0 || n === 2 || n === 4;                      // VVVV, hhVV, hhhh
     };
-    // set a whole group of edges to scalar at once, or not at all
+    let hTotal = 0;
     const makeScalar = (list) => {
       if (!list.length) return false;
       const delta = new Map();
       for (const ei of list) {
-        if (edges[ei].type !== 'b') return false;
+        if (edges[ei].type !== null) return false;
         for (const v of [edges[ei].a, edges[ei].b]) delta.set(v, (delta.get(v) || 0) + 1);
       }
-      for (const [v, d] of delta) if (!legalH(v, hAt[v] + d)) return false;
+      for (const [v, d] of delta) if (!hOk(v, hAt[v] + d)) return false;
       list.forEach(ei => { edges[ei].type = 'h'; });
       for (const [v, d] of delta) hAt[v] += d;
+      hTotal += list.length;
       return true;
     };
 
-    // pure scalar vertices: every leg dashed (hhh or hhhh)
+    // pure scalar vertices: every leg dashed. Four legs gives the quartic hhhh,
+    // three gives the self-coupling hhh.
     const pure = [];
-    shuffled(pts.map((_, i) => i).filter(v => vdeg[v] >= 3 && !fermionAt[v]))
-      .forEach(v => {
-        if (pure.length >= (cfg.higgsQuads || 5)) return;
-        if (pure.some(p => Math.hypot(pts[p][0] - pts[v][0], pts[p][1] - pts[v][1]) < 260)) return;
-        if (makeScalar(vinc[v].slice())) {
-          pure.push(v);
-          vinc[v].forEach(ei => { edges[ei].special = true; });
+    const wantPure = cfg.higgsPure == null ? 16 : cfg.higgsPure;
+    const wantQuartic = cfg.higgsQuartics == null ? 2 : cfg.higgsQuartics;
+    const apart = cfg.higgsApart == null ? 190 : cfg.higgsApart;
+    const tryPure = (v, spacing) => {
+      if (vdeg[v] < 3 || hAt[v]) return false;
+      if (pure.some(p => Math.hypot(pts[p][0] - pts[v][0], pts[p][1] - pts[v][1]) < spacing)) return false;
+      const own = vinc[v].slice();
+      let ok = makeScalar(own);
+      if (!ok) {
+        // a four-legged neighbour cannot take a single scalar leg (VVVh), so
+        // offer it a second and let it settle on hhVV
+        const extra = [];
+        for (const ei of own) {
+          const o = other(ei, v);
+          if (vdeg[o] !== 4) continue;
+          const partner = vinc[o].find(e2 => e2 !== ei && edges[e2].type === null
+            && own.indexOf(e2) < 0 && extra.indexOf(e2) < 0);
+          if (partner != null) extra.push(partner);
         }
-      });
+        ok = extra.length > 0 && makeScalar(own.concat(extra));
+      }
+      if (!ok) return false;
+      pure.push(v);
+      own.forEach(ei => { edges[ei].special = true; });
+      return true;
+    };
+    let quartics = 0;
+    for (const v of shuffled(pts.map((_, i) => i).filter(v => vdeg[v] === 4))) {
+      if (quartics >= wantQuartic) break;
+      if (tryPure(v, apart * 0.45)) quartics++;      // worth crowding a little
+    }
+    for (const v of shuffled(pts.map((_, i) => i).filter(v => vdeg[v] >= 3))) {
+      if (pure.length >= wantPure) break;
+      tryPure(v, apart);
+    }
 
-    // hhVV at four-legged vertices: scalars have to arrive in pairs there
-    const hTarget = Math.round(edges.length * (cfg.higgsShare || 0.15));
-    const hNow = () => edges.reduce((n, e) => n + (e.type === 'h' ? 1 : 0), 0);
-    shuffled(pts.map((_, i) => i).filter(v => vdeg[v] === 4 && !fermionAt[v]))
-      .forEach(v => {
-        if (hNow() >= hTarget * 0.55) return;
-        const free = vinc[v].filter(ei => edges[ei].type === 'b');
-        for (let i = 0; i < free.length; i++) {
-          for (let j = i + 1; j < free.length; j++) {
-            if (makeScalar([free[i], free[j]])) return;
-          }
-        }
-      });
-
-    // hVV and ffh: a single dashed leg wherever that leaves the vertex legal
-    shuffled(edges.map((_, i) => i)).forEach(ei => {
-      if (hNow() >= hTarget) return;
+    // then scatter the rest: pairs at four-legged vertices (hhVV), singles
+    // wherever one dashed leg leaves the vertex legal (hVV, and later ffh)
+    const hTarget = Math.round(edges.length * (cfg.higgsShare == null ? 0.16 : cfg.higgsShare));
+    for (const v of shuffled(pts.map((_, i) => i).filter(v => vdeg[v] === 4))) {
+      if (hTotal >= hTarget * 0.5) break;
+      const free = vinc[v].filter(ei => edges[ei].type === null);
+      for (let i = 0; i < free.length && hAt[v] === 0; i++) {
+        for (let j = i + 1; j < free.length; j++) if (makeScalar([free[i], free[j]])) break;
+      }
+    }
+    for (const ei of shuffled(edges.map((_, i) => i))) {
+      if (hTotal >= hTarget) break;
       makeScalar([ei]);
-    });
+    }
+
+    // ---- fermion lines ----
+    // A fermion line is continuous: it enters a vertex and leaves again, so
+    // every vertex it touches carries exactly two fermion legs. Laying the
+    // lines as closed loops makes that true by construction -- no parity to
+    // repair afterwards. A vertex can take a pair if what is already dashed
+    // leaves a legal vertex: on three legs the spare one may be scalar (ffh),
+    // on four it may not, since ffVV wants two vectors.
+    const fermionAt = new Uint8Array(pts.length);
+    const canHost = v => {
+      if (loose(v) || fermionAt[v]) return false;
+      if (vdeg[v] === 3) return hAt[v] <= 1;
+      if (vdeg[v] === 4) return cfg.allowFFVV !== false && hAt[v] === 0;
+      return false;
+    };
+    const freeEdge = ei => edges[ei].type === null;
+    const fermionTarget = Math.round(edges.length * (cfg.fermionShare == null ? 0.42 : cfg.fermionShare));
+    let fermionEdges = 0;
+
+    const layLoop = (v0, maxDepth) => {
+      if (!canHost(v0)) return false;
+      const path = [v0], pathE = [], onPath = new Set([v0]);
+      let budget = cfg.fermionBudget || 3000;
+      const dfs = () => {
+        if (budget-- < 0) return false;
+        const cur = path[path.length - 1];
+        const last = pathE.length ? pathE[pathE.length - 1] : -1;
+        for (const ei of shuffled(vinc[cur].filter(e => e !== last && freeEdge(e)))) {
+          const nxt = other(ei, cur);
+          if (nxt === v0 && pathE.length >= 2) { pathE.push(ei); return true; }
+          if (onPath.has(nxt) || !canHost(nxt) || path.length >= maxDepth) continue;
+          path.push(nxt); pathE.push(ei); onPath.add(nxt);
+          if (dfs()) return true;
+          path.pop(); pathE.pop(); onPath.delete(nxt);
+        }
+        return false;
+      };
+      if (!dfs()) return false;
+      pathE.forEach(ei => { edges[ei].type = 'f'; });
+      path.forEach(v => { fermionAt[v] = 1; });
+      fermionEdges += pathE.length;
+      return true;
+    };
+
+    // Start where the mesh is most constrained. A vertex with few free
+    // neighbours is the one most likely to be stranded if its neighbours get
+    // used first, and a stranded vertex carries no fermion line at all.
+    const freeDeg = v => vinc[v].reduce((n, ei) => n + (freeEdge(ei) ? 1 : 0), 0);
+    for (const depth of (cfg.fermionDepths || [5, 9, 16, 28])) {
+      const order = shuffled(pts.map((_, i) => i).filter(canHost))
+        .sort((a, b) => freeDeg(a) - freeDeg(b));
+      for (const v of order) {
+        if (fermionEdges >= fermionTarget) break;
+        layLoop(v, depth);
+      }
+      if (fermionEdges >= fermionTarget) break;
+    }
+
+    // ---- everything still untyped is a vector ----
+    edges.forEach(e => { if (e.type === null) e.type = 'b'; });
 
     // ---- growth timing: graph distance from the roots ----
     const dist = new Float64Array(pts.length).fill(Infinity);
