@@ -25,6 +25,60 @@ The animated cut of the Instagram board is rendered on demand — see
 `out/archive-first-direction/` holds an earlier, unrelated poster direction
 (a p5.js detector-ring sketch, still in `poster/`) kept for reference.
 
+## The website (`site/`)
+
+A Hugo site that wears the same identity as the poster — same stock colour,
+ink, accent, faces, paper texture, and the **same generator**: `design/network.js`
+is copied to `site/static/js/network.js`, and CI diffs the two so they cannot
+drift apart.
+
+```sh
+cd site
+./run.sh serve      # Docker, live reload on :1313
+./run.sh build      # to site/public
+FORCE_HOST=1 ./run.sh build    # if hugo extended is on your PATH
+```
+
+**Content is Markdown.** `site/content/_index.md` holds the prose; the
+structured bits — programme rows, the `if` / `&&` questions, date and venue —
+are front matter in the same file. Editing that one file is the whole job for
+ordinary copy changes; the layout lives in `site/layouts/`.
+
+### The background
+
+The field is the poster's mesh, animated. `site/static/js/field.js`:
+
+- **A direction-biased flood.** A plain Dijkstra from a seed spreads as a disc.
+  Multiplying each edge's cost by how far it points from a *drifting* preferred
+  heading makes the front travel instead — cheap along the heading, expensive
+  across it — so it wanders across the field.
+- **Head and tail.** Every edge gets an arrival distance. A frame draws only the
+  edges arriving inside `(head - tail, head]`, part-grown at the head and fading
+  out at the tail. The result is a blob that propagates rather than expands.
+- **Scroll owns the tail.** `TAIL_TOP` (0.18 of the flood) to `TAIL_BOTTOM`
+  (1.3 — longer than the flood itself, so nothing dissolves). By the bottom of
+  the page the whole field is lit.
+- **Two walkers, out of phase**, so one is always mid-life while the other
+  re-seeds and the background never empties.
+- **`SCALE` is the legibility dial.** It zooms the diagram geometry —
+  wavelengths, dash lengths, node radii, line weights — along with the point
+  spacing. That is what keeps the linework readable *as physics* through the
+  15px `backdrop-filter` blur; shrinking the mesh instead just makes grey fuzz.
+
+The canvas is `position: fixed` and full-window. The content panes scroll over
+it and frost what they pass. There is an opaque fallback for browsers without
+`backdrop-filter`, and `prefers-reduced-motion` settles the field and holds it.
+
+### Deploying
+
+`.github/workflows/pages.yml` builds `site/` on every push and PR — running
+the network checks and the generator diff first — and deploys to GitHub Pages
+**only from `main`**.
+
+One repo setting has to be done by hand, once: **Settings → Pages → Source:
+GitHub Actions**. Until this branch is merged to `main`, pushes build as a
+check but publish nothing.
+
 ## The design canvas (`design/`)
 
 `design/Sigma Mu Mu Network.dc.html` is the live artboard set — **TABLOID** and
