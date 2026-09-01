@@ -1,7 +1,7 @@
-# σμμ — advertisement post copy
+# σμμ — post copy
 
-Pair either caption with `sigmamumu-ad-post-1080x1080.png` (square, feed and
-paid placements) or `sigmamumu-instagram-post-1080x1350.mp4` (animated 4:5).
+Pair either caption with `sigmamumu-instagram-post-1080x1350.jpg` (portrait
+4:5, feed and paid placements) or the animated cut of the same board.
 
 ---
 

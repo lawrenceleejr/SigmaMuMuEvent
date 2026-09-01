@@ -30,7 +30,7 @@ function args() {
   const mode = a.shift();
   const o = {
     mode, file: 'design/Sigma Mu Mu Network.dc.html', screen: 'TABLOID',
-    scale: 2, fps: 25, seconds: 14, out: 'out/dc.png', settle: 2500, start: 0,
+    scale: 2, fps: 25, seconds: 14, out: 'out/dc.png', settle: 2500, start: 0, fast: '0',
   };
   for (let i = 0; i < a.length; i += 2) o[a[i].replace(/^--/, '')] = a[i + 1];
   o.scale = parseFloat(o.scale); o.fps = parseInt(o.fps, 10);
@@ -101,16 +101,43 @@ export async function open(o, port, browser) {
   // Real time still passes while the clock is frozen, so fonts load and the
   // sketch boots without the animation advancing a single frame.
   await page.waitForTimeout(o.settle);
+
+  // Chromium re-rasterises the whole page for every capture, so a sheet we are
+  // not shooting still costs us on each frame. Hide the others.
+  if (o.mode === 'video') {
+    await page.evaluate((screen) => {
+      document.querySelectorAll('[data-screen-label]').forEach((el) => {
+        if (el.getAttribute('data-screen-label') !== screen) {
+          const col = el.closest('div');
+          if (col) col.style.display = 'none';
+        }
+      });
+    }, o.screen);
+  }
+
+  // The ink filters are re-evaluated on every captured frame. Dropping them
+  // gives a quick preview of timing and layout.
+  if (String(o.fast) === '1') {
+    await page.evaluate(() => {
+      document.querySelectorAll('[style*="filter:url("]').forEach((el) => {
+        el.style.filter = 'none';
+      });
+    });
+    console.log('[dc] fast mode: ink filters off for this capture');
+  }
   return { page, errs };
 }
 
 /* crop a PNG buffer to exactly w x h (the compositor can hand back a stray
-   half pixel on fractional layouts) */
-function exact(buf, w, h) {
+   half pixel on fractional layouts), and encode to jpeg when that is asked for */
+function exact(buf, w, h, jpeg) {
   return new Promise((res, rej) => {
+    const codec = jpeg
+      ? ['-q:v', '2', '-pix_fmt', 'yuvj444p', '-c:v', 'mjpeg']
+      : ['-c:v', 'png'];
     const ff = spawn(process.env.FFMPEG || 'ffmpeg', [
       '-loglevel', 'error', '-i', '-', '-vf', `crop=${w}:${h}:0:0`,
-      '-frames:v', '1', '-f', 'image2pipe', '-c:v', 'png', '-',
+      '-frames:v', '1', '-f', 'image2pipe', ...codec, '-',
     ], { stdio: ['pipe', 'pipe', 'inherit'] });
     const out = [];
     ff.stdout.on('data', (d) => out.push(d));
@@ -142,7 +169,8 @@ async function main() {
 
     if (o.mode === 'shot') {
       const buf = await art.screenshot({ type: 'png', timeout: 180000 });
-      await writeFile(o.out, await exact(buf, css.w * o.scale, css.h * o.scale));
+      const jpeg = /\.jpe?g$/i.test(o.out);
+      await writeFile(o.out, await exact(buf, css.w * o.scale, css.h * o.scale, jpeg));
       console.log(`[dc] wrote ${o.out} in ${((Date.now() - t0) / 1000).toFixed(1)}s`);
     } else if (o.mode === 'video') {
       const n = Math.round(o.fps * o.seconds);
@@ -152,16 +180,18 @@ async function main() {
       if (stepMs < 36) console.log(`[dc] warning: ${o.fps}fps steps ${stepMs.toFixed(1)}ms, below the sketch's 34ms redraw throttle`);
       const w = Math.round(css.w * o.scale / 2) * 2;
       const h = Math.round(css.h * o.scale / 2) * 2;
+      // One long-lived ffmpeg, fed jpeg frames: encoding a PNG per frame in the
+      // browser and then spawning a cropper per frame was costing more than the
+      // page render itself. Cropping happens here, in the same filter chain.
       const ff = spawn(process.env.FFMPEG || 'ffmpeg', [
-        '-y', '-f', 'image2pipe', '-framerate', String(o.fps), '-c:v', 'png', '-i', '-',
-        '-vf', `scale=${w}:${h}:flags=lanczos`, '-c:v', 'libx264', '-preset', 'slow',
-        '-crf', '17', '-profile:v', 'high', '-pix_fmt', 'yuv420p', '-movflags', '+faststart',
+        '-y', '-f', 'image2pipe', '-framerate', String(o.fps), '-c:v', 'mjpeg', '-i', '-',
+        '-vf', `crop=${w}:${h}:0:0`, '-c:v', 'libx264', '-preset', 'medium',
+        '-crf', '18', '-profile:v', 'high', '-pix_fmt', 'yuv420p', '-movflags', '+faststart',
         o.out,
       ], { stdio: ['pipe', 'inherit', 'inherit'] });
       for (let i = 0; i < n; i++) {
         if (i) await page.clock.runFor(stepMs);
-        const raw = await art.screenshot({ type: 'png', timeout: 120000 });
-        const buf = await exact(raw, w, h);
+        const buf = await art.screenshot({ type: 'jpeg', quality: 95, timeout: 120000 });
         if (!ff.stdin.write(buf)) await once(ff.stdin, 'drain');
         if (i % 30 === 0 || i === n - 1) {
           const el = (Date.now() - t0) / 1000;

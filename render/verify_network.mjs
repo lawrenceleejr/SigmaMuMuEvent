@@ -12,11 +12,9 @@ new Function('window', readFileSync(resolve(ROOT, 'design/network.js'), 'utf8'))
 // mirrors the SHEETS config in design/Sigma Mu Mu Network.dc.html
 const CASES = [
   { name: 'tabloid', w: 1100, h: 1700, spacing: 35, keep: 0.72, speed: 135,
-    seeds: [{ x: 862, y: 300 }, { x: 250, y: 1120 }], bands: [620, 1180, 0.8, 0.7, 0.5] },
+    seeds: [{ x: 862, y: 300 }, { x: 250, y: 1120 }], bands: [620, 1180, 1.35, 0.78, 0.5] },
   { name: 'instagram', w: 1080, h: 1350, spacing: 33, keep: 0.72, speed: 125,
-    seeds: [{ x: 858, y: 250 }, { x: 210, y: 890 }], bands: [470, 940, 0.78, 0.68, 0.48] },
-  { name: 'ad', w: 1080, h: 1080, spacing: 32, keep: 0.72, speed: 120,
-    seeds: [{ x: 850, y: 230 }, { x: 200, y: 760 }], bands: [400, 780, 0.78, 0.68, 0.48] },
+    seeds: [{ x: 858, y: 250 }, { x: 210, y: 890 }], bands: [470, 940, 1.3, 0.76, 0.48] },
 ];
 const MAX_LEGS = 4, MIN_SEP = 0.52, MIN_COMP = 8;
 const angDiff = (a, b) => { let d = Math.abs(a - b) % (Math.PI * 2); return d > Math.PI ? Math.PI * 2 - d : d; };

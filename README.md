@@ -15,17 +15,19 @@ reads as pressed rather than plotted.
 |---|---|
 | `sigmamumu-poster-tabloid-11x17.pdf` | Tabloid print master, 11 × 17 in at 300 dpi |
 | `sigmamumu-poster-tabloid-3300x5100.png` | Same sheet as a flat PNG |
-| `sigmamumu-instagram-post-1080x1350.mp4` | Animated 4:5 post — the network draws itself in over 14 s |
-| `sigmamumu-ad-post-1080x1080.png` | Square advertisement post |
-| `sigmamumu-ad-post-caption.md` | Caption copy for the ad, feed and sponsor-facing |
+| `sigmamumu-instagram-post-1080x1350.jpg` | Instagram portrait post, same board as the poster |
+| `sigmamumu-ad-post-caption.md` | Caption copy — feed and sponsor-facing |
+
+The animated cut of the Instagram board is rendered on demand — see
+**Rendering the video** below.
 
 `out/archive-first-direction/` holds an earlier, unrelated poster direction
 (a p5.js detector-ring sketch, still in `poster/`) kept for reference.
 
 ## The design canvas (`design/`)
 
-`design/Sigma Mu Mu Network.dc.html` is the live artboard set — **TABLOID**,
-**INSTAGRAM** and **AD** — authored in Claude Design and editable there.
+`design/Sigma Mu Mu Network.dc.html` is the live artboard set — **TABLOID** and
+**INSTAGRAM** — authored in Claude Design and editable there.
 `design/network.js` is the generator behind all three; the other two `.dc.html`
 files are earlier explorations from the same canvas.
 
@@ -65,31 +67,51 @@ These are checked, not eyeballed — run `node render/verify_network.mjs`:
   so the corner reads struck by hand — a small nick, with the mesh running
   right up into it
 
-## Rendering
+## Rendering the stills
 
 ```sh
 cd render && npm install                 # playwright-core
-export CHROMIUM_PATH=/path/to/chrome     # optional
+export CHROMIUM_PATH=/path/to/chrome     # optional, autodetected by the scripts
 export FFMPEG=$(python3 -c "import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())")
 
-# print master
+# print master + PDF
 node render/dcrender.mjs shot --file "design/Sigma Mu Mu Network.dc.html" \
-     --screen TABLOID --scale 3 --settle 8000 \
+     --screen TABLOID --scale 3 --settle 16000 \
      --out out/sigmamumu-poster-tabloid-3300x5100.png
 python3 -m img2pdf out/sigmamumu-poster-tabloid-3300x5100.png \
      --pagesize 11inx17in -o out/sigmamumu-poster-tabloid-11x17.pdf
 
-# animated post
-node render/dcrender.mjs video --file "design/Sigma Mu Mu Network.dc.html" \
-     --screen INSTAGRAM --scale 1 --fps 25 --seconds 14 --settle 6000 \
-     --out out/sigmamumu-instagram-post-1080x1350.mp4
-
-# advertisement post
+# Instagram portrait still (.jpg or .png, by extension)
 node render/dcrender.mjs shot --file "design/Sigma Mu Mu Network.dc.html" \
-     --screen AD --scale 1 --settle 8000 --out out/sigmamumu-ad-post-1080x1080.png
+     --screen INSTAGRAM --scale 1 --settle 22000 \
+     --out out/sigmamumu-instagram-post-1080x1350.jpg
 ```
 
-Capturing a frame takes far longer than a frame lasts, so video mode freezes the
-page clock and steps it by hand — one captured second is one second of
-animation. The sketch throttles its own redraw at ~34 ms, which is why the
-video runs at 25 fps.
+## Rendering the video
+
+```sh
+./render/render-video.sh                       # 14s, 1080x1350
+./render/render-video.sh --fast                # quick preview, ink filters off
+./render/render-video.sh --seconds 8 --fps 20  # shorter / cheaper
+```
+
+The script finds Chrome/Chromium and ffmpeg for you, installs the one npm
+dependency, and writes `out/sigmamumu-instagram-post-1080x1350.mp4`.
+
+**Why it is not instant.** The canvas ships an animation that a browser *draws
+live*; there is no frame sequence in the package to collect. Each frame has to
+be composed by the page and read back out. Two details make that slower than
+you would expect:
+
+- Capturing a frame takes far longer than a frame lasts, so the renderer
+  freezes the page clock and steps it by hand — one captured second is one
+  second of animation, at the cost of stepping serially.
+- Chromium re-rasterises what it is asked to capture every single time. Under
+  software rendering (a headless box with no GPU) a 1080×1350 sheet of large
+  canvases and filtered layers costs seconds per frame; with a GPU it is far
+  quicker. The renderer already hides the artboards it is not shooting, which
+  roughly halves the work, and `--fast` drops the ink filters on top of that.
+
+Profiled per frame on a headless, GPU-less box: page clock stepping **8 ms**,
+screenshot **~3.4 s**. The screenshot is the whole cost, and it is the part
+that gets dramatically better on a real machine.
