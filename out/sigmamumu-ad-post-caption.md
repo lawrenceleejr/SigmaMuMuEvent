@@ -11,12 +11,13 @@ Pair either caption with `sigmamumu-instagram-post-1080x1350.jpg` (portrait
 
 Sunday 13 December 2026 · 4:30–6:30 p.m. · Stanford University
 
-Were you a particle physicist in a previous career? Work in tech and want to
-reconnect with the friends and physics of your HEP days? Curious about the
-10 TeV muon collider renaissance?
+Were you a particle physicist in a previous career? Want to reconnect with the
+friends and physics of your HEP days? Curious about the 10 TeV muon collider
+renaissance?
 
 Come for the cocktail hour, hear the physics case for a 10 TeV muon collider,
-then let students and researchers show you what building one actually takes.
+and let our community show you what building one actually takes and how you can
+help. Your physics brain misses you.
 
 Contribute to tomorrow's collider, today. RSVP → hepalumni.muoncollider.us
 

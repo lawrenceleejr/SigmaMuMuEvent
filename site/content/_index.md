@@ -12,7 +12,7 @@ usmcc_url = "https://www.muoncollider.us"
 
 [[params.questions]]
 op = "if"
-text = "Work in tech and want to reconnect with the friends and physics of your HEP days?"
+text = "Want to reconnect with the friends and physics of your HEP days?"
 
 [[params.questions]]
 op = "&&"
@@ -20,7 +20,7 @@ text = "Curious about the 10 TeV muon collider renaissance?"
 
 [[params.questions]]
 op = "&&"
-text = "Want to help build or fund tomorrow's energy frontier?"
+text = "Want to help make tomorrow's energy frontier a reality?"
 
 [[params.program]]
 time = "4:45"
