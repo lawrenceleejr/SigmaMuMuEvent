@@ -23,5 +23,9 @@
 
 <script src="{{ "js/network.js" | relURL }}"></script>
 <script src="{{ "js/field.js" | relURL }}" defer></script>
+
+{{ with site.Params.cloudflare_analytics_token }}
+<!-- Cloudflare Web Analytics --><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "{{ . }}"}'></script><!-- End Cloudflare Web Analytics -->
+{{ end }}
 </body>
 </html>

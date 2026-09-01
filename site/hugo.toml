@@ -11,3 +11,8 @@ enableRobotsTXT = true
 
 [params]
   description = "An evening for physicists who left the field for industry, and the teams they build with now. Sunday 13 December 2026, Stanford University."
+
+  # Cloudflare Web Analytics. Cookieless, so no consent banner is needed.
+  # The token is a public site identifier, not a secret. Blank it to switch
+  # the beacon off; the tag disappears from the built pages entirely.
+  cloudflare_analytics_token = "a2404cc8fdd04d4d81b1abdada7e1eb2"
