@@ -1,4 +1,4 @@
-# σμμ — A Physics × Industry Mixer
+# σμμ — A Physics × Alumni Reunion
 
 Artwork for **σμμ**, the US Muon Collider Collaboration's physics × industry
 mixer — Sunday 13 December 2026, 4:30–6:30 p.m., Stanford campus.
