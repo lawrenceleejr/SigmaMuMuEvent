@@ -9,6 +9,11 @@ enableRobotsTXT = true
 [markup.goldmark.renderer]
   unsafe = true
 
+# Lets a heading name its own anchor: "## Heading {#short-id}". Without this
+# the ids are slugs of the full heading text, which are clumsy to share.
+[markup.goldmark.parser.attribute]
+  block = true
+
 [params]
   description = "An evening for physicists who left the field for industry, and the teams they build with now. Sunday 13 December 2026, Stanford University."
 

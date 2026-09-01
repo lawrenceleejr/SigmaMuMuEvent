@@ -1,0 +1,2 @@
+{{- /* Same anchor treatment for headings written in Markdown. */ -}}
+<h{{ .Level }} id="{{ .Anchor }}">{{ .Text }}{{ partial "anchor.html" .Anchor }}</h{{ .Level }}>

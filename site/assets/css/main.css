@@ -266,6 +266,29 @@ h2 {
 .people li:last-child { border-bottom: 1px solid var(--rule); }
 .who { flex: 0 0 auto; font-size: 1.06rem; font-weight: 700; letter-spacing: -0.005em; }
 .where { font-size: 0.92rem; color: var(--muted); }
+.who-mail {
+  font-size: 0.92rem;
+  color: var(--accent);
+  text-underline-offset: 0.18em;
+}
+
+/* ---- section anchors ---------------------------------------------------- */
+/* Every section can be linked to. The # stays out of the way until you hover
+   the heading or tab to it — except where there is no hover to reveal it. */
+[id] { scroll-margin-top: clamp(1rem, 4vh, 2rem); }
+.anchor {
+  margin-left: 0.45em;
+  color: var(--accent);
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+h2:hover > .anchor,
+.anchor:focus,
+.anchor:focus-visible { opacity: 1; }
+@media (hover: none) {
+  .anchor { opacity: 0.4; }
+}
 
 /* ---- prose -------------------------------------------------------------- */
 .prose { max-width: none; }

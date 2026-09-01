@@ -2,7 +2,7 @@
 {{ $p := .Params }}
 <main>
 
-  <section class="pane pane--hero">
+  <section class="pane pane--hero" id="top">
     <div class="meta">
       <span>{{ $p.meeting }}</span>
       <a class="logo-link" href="{{ $p.usmcc_url }}" rel="noopener"
@@ -42,8 +42,8 @@
   </section>
 
   {{ with $p.program }}
-  <section class="pane">
-    <h2>Program</h2>
+  <section class="pane" id="program">
+    <h2>Program{{ partial "anchor.html" "program" }}</h2>
     <ol class="program">
       {{ range . }}
       <li>
@@ -63,20 +63,21 @@
   </section>
 
   {{ with $p.organizers }}
-  <section class="pane">
-    <h2>Organizers</h2>
+  <section class="pane" id="organizers">
+    <h2>Organizers{{ partial "anchor.html" "organizers" }}</h2>
     <ul class="people">
       {{ range . }}
       <li>
         <span class="who">{{ .name }}</span>
         <span class="where">{{ .affiliation }}</span>
+        {{ with .email }}<a class="who-mail" href="mailto:{{ . }}">{{ . }}</a>{{ end }}
       </li>
       {{ end }}
     </ul>
   </section>
   {{ end }}
 
-  <footer class="pane pane--foot">
+  <footer class="pane pane--foot" id="contact">
     <p>US Muon Collider Collaboration · <span class="keep">σμμ</span> · {{ $p.dateline }}</p>
     {{ with $p.social }}
     <ul class="social">

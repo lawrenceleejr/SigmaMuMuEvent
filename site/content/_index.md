@@ -44,6 +44,7 @@ affiliation = "Tufts University"
 [[params.organizers]]
 name = "Lawrence Lee"
 affiliation = "University of Tennessee, Knoxville"
+email = "LLee@utk.edu"
 
 [[params.organizers]]
 name = "Toyoko Orimoto"
@@ -66,7 +67,7 @@ name = "LinkedIn"
 url = "https://www.linkedin.com/company/muoncollider-us"
 +++
 
-## About the evening
+## About the evening {#about}
 
 The US Muon Collider Collaboration is hosting an evening for physicists who
 left high-energy physics for industry and their new colleagues, to reconnect
@@ -76,13 +77,10 @@ Come for the cocktail hour, hear the physics case for a 10 TeV muon collider,
 and let our community show you what building one actually takes and how you can
 help. Your physics brain misses you.
 
-## Donations, sponsorship, recruiting
+## Donations, sponsorship, recruiting {#donations}
 
 Donations are warmly welcomed at registration, and sponsorship keeps the
 evening open to every guest, enables student travel support, and helps make a
-muon collider a reality. If your organization would like to support the reunion — or to talk about
-recruiting from a room full of people who know how to build hard things — please
-get in touch:
-
-- **Lawrence Lee** — <LLee@utk.edu>
-- **Kiley Kennedy** — email to follow
+muon collider a reality. If your organization would like to support the reunion
+— or to talk about recruiting from a room full of people who know how to build
+hard things — get in touch with any of [the organizers](#organizers).
