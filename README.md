@@ -40,7 +40,7 @@ FORCE_HOST=1 ./run.sh build    # if hugo extended is on your PATH
 ```
 
 **Content is Markdown.** `site/content/_index.md` holds the prose; the
-structured bits — programme rows, the `if` / `&&` questions, date and venue —
+structured bits — program rows, the `if` / `&&` questions, date and venue —
 are front matter in the same file. Editing that one file is the whole job for
 ordinary copy changes; the layout lives in `site/layouts/`.
 

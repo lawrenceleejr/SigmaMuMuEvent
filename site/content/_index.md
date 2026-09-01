@@ -7,9 +7,7 @@ timeline = "4:30 – 6:30 p.m. Stanford University"
 meeting = "USMCC Annual Meeting · Stanford"
 cta = "Contribute to tomorrow's collider, today."
 rsvp_label = "RSVP"
-rsvp_url = ""
-agenda_label = "Meeting agenda"
-agenda_url = ""
+rsvp_url = "https://indico.muoncollider.us/e/hepalumni"
 usmcc_url = "https://www.muoncollider.us"
 
 [[params.questions]]
@@ -24,12 +22,12 @@ text = "Curious about the 10 TeV muon collider renaissance?"
 op = "&&"
 text = "Want to help build or fund tomorrow's energy frontier?"
 
-[[params.programme]]
+[[params.program]]
 time = "4:45"
 name = "The physics case for a 10 TeV muon collider"
 note = "Learn about what lies ahead at the 10 TeV interaction scale, and why we need to use unstable particles to get there."
 
-[[params.programme]]
+[[params.program]]
 time = "5:15"
 name = "Research fair"
 note = "Students and researchers present work in progress. Find out where you can contribute."
@@ -55,7 +53,6 @@ affiliation = "Northeastern University"
 name = "Lauren Tompkins"
 affiliation = "Stanford University"
 
-# Fill in a url and the label below becomes a link.
 [[params.social]]
 name = "Instagram"
 url = "https://www.instagram.com/muoncollider.us"
@@ -81,8 +78,8 @@ help. Your physics brain misses you.
 
 ## Donations, sponsorship, recruiting
 
-Donations are warmly welcomed, and sponsorship keeps the evening open to every
-guest. If your organisation would like to support the reunion — or to talk about
+Donations are warmly welcomed at registration, and sponsorship keeps the
+evening open to every guest. If your organization would like to support the reunion — or to talk about
 recruiting from a room full of people who know how to build hard things — please
 get in touch:
 

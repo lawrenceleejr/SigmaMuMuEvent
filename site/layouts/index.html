@@ -38,18 +38,13 @@
       {{ else }}
         <span class="pending">{{ $p.rsvp_label }} — link to follow</span>
       {{ end }}
-      {{ if $p.agenda_url }}
-        <a class="button button--quiet" href="{{ $p.agenda_url }}">{{ $p.agenda_label }}</a>
-      {{ else }}
-        <span class="pending">{{ $p.agenda_label }} — link to follow</span>
-      {{ end }}
     </p>
   </section>
 
-  {{ with $p.programme }}
+  {{ with $p.program }}
   <section class="pane">
-    <h2>Programme</h2>
-    <ol class="programme">
+    <h2>Program</h2>
+    <ol class="program">
       {{ range . }}
       <li>
         <span class="time">{{ .time }}</span>

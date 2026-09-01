@@ -224,7 +224,7 @@ main {
 .logo-link:hover .logo, .logo-link:focus-visible .logo { opacity: 0.72; }
 .logo { transition: opacity 0.15s ease; }
 
-/* ---- programme ---------------------------------------------------------- */
+/* ---- program ---------------------------------------------------------- */
 h2 {
   margin: 0 0 1.4rem;
   font-size: 0.78rem;
@@ -234,14 +234,14 @@ h2 {
   color: var(--accent);
 }
 
-.programme { margin: 0; padding: 0; list-style: none; }
-.programme li {
+.program { margin: 0; padding: 0; list-style: none; }
+.program li {
   display: flex;
   gap: clamp(0.9rem, 3vw, 1.6rem);
   padding: 0.95rem 0;
   border-top: 1px solid var(--rule);
 }
-.programme li:last-child { border-bottom: 1px solid var(--rule); }
+.program li:last-child { border-bottom: 1px solid var(--rule); }
 .time {
   flex: 0 0 3.4rem;
   font-size: 0.92rem;
