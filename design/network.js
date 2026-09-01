@@ -1,7 +1,10 @@
 /* σμμ Feynman network.
    Blue-noise points at band-varying density -> Delaunay (planar, no crossings)
    -> thinned so every vertex keeps degree >= 3 (no dangling legs, no direction-only
-   vertices) -> line types assigned -> growth timed by graph distance from the roots. */
+   vertices) -> vertex legs capped at 4 and tight leg angles opened out
+   -> line types assigned -> growth timed by graph distance from the roots.
+   Strokes print with an ink bleed: a soft halo under a wobbling line, so the
+   mesh reads as pressed into paper rather than plotted. */
 (function () {
   const INK = '#201e1d';
 
@@ -79,8 +82,11 @@
     const clear = cfg.clearance == null ? 6 : cfg.clearance;
     const speed = cfg.speed || 200;
     const scaleAt = cfg.scaleAt || function () { return 1; };
-    const minSep = cfg.minSep == null ? 0.1745 : cfg.minSep;
+    const minSep = cfg.minSep == null ? 0.52 : cfg.minSep;   // ~30 degrees
+    const maxLegs = cfg.maxLegs == null ? 4 : cfg.maxLegs;
     const spacing = cfg.spacing || 42;
+    // keep the sheet's corners open: points live inside a rounded rectangle
+    const corner = cfg.cornerR == null ? Math.min(W, H) * 0.2 : cfg.cornerR;
     const clearAt = cfg.clearanceAt || function () { return clear; };
     const zones = (cfg.zones || []).map(z => {
       const c = clearAt(z.y + z.h / 2);
@@ -89,6 +95,14 @@
 
     function blocked(x, y) {
       if (x < pad || y < pad || x > W - pad || y > H - pad) return true;
+      if (corner > 0) {
+        // outside the rounded rectangle == in a corner we are leaving empty
+        const x0 = pad + corner, y0 = pad + corner;
+        const x1 = W - pad - corner, y1 = H - pad - corner;
+        const qx = x < x0 ? x0 : (x > x1 ? x1 : x);
+        const qy = y < y0 ? y0 : (y > y1 ? y1 : y);
+        if ((qx !== x || qy !== y) && Math.hypot(x - qx, y - qy) > corner) return true;
+      }
       for (let i = 0; i < zones.length; i++) {
         const z = zones[i];
         if (x > z.x && x < z.x + z.w && y > z.y && y < z.y + z.h) return true;
@@ -177,31 +191,55 @@
       dead[ei] = 1; deg[e.a]--; deg[e.b]--; live--;
     }
 
-    // ---- widen tight vertex angles where the mesh can spare the edge ----
+    // ---- vertex hygiene: at most `maxLegs` legs, and no tight angle between two
+    //      legs of the same vertex. Both are hard rules, so an offending edge goes
+    //      even when that leaves a short leg behind; the passes below reconnect
+    //      what they can and the rest ends in the vacuum as an x. ----
     const incOf = () => {
       const inc = pts.map(() => []);
       cand.forEach((e, i) => { if (!dead[i]) { inc[e.a].push(i); inc[e.b].push(i); } });
       return inc;
     };
-    for (let pass = 0; pass < 4; pass++) {
+    const dirFrom = (v, ei) => {
+      const e = cand[ei], o = e.a === v ? e.b : e.a;
+      return Math.atan2(pts[o][1] - pts[v][1], pts[o][0] - pts[v][0]);
+    };
+    const kill = ei => { const e = cand[ei]; dead[ei] = 1; deg[e.a]--; deg[e.b]--; };
+    // an edge's cost to keep: long ones and ones bridging already-busy vertices go first
+    const cost = ei => {
+      const e = cand[ei];
+      return e.len * (0.75 + 0.25 * R()) + 26 * (deg[e.a] + deg[e.b]);
+    };
+
+    for (let pass = 0; pass < 8; pass++) {
       const inc = incOf();
       let changed = 0;
       for (let v = 0; v < pts.length; v++) {
-        const list = inc[v];
-        if (list.length < 4) continue;
-        for (let i = 0; i < list.length; i++) {
-          for (let j = i + 1; j < list.length; j++) {
-            const e1 = cand[list[i]], e2 = cand[list[j]];
-            if (dead[list[i]] || dead[list[j]]) continue;
-            const o1 = e1.a === v ? e1.b : e1.a, o2 = e2.a === v ? e2.b : e2.a;
-            const d1 = Math.atan2(pts[o1][1] - pts[v][1], pts[o1][0] - pts[v][0]);
-            const d2 = Math.atan2(pts[o2][1] - pts[v][1], pts[o2][0] - pts[v][0]);
-            if (angDiff(d1, d2) >= minSep) continue;
-            const drop = e1.len > e2.len ? list[i] : list[j];
-            const de = cand[drop];
-            if (deg[de.a] <= 3 || deg[de.b] <= 3) continue;
-            dead[drop] = 1; deg[de.a]--; deg[de.b]--; changed++;
+        // 1. cap the number of legs
+        let list = inc[v].filter(ei => !dead[ei]);
+        while (list.length > maxLegs) {
+          let worst = list[0], wc = -Infinity;
+          list.forEach(ei => { const c = cost(ei); if (c > wc) { wc = c; worst = ei; } });
+          kill(worst);
+          list = list.filter(ei => ei !== worst);
+          changed++;
+        }
+        // 2. open out tight angles, dropping the costlier of the offending pair
+        for (let guard = 0; guard < maxLegs * 2; guard++) {
+          let hit = null;
+          for (let i = 0; i < list.length && !hit; i++) {
+            for (let j = i + 1; j < list.length; j++) {
+              if (angDiff(dirFrom(v, list[i]), dirFrom(v, list[j])) < minSep) {
+                hit = [list[i], list[j]];
+                break;
+              }
+            }
           }
+          if (!hit) break;
+          const drop = cost(hit[0]) >= cost(hit[1]) ? hit[0] : hit[1];
+          kill(drop);
+          list = list.filter(ei => ei !== drop);
+          changed++;
         }
       }
       if (!changed) break;
@@ -248,7 +286,7 @@
           const k = e.a < e.b ? e.a * 100000 + e.b : e.b * 100000 + e.a;
           if (have.has(k)) continue;
           const o = e.a === v ? e.b : e.a;
-          if (d[o] < 2) continue;
+          if (d[o] < 2 || d[o] >= maxLegs) continue;
           const dv = Math.atan2(pts[o][1] - pts[v][1], pts[o][0] - pts[v][0]);
           let ok = true;
           for (let j = 0; j < dirs[v].length; j++) if (angDiff(dv, dirs[v][j]) < minSep) { ok = false; break; }
@@ -256,7 +294,7 @@
           if (!ok) continue;
           opts.push({ e: e, dv: dv, o: o });
         }
-        if (opts.length < 2) continue;
+        if (opts.length < 2 || d[v] + 2 > maxLegs) continue;
         opts.sort((x, y) => x.e.len - y.e.len);
         let picked = null;
         for (let i = 0; i < opts.length && !picked; i++) {
@@ -276,6 +314,21 @@
       }
       if (!added) break;
     }
+
+    // ---- sweep up the debris: a stub or a stranded pair reads as dirt, not physics,
+    //      so only components big enough to look like a diagram survive ----
+    {
+      const minComp = cfg.minComponent == null ? 5 : cfg.minComponent;
+      const parent = new Int32Array(pts.length);
+      for (let i = 0; i < parent.length; i++) parent[i] = i;
+      const find = x => { while (parent[x] !== x) { parent[x] = parent[parent[x]]; x = parent[x]; } return x; };
+      const join = (x, y) => { const rx = find(x), ry = find(y); if (rx !== ry) parent[rx] = ry; };
+      edges.forEach(e => join(e.a, e.b));
+      const size = new Map();
+      edges.forEach(e => { const r = find(e.a); size.set(r, (size.get(r) || 0) + 1); });
+      edges = edges.filter(e => (size.get(find(e.a)) || 0) >= minComp);
+    }
+    if (!edges.length) return { verts: pts, edges: [], duration: 1 };
 
     {
       const d = new Array(pts.length).fill(0);
@@ -408,70 +461,114 @@
   }
 
   // ---- rendering ---------------------------------------------------------
+  // Every line is inked, not plotted: it wanders a little, wicks a soft halo into
+  // the paper, and pools where legs meet. All of it is a pure function of the
+  // edge's endpoints, so a sheet prints the same way twice.
+  function edgeSeed(e) { return (((e.a + 1) * 73856093) ^ ((e.b + 1) * 19349663)) >>> 0; }
+
   function pathPoints(net, e) {
+    if (e.__pts) return e.__pts;
     const a = net.verts[e.a], b = net.verts[e.b];
-    if (e.type !== 'b') return [a, b];
     const s = e.s || 1;
     const dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy) || 1;
     const px = -dy / len, py = dx / len;
-    const lam = 15 * s, amp = 4.4 * s;
+    const w = rng(edgeSeed(e));
+    const p1 = w() * Math.PI * 2, p2 = w() * Math.PI * 2;
+    const k1 = 1 + w(), k2 = 2.2 + w() * 1.6;
+    const amp = (0.5 + w() * 0.7) * s;
+    const boson = e.type === 'b';
+    const lam = 15 * s, bAmp = 4.4 * s;
     const cycles = Math.max(1, Math.round(len / lam));
-    const steps = Math.max(18, Math.ceil(len / 1.6));
-    const pts = [];
+    const steps = boson ? Math.max(18, Math.ceil(len / 1.6)) : Math.max(6, Math.ceil(len / 7));
+    const out = [];
     for (let i = 0; i <= steps; i++) {
       const u = i / steps;
-      const taper = Math.min(1, Math.sin(Math.PI * u) * 2.2);
-      const w = Math.sin(u * Math.PI * 2 * cycles) * amp * taper;
-      pts.push([a[0] + dx * u + px * w, a[1] + dy * u + py * w]);
+      const taper = Math.sin(Math.PI * u);          // straight at the vertices
+      let off = (Math.sin(u * Math.PI * k1 + p1) * 0.62
+               + Math.sin(u * Math.PI * k2 + p2) * 0.38) * amp * taper;
+      if (boson) off += Math.sin(u * Math.PI * 2 * cycles) * bAmp * Math.min(1, taper * 2.2);
+      out.push([a[0] + dx * u + px * off, a[1] + dy * u + py * off]);
     }
-    return pts;
+    e.__pts = out;
+    return out;
   }
 
   function stroke(ctx, pts, frac) {
+    const total = pts.length - 1;
+    const reach = total * Math.max(0.015, Math.min(1, frac));
+    const whole = Math.floor(reach);
     ctx.beginPath();
-    if (pts.length === 2) {
-      const u = Math.max(0.02, frac);
-      ctx.moveTo(pts[0][0], pts[0][1]);
-      ctx.lineTo(pts[0][0] + (pts[1][0] - pts[0][0]) * u, pts[0][1] + (pts[1][1] - pts[0][1]) * u);
-    } else {
-      const n = Math.max(2, Math.ceil((pts.length - 1) * frac) + 1);
-      ctx.moveTo(pts[0][0], pts[0][1]);
-      for (let i = 1; i < Math.min(n, pts.length); i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i <= Math.min(whole, total); i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    if (whole < total) {
+      const u = reach - whole, p = pts[whole], q = pts[whole + 1];
+      ctx.lineTo(p[0] + (q[0] - p[0]) * u, p[1] + (q[1] - p[1]) * u);
     }
     ctx.stroke();
   }
 
   function drawEdge(ctx, net, e, frac, o) {
     const acc = o.accent, s = e.s || 1, lwf = 0.8 + 0.3 * s;
-    ctx.lineCap = 'round';
+    const bleed = o.bleed == null ? 1 : o.bleed;
+    const pts = pathPoints(net, e);
+    const w = rng(edgeSeed(e) ^ 0x9e3779b9);
+    const dens = 0.86 + w() * 0.3;                  // uneven take-up, line to line
+    let dash = null, color, lw;
     if (e.type === 'h') {
-      ctx.setLineDash([6.5 * s, 6.5 * s]);
-      ctx.strokeStyle = e.special ? acc : rgba(acc, 0.78);
-      ctx.lineWidth = (e.special ? 2 : 1.25) * lwf;
+      dash = [6.5 * s, 6.5 * s];
+      color = e.special ? acc : rgba(acc, 0.78);
+      lw = (e.special ? 2 : 1.25) * lwf;
     } else if (e.type === 'b') {
-      ctx.setLineDash([]);
-      ctx.strokeStyle = rgba(INK, 0.62);
-      ctx.lineWidth = 1.05 * lwf;
+      color = rgba(INK, 0.62); lw = 1.05 * lwf;
     } else {
-      ctx.setLineDash([]);
-      ctx.strokeStyle = rgba(INK, 0.8);
-      ctx.lineWidth = 1.25 * lwf;
+      color = rgba(INK, 0.8); lw = 1.25 * lwf;
     }
-    stroke(ctx, pathPoints(net, e), frac);
+    lw *= dens;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    // ink wicking into the fibre: two faint, wider passes under the impression
+    if (bleed > 0) {
+      const halo = e.type === 'h' ? acc : INK;
+      ctx.setLineDash(dash || []);
+      ctx.strokeStyle = rgba(halo, 0.055 * bleed);
+      ctx.lineWidth = lw + (2.6 + 1.1 * s) * bleed;
+      stroke(ctx, pts, frac);
+      ctx.strokeStyle = rgba(halo, 0.1 * bleed);
+      ctx.lineWidth = lw + (1 + 0.5 * s) * bleed;
+      stroke(ctx, pts, frac);
+    }
+
+    ctx.setLineDash(dash || []);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lw;
+    stroke(ctx, pts, frac);
     ctx.setLineDash([]);
+
     if (frac >= 1) {
-      const rr = 1.7 * (0.72 + 0.5 * s);
-      const dot = r => { ctx.beginPath(); ctx.arc(r[0], r[1], rr, 0, Math.PI * 2); ctx.fill(); };
+      const rr = 1.7 * (0.72 + 0.5 * s) * (0.9 + 0.24 * w());
+      const dot = r => {
+        if (bleed > 0) {
+          ctx.fillStyle = rgba(INK, 0.13 * bleed);       // the pool around the node
+          ctx.beginPath(); ctx.arc(r[0], r[1], rr + (1.5 + 0.5 * s) * bleed, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.fillStyle = rgba(INK, 0.85);
+        ctx.beginPath(); ctx.arc(r[0], r[1], rr, 0, Math.PI * 2); ctx.fill();
+      };
       const cross = r => {
         const q = 3.4 * (0.72 + 0.5 * s);
-        ctx.beginPath();
-        ctx.moveTo(r[0] - q, r[1] - q); ctx.lineTo(r[0] + q, r[1] + q);
-        ctx.moveTo(r[0] + q, r[1] - q); ctx.lineTo(r[0] - q, r[1] + q);
-        ctx.stroke();
+        const line = (lwv, alpha) => {
+          ctx.strokeStyle = rgba(INK, alpha);
+          ctx.lineWidth = lwv;
+          ctx.beginPath();
+          ctx.moveTo(r[0] - q, r[1] - q); ctx.lineTo(r[0] + q, r[1] + q);
+          ctx.moveTo(r[0] + q, r[1] - q); ctx.lineTo(r[0] - q, r[1] + q);
+          ctx.stroke();
+        };
+        if (bleed > 0) line(1.2 * lwf + 1.6 * bleed, 0.12 * bleed);
+        line(1.2 * lwf, 0.8);
       };
-      ctx.fillStyle = rgba(INK, 0.85);
-      ctx.strokeStyle = rgba(INK, 0.8);
-      ctx.lineWidth = 1.2 * lwf;
       if (e.xa) cross(net.verts[e.a]); else dot(net.verts[e.a]);
       if (e.xb) cross(net.verts[e.b]); else dot(net.verts[e.b]);
     }
