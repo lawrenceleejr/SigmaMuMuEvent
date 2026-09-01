@@ -15,7 +15,8 @@ reads as pressed rather than plotted.
 |---|---|
 | `sigmamumu-poster-tabloid-11x17.pdf` | Tabloid print master, 11 × 17 in at 300 dpi |
 | `sigmamumu-poster-tabloid-3300x5100.png` | Same sheet as a flat PNG |
-| `sigmamumu-instagram-post-1080x1350.jpg` | Instagram portrait post, same board as the poster |
+| `sigmamumu-instagram-post-2160x2700.jpg` | Instagram portrait master at 2× — use this for viewing and zooming |
+| `sigmamumu-instagram-post-1080x1350.jpg` | Same board at Instagram's exact upload size |
 | `sigmamumu-ad-post-caption.md` | Caption copy — feed and sponsor-facing |
 
 The animated cut of the Instagram board is rendered on demand — see
@@ -83,9 +84,17 @@ python3 -m img2pdf out/sigmamumu-poster-tabloid-3300x5100.png \
 
 # Instagram portrait still (.jpg or .png, by extension)
 node render/dcrender.mjs shot --file "design/Sigma Mu Mu Network.dc.html" \
-     --screen INSTAGRAM --scale 1 --settle 22000 \
-     --out out/sigmamumu-instagram-post-1080x1350.jpg
+     --screen INSTAGRAM --scale 2 --settle 26000 \
+     --out out/sigmamumu-instagram-post-2160x2700.jpg
+$FFMPEG -y -i out/sigmamumu-instagram-post-2160x2700.jpg \
+     -vf scale=1080:1350:flags=lanczos -q:v 2 -pix_fmt yuvj444p \
+     out/sigmamumu-instagram-post-1080x1350.jpg
 ```
+
+`--scale` is the whole resolution story: the artboards are laid out in CSS
+pixels (1100 × 1700 and 1080 × 1350) and `--scale N` renders them at N times
+that. The canvases inside the design follow the same ratio, so a 3× capture is
+genuinely 3× of line art rather than an upscale of something smaller.
 
 ## Rendering the video
 
@@ -93,6 +102,7 @@ node render/dcrender.mjs shot --file "design/Sigma Mu Mu Network.dc.html" \
 ./render/render-video.sh                       # 14s, 1080x1350
 ./render/render-video.sh --fast                # quick preview, ink filters off
 ./render/render-video.sh --seconds 8 --fps 20  # shorter / cheaper
+./render/render-video.sh --scale 2             # 2160x2700 instead of 1080x1350
 ```
 
 The script finds Chrome/Chromium and ffmpeg for you, installs the one npm

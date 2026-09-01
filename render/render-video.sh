@@ -4,6 +4,7 @@
 #   ./render/render-video.sh                       # 14s, 1080x1350, full quality
 #   ./render/render-video.sh --fast                # quick preview, no ink filters
 #   ./render/render-video.sh --seconds 8 --fps 20  # shorter / cheaper
+#   ./render/render-video.sh --scale 2             # 2160x2700 master
 #   ./render/render-video.sh --screen TABLOID --out out/tabloid.mp4
 #
 # Needs: node 18+, and a Chromium/Chrome. ffmpeg is found automatically if you

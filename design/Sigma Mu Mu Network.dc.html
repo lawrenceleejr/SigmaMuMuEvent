@@ -279,6 +279,15 @@ class Component extends DCLogic {
     return out.length > 5 ? out : null;
   }
 
+  /* Match the canvas backing store to the device pixel ratio the page is being
+     rendered at. A 3x print capture of a 1.5x canvas was upscaling the line art
+     two-fold, which is exactly what soft, pixelated strokes look like. Floored
+     at 1.5 so on-screen editing keeps its detail, capped at 3 for memory. */
+  dpr() {
+    const d = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
+    return Math.max(1.5, Math.min(3, d));
+  }
+
   ctxFor(id, w, h, dpr) {
     const c = document.getElementById(id);
     if (!c) return null;
@@ -305,8 +314,8 @@ class Component extends DCLogic {
       });
       const s = {
         cfg: cfg, net: net, drawn: new Uint8Array(net.edges.length), head: 0, cycle: -1,
-        grow: this.ctxFor(cfg.key + '-grow', cfg.w, cfg.h, 1.5),
-        front: this.ctxFor(cfg.key + '-front', cfg.w, cfg.h, 1.5)
+        grow: this.ctxFor(cfg.key + '-grow', cfg.w, cfg.h, this.dpr()),
+        front: this.ctxFor(cfg.key + '-front', cfg.w, cfg.h, this.dpr())
       };
       if (s.grow) s.grow.clearRect(0, 0, cfg.w, cfg.h);
       if (s.front) s.front.clearRect(0, 0, cfg.w, cfg.h);
@@ -319,7 +328,7 @@ class Component extends DCLogic {
   }
 
   drawTop(cfg, o) {
-    const ctx = this.ctxFor(cfg.key + '-top', cfg.w, cfg.h, 1.5);
+    const ctx = this.ctxFor(cfg.key + '-top', cfg.w, cfg.h, this.dpr());
     if (!ctx) return;
     const W = cfg.w, H = cfg.h;
     ctx.clearRect(0, 0, W, H);
@@ -352,7 +361,7 @@ class Component extends DCLogic {
       ctx.lineTo(fx + Math.cos(a) * L, fy + Math.sin(a) * L);
       ctx.stroke();
     }
-    const qctx = this.ctxFor(cfg.key + '-qr', W, H, 1.5);
+    const qctx = this.ctxFor(cfg.key + '-qr', W, H, this.dpr());
     if (!qctx) return;
     qctx.clearRect(0, 0, W, H);
     const q = cfg.qr, N = 25, m = q.s / N;
