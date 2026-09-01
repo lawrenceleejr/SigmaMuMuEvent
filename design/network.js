@@ -85,8 +85,11 @@
     const minSep = cfg.minSep == null ? 0.52 : cfg.minSep;   // ~30 degrees
     const maxLegs = cfg.maxLegs == null ? 4 : cfg.maxLegs;
     const spacing = cfg.spacing || 42;
-    // keep the sheet's corners open: points live inside a rounded rectangle
-    const corner = cfg.cornerR == null ? Math.min(W, H) * 0.2 : cfg.cornerR;
+    // just knock the sharp point off each corner -- a small radius that breathes
+    // around the arc, so the boundary reads struck by hand rather than by compass
+    const corner = cfg.cornerR == null ? Math.min(W, H) * 0.055 : cfg.cornerR;
+    const cornerWob = cfg.cornerWobble == null ? 0.3 : cfg.cornerWobble;
+    const cornerPhase = R() * Math.PI * 2;
     const clearAt = cfg.clearanceAt || function () { return clear; };
     const zones = (cfg.zones || []).map(z => {
       const c = clearAt(z.y + z.h / 2);
@@ -96,12 +99,17 @@
     function blocked(x, y) {
       if (x < pad || y < pad || x > W - pad || y > H - pad) return true;
       if (corner > 0) {
-        // outside the rounded rectangle == in a corner we are leaving empty
         const x0 = pad + corner, y0 = pad + corner;
         const x1 = W - pad - corner, y1 = H - pad - corner;
         const qx = x < x0 ? x0 : (x > x1 ? x1 : x);
         const qy = y < y0 ? y0 : (y > y1 ? y1 : y);
-        if ((qx !== x || qy !== y) && Math.hypot(x - qx, y - qy) > corner) return true;
+        if (qx !== x || qy !== y) {
+          const ax = x - qx, ay = y - qy;
+          const a = Math.atan2(ay, ax);
+          const r = corner * (1 + cornerWob * (0.62 * Math.sin(a * 3 + cornerPhase)
+                                             + 0.38 * Math.sin(a * 5 - cornerPhase * 1.7)));
+          if (Math.hypot(ax, ay) > r) return true;
+        }
       }
       for (let i = 0; i < zones.length; i++) {
         const z = zones[i];

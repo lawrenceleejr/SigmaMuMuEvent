@@ -9,11 +9,14 @@ const ROOT = resolve(new URL('..', import.meta.url).pathname);
 const win = {};
 new Function('window', readFileSync(resolve(ROOT, 'design/network.js'), 'utf8'))(win);
 
+// mirrors the SHEETS config in design/Sigma Mu Mu Network.dc.html
 const CASES = [
   { name: 'tabloid', w: 1100, h: 1700, spacing: 35, keep: 0.72, speed: 135,
-    seeds: [{ x: 862, y: 300 }, { x: 250, y: 1120 }], bands: [620, 1180, 1.5, 0.95, 0.5] },
+    seeds: [{ x: 862, y: 300 }, { x: 250, y: 1120 }], bands: [620, 1180, 0.8, 0.7, 0.5] },
   { name: 'instagram', w: 1080, h: 1350, spacing: 33, keep: 0.72, speed: 125,
-    seeds: [{ x: 858, y: 250 }, { x: 210, y: 890 }], bands: [470, 940, 1.3, 0.85, 0.45] },
+    seeds: [{ x: 858, y: 250 }, { x: 210, y: 890 }], bands: [470, 940, 0.78, 0.68, 0.48] },
+  { name: 'ad', w: 1080, h: 1080, spacing: 32, keep: 0.72, speed: 120,
+    seeds: [{ x: 850, y: 230 }, { x: 200, y: 760 }], bands: [400, 780, 0.78, 0.68, 0.48] },
 ];
 const MAX_LEGS = 4, MIN_SEP = 0.52, MIN_COMP = 8;
 const angDiff = (a, b) => { let d = Math.abs(a - b) % (Math.PI * 2); return d > Math.PI ? Math.PI * 2 - d : d; };
@@ -23,10 +26,11 @@ for (const c of CASES) {
   const b = c.bands;
   const net = win.SMMNet.build({
     w: c.w, h: c.h, zones: [], seeds: c.seeds, seed: 7, spacing: c.spacing,
-    keep: c.keep, speed: c.speed, clearance: 6, clearanceAt: () => 12,
+    keep: c.keep, speed: c.speed, darts: 120000, pad: 8, clearance: 5,
+    clearanceAt: y => (y < c.h * 0.66 ? 11 : 5),
     scaleAt: y => (y < b[0] ? b[2] : y < b[1] ? b[3] : b[4]),
-    higgsQuads: 5, cornerR: Math.min(c.w, c.h) * 0.3, maxLegs: MAX_LEGS,
-    minSep: MIN_SEP, minComponent: MIN_COMP,
+    higgsQuads: 5, cornerR: Math.min(c.w, c.h) * 0.05, cornerWobble: 0.34,
+    maxLegs: MAX_LEGS, minSep: MIN_SEP, minComponent: MIN_COMP,
   });
 
   const inc = net.verts.map(() => []);
