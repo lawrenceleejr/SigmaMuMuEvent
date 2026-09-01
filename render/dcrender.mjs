@@ -29,7 +29,7 @@ function args() {
   const mode = a.shift();
   const o = {
     mode, file: 'design/Sigma Mu Mu Network.dc.html', screen: 'TABLOID',
-    scale: 2, fps: 30, seconds: 24, out: 'out/dc.png', settle: 2500, start: 0,
+    scale: 2, fps: 25, seconds: 14, out: 'out/dc.png', settle: 2500, start: 0,
   };
   for (let i = 0; i < a.length; i += 2) o[a[i].replace(/^--/, '')] = a[i + 1];
   o.scale = parseFloat(o.scale); o.fps = parseInt(o.fps, 10);
@@ -66,6 +66,14 @@ export async function open(o, port, browser) {
   const page = await browser.newPage({
     viewport: { width: 1600, height: 1200 }, deviceScaleFactor: o.scale,
   });
+  // Capturing a frame takes far longer than a frame lasts, so real time would
+  // race ahead of the recording. Video mode freezes the page clock and steps it
+  // by hand, one frame at a time.
+  if (o.mode === 'video') {
+    const T0 = new Date('2026-12-13T16:30:00Z');
+    await page.clock.install({ time: T0 });
+    await page.clock.pauseAt(T0);
+  }
   await page.route('**/*', async (route) => {
     const url = route.request().url();
     const hit = CDN.find(([re]) => re.test(url));
@@ -85,6 +93,8 @@ export async function open(o, port, browser) {
   page.on('console', (m) => { if (m.type() === 'error') errs.push(m.text()); });
   await page.goto(`http://127.0.0.1:${port}/${encodeURI(o.file)}`, { waitUntil: 'load' });
   await page.waitForSelector(`[data-screen-label="${o.screen}"]`, { timeout: 30000 });
+  // Real time still passes while the clock is frozen, so fonts load and the
+  // sketch boots without the animation advancing a single frame.
   await page.waitForTimeout(o.settle);
   return { page, errs };
 }
@@ -111,6 +121,10 @@ async function main() {
       console.log(`[dc] wrote ${o.out} in ${((Date.now() - t0) / 1000).toFixed(1)}s`);
     } else if (o.mode === 'video') {
       const n = Math.round(o.fps * o.seconds);
+      const stepMs = 1000 / o.fps;
+      // the sketch throttles its own redraw at ~34ms, so a step below that
+      // would repeat frames; 25fps keeps playback at the designed speed
+      if (stepMs < 36) console.log(`[dc] warning: ${o.fps}fps steps ${stepMs.toFixed(1)}ms, below the sketch's 34ms redraw throttle`);
       const w = Math.round(box.width * o.scale / 2) * 2;
       const h = Math.round(box.height * o.scale / 2) * 2;
       const ff = spawn(process.env.FFMPEG || 'ffmpeg', [
@@ -120,6 +134,7 @@ async function main() {
         o.out,
       ], { stdio: ['pipe', 'inherit', 'inherit'] });
       for (let i = 0; i < n; i++) {
+        if (i) await page.clock.runFor(stepMs);
         const buf = await art.screenshot({ type: 'png', timeout: 120000 });
         if (!ff.stdin.write(buf)) await once(ff.stdin, 'drain');
         if (i % 30 === 0 || i === n - 1) {
