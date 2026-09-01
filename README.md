@@ -208,3 +208,20 @@ you would expect:
 Profiled per frame on a headless, GPU-less box: page clock stepping **8 ms**,
 screenshot **~3.4 s**. The screenshot is the whole cost, and it is the part
 that gets dramatically better on a real machine.
+
+### The poster QR
+
+`design/Sigma Mu Mu Network.dc.html` carries the QR as a literal module matrix
+in the `QR` constant, so nothing has to be fetched at render time. It encodes
+`https://hepalumni.muoncollider.us`. If the address changes, regenerate it:
+
+```sh
+pip install segno
+python3 -c "
+import segno
+q = segno.make('https://hepalumni.muoncollider.us', error='m')
+print('\n'.join(\"  '\" + ''.join('1' if v else '0' for v in r) + \"',\" for r in q.matrix))"
+```
+
+and paste the rows over the existing ones. The drawing code and the quiet-zone
+exclusion both read `QR.length`, so a different version just works.
