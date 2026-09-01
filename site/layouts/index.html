@@ -92,6 +92,7 @@
     {{ end }}
     <p class="fine">Alongside the USMCC annual meeting at Stanford University.
       <a href="{{ $p.usmcc_url }}" rel="noopener">muoncollider.us</a></p>
+    {{ with $p.copyright }}<p class="fine copyright">{{ . }}</p>{{ end }}
   </footer>
 
 </main>

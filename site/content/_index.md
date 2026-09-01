@@ -9,6 +9,7 @@ cta = "Contribute to tomorrow's collider, today."
 rsvp_label = "RSVP"
 rsvp_url = "https://indico.muoncollider.us/e/hepalumni"
 usmcc_url = "https://www.muoncollider.us"
+copyright = "© 2026 US Muon Collider Collaboration. All rights reserved."
 
 [[params.questions]]
 op = "if"
