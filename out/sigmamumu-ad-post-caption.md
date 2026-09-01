@@ -9,7 +9,7 @@ Pair either caption with `sigmamumu-instagram-post-1080x1350.jpg` (portrait
 
 **σμμ — a particle physics alumni reunion**
 
-Sunday 13 December 2026 · 4:30–6:30 p.m. · Stanford campus
+Sunday 13 December 2026 · 4:30–6:30 p.m. · Stanford University
 
 Were you a particle physicist in a previous career? Work in tech and want to
 reconnect with the friends and physics of your HEP days? Curious about the
@@ -28,7 +28,7 @@ Contribute to tomorrow's collider, today. RSVP → [link]
 ## LinkedIn / sponsor-facing
 
 **σμμ — A Particle Physics Alumni Reunion**
-Sunday 13 December 2026 · 4:30–6:30 p.m. · Stanford campus
+Sunday 13 December 2026 · 4:30–6:30 p.m. · Stanford University
 
 The US Muon Collider Collaboration is hosting an evening for physicists who
 left the field for industry — and for the teams they build with now.

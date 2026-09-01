@@ -1,7 +1,7 @@
 # σμμ — A Particle Physics Alumni Reunion
 
 Artwork for **σμμ**, the US Muon Collider Collaboration's particle physics alumni
-reunion — Sunday 13 December 2026, 4:30–6:30 p.m., Stanford campus.
+reunion — Sunday 13 December 2026, 4:30–6:30 p.m., Stanford University.
 
 The poster is a Feynman network drawn clean: blue-noise vertices triangulated
 into a planar mesh, thinned into fermion, boson and Higgs lines, and grown

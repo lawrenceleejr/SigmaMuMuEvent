@@ -751,16 +751,19 @@
 
   function drawEdge(ctx, net, e, frac, o) {
     const acc = o.accent, s = e.s || 1, lwf = 0.8 + 0.3 * s;
+    // `tone` sits the whole network back or brings it forward without touching
+    // the type: 1 is full strength, lower is lighter
+    const t = o.tone == null ? 1 : o.tone;
     const pts = pathPoints(net, e);
     let dash = null, color, lw;
     if (e.type === 'h') {
       dash = [6.5 * s, 6.5 * s];
-      color = e.special ? acc : rgba(acc, 0.85);
+      color = e.special ? rgba(acc, t) : rgba(acc, 0.85 * t);
       lw = (e.special ? 2.1 : 1.35) * lwf;
     } else if (e.type === 'b') {
-      color = rgba(INK, 0.72); lw = 1.15 * lwf;
+      color = rgba(INK, 0.72 * t); lw = 1.15 * lwf;
     } else {
-      color = rgba(INK, 0.88); lw = 1.35 * lwf;
+      color = rgba(INK, 0.88 * t); lw = 1.35 * lwf;
     }
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
@@ -773,8 +776,8 @@
     if (frac >= 1) {
       const rr = 1.8 * (0.72 + 0.5 * s);
       const q = 3.4 * (0.72 + 0.5 * s);
-      ctx.fillStyle = rgba(INK, 0.92);
-      ctx.strokeStyle = rgba(INK, 0.88);
+      ctx.fillStyle = rgba(INK, 0.92 * t);
+      ctx.strokeStyle = rgba(INK, 0.88 * t);
       ctx.lineWidth = 1.3 * lwf;
       const dot = r => { ctx.beginPath(); ctx.arc(r[0], r[1], rr, 0, Math.PI * 2); ctx.fill(); };
       const cross = r => {

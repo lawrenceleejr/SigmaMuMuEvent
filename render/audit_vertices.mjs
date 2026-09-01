@@ -62,10 +62,10 @@ const WHY = {
 };
 
 const CASES = [
-  { name: 'tabloid', w: 1100, h: 1700, spacing: 30, keep: 0.72, speed: 180,
+  { name: 'tabloid', w: 1100, h: 1700, spacing: 33, keep: 0.72, speed: 180,
     seeds: [{ x: 862, y: 300 }, { x: 250, y: 1120 }],
     bands: [[0, 0.72], [225, 1.12], [560, 1.32], [700, 0.86], [1180, 0.74], [1700, 0.5]] },
-  { name: 'instagram', w: 1080, h: 1350, spacing: 28, keep: 0.72, speed: 175,
+  { name: 'instagram', w: 1080, h: 1350, spacing: 31, keep: 0.72, speed: 175,
     seeds: [{ x: 858, y: 250 }, { x: 210, y: 890 }],
     bands: [[0, 0.7], [185, 1.08], [430, 1.28], [560, 0.84], [940, 0.72], [1350, 0.48]] },
 ];
