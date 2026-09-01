@@ -154,6 +154,10 @@
       }
       return true;
     }
+    function addSplitVertex(x, y) {
+      pts.push([x, y]);
+      return pts.length - 1;
+    }
     function addPt(x, y) {
       const i = pts.length;
       pts.push([x, y]);
@@ -264,7 +268,7 @@
     // nowhere to go. Dropping an edge whose both ends have four legs turns two
     // vertices trivalent at once and cannot strand anything below three.
     {
-      const bias = cfg.trivalentBias == null ? 0.7 : cfg.trivalentBias;
+      const bias = cfg.trivalentBias == null ? 0 : cfg.trivalentBias;
       const live = [];
       cand.forEach((e, i) => { if (!dead[i]) live.push(i); });
       for (let i = live.length - 1; i > 0; i--) {
@@ -365,6 +369,129 @@
     }
     if (!edges.length) return { verts: pts, edges: [], duration: 1 };
 
+    // ---- split every four-legged vertex into two three-legged ones ----
+    // A fermion pair can only meet one boson, so fermion lines need three-legged
+    // vertices; but deleting a leg to get there cuts the mesh apart and strands
+    // loose ends everywhere. Splitting keeps every connection: the four legs are
+    // dealt out two and two across the widest pair of gaps between them, and a
+    // short edge joins the halves. Planarity survives because each half keeps an
+    // angularly contiguous pair.
+    if (cfg.splitQuads !== false) {
+      const incQ = pts.map(() => []);
+      edges.forEach((e, i) => { incQ[e.a].push(i); incQ[e.b].push(i); });
+      const nOrig = pts.length;
+      for (let v = 0; v < nOrig; v++) {
+        if (incQ[v].length !== 4) continue;
+        const legs = incQ[v].map(ei => {
+          const o = edges[ei].a === v ? edges[ei].b : edges[ei].a;
+          return { ei: ei, o: o, ang: Math.atan2(pts[o][1] - pts[v][1], pts[o][0] - pts[v][0]) };
+        }).sort((x, y) => x.ang - y.ang);
+        const gap = i => {
+          const a = legs[i].ang, b = legs[(i + 1) % 4].ang;
+          return ((b - a) + Math.PI * 2) % (Math.PI * 2);
+        };
+        // two ways to cut a ring of four into contiguous pairs; take the one
+        // that leaves the most room between the halves
+        const A = [[legs[0], legs[1]], [legs[2], legs[3]]], scoreA = gap(1) + gap(3);
+        const B = [[legs[1], legs[2]], [legs[3], legs[0]]], scoreB = gap(0) + gap(2);
+        const groups = scoreA >= scoreB ? A : B;
+        const step = 0.22 * rad(pts[v][1]);
+        const mid = g => {
+          const x = Math.cos(g[0].ang) + Math.cos(g[1].ang);
+          const y = Math.sin(g[0].ang) + Math.sin(g[1].ang);
+          const m = Math.hypot(x, y) || 1;
+          return [x / m, y / m];
+        };
+        const at = groups.map(g => {
+          const d = mid(g);
+          return [pts[v][0] + d[0] * step, pts[v][1] + d[1] * step];
+        });
+        // Moving the legs onto the two new points swings their directions, so
+        // check the split actually keeps every angle open before taking it --
+        // otherwise leave the vertex on four legs, which is a legal vertex too.
+        const angleOk = groups.every((g, gi) => {
+          const here = at[gi], far = at[1 - gi];
+          const dirs = g.map(l => Math.atan2(pts[l.o][1] - here[1], pts[l.o][0] - here[0]));
+          dirs.push(Math.atan2(far[1] - here[1], far[0] - here[0]));
+          for (let i = 0; i < dirs.length; i++) {
+            for (let j = i + 1; j < dirs.length; j++) {
+              if (angDiff(dirs[i], dirs[j]) < minSep) return false;
+            }
+          }
+          return true;
+        });
+        if (!angleOk) continue;
+        const ends = at.map(pt => addSplitVertex(pt[0], pt[1]));
+        groups.forEach((g, gi) => {
+          g.forEach(l => {
+            const e = edges[l.ei];
+            if (e.a === v) e.a = ends[gi]; else e.b = ends[gi];
+            e.len = Math.hypot(pts[e.b][0] - pts[e.a][0], pts[e.b][1] - pts[e.a][1]);
+          });
+        });
+        const my = (pts[ends[0]][1] + pts[ends[1]][1]) / 2;
+        edges.push({
+          a: ends[0], b: ends[1],
+          len: Math.hypot(pts[ends[1]][0] - pts[ends[0]][0], pts[ends[1]][1] - pts[ends[0]][1]),
+          s: scaleAt(my),
+        });
+      }
+    }
+
+    // ---- tidy up after the splits ----
+    // Re-anchoring a leg onto one of the new points swings its direction at the
+    // far end too, which can pinch an angle several vertices away. Re-open any
+    // that closed, shed the direction-only vertices that leaves behind, and
+    // sweep up anything that came adrift.
+    {
+      const dirAt = (v, ei) => {
+        const o = edges[ei].a === v ? edges[ei].b : edges[ei].a;
+        return Math.atan2(pts[o][1] - pts[v][1], pts[o][0] - pts[v][0]);
+      };
+      for (let pass = 0; pass < 8; pass++) {
+        const inc = pts.map(() => []);
+        edges.forEach((e, i) => { inc[e.a].push(i); inc[e.b].push(i); });
+        const drop = new Set();
+        for (let v = 0; v < pts.length; v++) {
+          const list = inc[v];
+          for (let i = 0; i < list.length; i++) {
+            if (drop.has(list[i])) continue;
+            for (let j = i + 1; j < list.length; j++) {
+              if (drop.has(list[j]) || drop.has(list[i])) continue;
+              if (angDiff(dirAt(v, list[i]), dirAt(v, list[j])) >= minSep) continue;
+              drop.add(edges[list[i]].len >= edges[list[j]].len ? list[i] : list[j]);
+            }
+          }
+        }
+        if (!drop.size) break;
+        edges = edges.filter((e, i) => !drop.has(i));
+      }
+      for (let pass = 0; pass < 40; pass++) {
+        const d = new Array(pts.length).fill(0);
+        const inc = pts.map(() => []);
+        edges.forEach((e, i) => { d[e.a]++; d[e.b]++; inc[e.a].push(i); inc[e.b].push(i); });
+        const drop = new Set();
+        for (let v = 0; v < pts.length; v++) {
+          if (d[v] !== 2) continue;
+          const i1 = inc[v][0], i2 = inc[v][1];
+          if (drop.has(i1) || drop.has(i2)) continue;
+          drop.add(edges[i1].len >= edges[i2].len ? i1 : i2);
+        }
+        if (!drop.size) break;
+        edges = edges.filter((e, i) => !drop.has(i));
+      }
+      {
+        const minComp = cfg.minComponent == null ? 5 : cfg.minComponent;
+        const parent = new Int32Array(pts.length);
+        for (let i = 0; i < parent.length; i++) parent[i] = i;
+        const find = x => { while (parent[x] !== x) { parent[x] = parent[parent[x]]; x = parent[x]; } return x; };
+        edges.forEach(e => { const rx = find(e.a), ry = find(e.b); if (rx !== ry) parent[rx] = ry; });
+        const size = new Map();
+        edges.forEach(e => { const r = find(e.a); size.set(r, (size.get(r) || 0) + 1); });
+        edges = edges.filter(e => (size.get(find(e.a)) || 0) >= minComp);
+      }
+    }
+
     {
       const d = new Array(pts.length).fill(0);
       edges.forEach(e => { d[e.a]++; d[e.b]++; });
@@ -392,18 +519,6 @@
       const o = other(ei, v);
       return Math.atan2(pts[o][1] - pts[v][1], pts[o][0] - pts[v][0]);
     };
-    // carry on as straight as the mesh allows, the way a real line is drawn
-    const straightOn = (cur, prevE) => {
-      const inDir = prevE < 0 ? null : dirOf(cur, prevE) + Math.PI;
-      let best = -1, bestOff = Infinity;
-      vinc[cur].forEach(ei => {
-        if (ei === prevE || edges[ei].type !== null) return;
-        const off = inDir == null ? R() * Math.PI : angDiff(dirOf(cur, ei), inDir);
-        if (off < bestOff) { bestOff = off; best = ei; }
-      });
-      return best;
-    };
-
     const shuffled = (arr) => {
       for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(R() * (i + 1));
@@ -413,72 +528,118 @@
     };
 
     const fermionAt = new Uint8Array(pts.length);       // hosts a fermion pair
-    const canCarry = v => vdeg[v] === 3 && !fermionAt[v];
-    let fermionEdges = 0;
-    const fermionTarget = Math.round(edges.length * (cfg.fermionShare || 0.34));
-
-    const commitFermion = (es, internal) => {
-      es.forEach(ei => { edges[ei].type = 'f'; });
-      internal.forEach(v => { fermionAt[v] = 1; });
-      fermionEdges += es.length;
-    };
-
-    // a closed fermion loop: every vertex on it sees the line in and out again.
-    // Walking straight almost never comes back to where it started, so this
-    // searches for a genuine short cycle through unused three-legged vertices.
-    const minLoop = cfg.fermionLoopMin == null ? 6 : cfg.fermionLoopMin;
-    const layLoop = (v0, maxDepth) => {
-      if (!canCarry(v0)) return false;
-      const path = [v0], pathE = [], onPath = new Set([v0]);
-      let budget = 4000;
-      const dfs = () => {
-        if (budget-- < 0) return false;
-        const cur = path[path.length - 1];
-        const last = pathE.length ? pathE[pathE.length - 1] : -1;
-        const opts = shuffled(vinc[cur].filter(ei => edges[ei].type === null && ei !== last));
-        for (const ei of opts) {
-          const nxt = other(ei, cur);
-          // a long ring reads as a line curving back on itself; a triangle just
-          // reads as a triangle, so short closures are refused
-          if (nxt === v0 && pathE.length >= minLoop - 1) { pathE.push(ei); return true; }
-          if (onPath.has(nxt) || !canCarry(nxt) || path.length >= maxDepth) continue;
-          path.push(nxt); pathE.push(ei); onPath.add(nxt);
-          if (dfs()) return true;
-          path.pop(); pathE.pop(); onPath.delete(nxt);
-        }
-        return false;
-      };
-      if (!dfs()) return false;
-      commitFermion(pathE, path);
-      return true;
-    };
-
-    // an open fermion line, running between two loose ends in the vacuum
-    const layChain = (v0) => {
-      if (vdeg[v0] !== 1) return false;
-      const e0 = vinc[v0][0];
-      if (edges[e0].type !== null) return false;
-      let cur = other(e0, v0), prevE = e0;
-      const es = [e0], internal = [];
-      for (let n = 0; n < 48; n++) {
-        if (vdeg[cur] === 1) { commitFermion(es, internal); return true; }
-        if (!canCarry(cur)) return false;
-        const ei = straightOn(cur, prevE);
-        if (ei < 0) return false;
-        internal.push(cur);
-        es.push(ei);
-        cur = other(ei, cur); prevE = ei;
+    const loose = v => vdeg[v] === 1;                   // external end, no parity rule
+    {
+      // How much of the mesh carries fermion lines is set here, by standing a
+      // share of the vertices down before any matching happens. Trimming
+      // afterwards does not work: the fermion set is a 2-factor, so it comes
+      // out as a handful of enormous cycles and dropping even one overshoots.
+      const stand = cfg.fermionOptOut == null ? 0.36 : cfg.fermionOptOut;
+      const off = new Uint8Array(pts.length);
+      for (let v = 0; v < pts.length; v++) {
+        if (!loose(v) && R() < stand) off[v] = 1;
       }
-      return false;
-    };
+      const eligible = [];
+      edges.forEach((e, i) => {
+        if (off[e.a] || off[e.b]) return;
+        const a = vdeg[e.a], b2 = vdeg[e.b];
+        if ((a === 3 || a === 1) && (b2 === 3 || b2 === 1)) eligible.push(i);
+      });
 
-    // external lines first, then loops to fill out the fermion content
-    shuffled(pts.map((_, i) => i).filter(v => vdeg[v] === 1))
-      .forEach(v => { if (fermionEdges < fermionTarget) layChain(v); });
-    [10, 16].forEach(depth => {
-      shuffled(pts.map((_, i) => i).filter(canCarry))
-        .forEach(v => { if (fermionEdges < fermionTarget) layLoop(v, depth); });
-    });
+      // On a three-legged vertex, hosting a fermion pair means picking which
+      // single leg is *not* fermion. Picking one leg per vertex, no vertex
+      // twice, is a matching -- and every edge outside it is then free to be
+      // fermion. So: greedy matching, then improve it with short augmenting
+      // paths, because every vertex the matching misses is a vertex that has
+      // to drop out of the fermion structure entirely.
+      const cutE = new Uint8Array(edges.length);
+      const matched = new Uint8Array(pts.length);
+      for (const ei of shuffled(eligible.slice())) {
+        const e = edges[ei];
+        if (loose(e.a) || loose(e.b) || matched[e.a] || matched[e.b]) continue;
+        if (off[e.a] || off[e.b]) continue;
+        cutE[ei] = 1; matched[e.a] = 1; matched[e.b] = 1;
+      }
+      for (let pass = 0; pass < 8; pass++) {
+        let gain = 0;
+        for (let u = 0; u < pts.length; u++) {
+          if (loose(u) || matched[u] || vdeg[u] !== 3 || off[u]) continue;
+          let done = false;
+          for (const e1 of vinc[u]) {
+            if (done) break;
+            const x = other(e1, u);
+            if (loose(x) || !matched[x] || off[x]) continue;
+            let f = -1;
+            for (const ei of vinc[x]) if (cutE[ei]) { f = ei; break; }
+            if (f < 0) continue;
+            const y = other(f, x);
+            for (const g of vinc[y]) {
+              const z = other(g, y);
+              if (z === u || z === x || loose(z) || matched[z] || vdeg[z] !== 3 || off[z]) continue;
+              cutE[f] = 0; cutE[e1] = 1; cutE[g] = 1;
+              matched[u] = 1; matched[z] = 1;
+              gain++; done = true; break;
+            }
+          }
+        }
+        if (!gain) break;
+      }
+
+      const inF = new Uint8Array(edges.length);
+      eligible.forEach(ei => { if (!cutE[ei]) inF[ei] = 1; });
+      const fdeg = new Array(pts.length).fill(0);
+      edges.forEach((e, i) => { if (inF[i]) { fdeg[e.a]++; fdeg[e.b]++; } });
+      const odd = v => !loose(v) && (fdeg[v] % 2) === 1;
+      const cut = ei => {
+        inF[ei] = 0;
+        fdeg[edges[ei].a]--; fdeg[edges[ei].b]--;
+      };
+
+      // Whatever the matching missed is still odd, and has to be paired off.
+      // Walk the shortest route through the *whole* mesh to the nearest other
+      // odd vertex and flip every edge along it in or out of the fermion set:
+      // the two ends change parity, each vertex in between sees two flips and
+      // keeps its own. Routing through the fermion lines instead means going
+      // the long way around whole cycles, which strips out most of the content.
+      const toggle = ei => {
+        const d = inF[ei] ? -1 : 1;
+        inF[ei] = inF[ei] ? 0 : 1;
+        fdeg[edges[ei].a] += d; fdeg[edges[ei].b] += d;
+      };
+      for (let guard = 0; guard < 20000; guard++) {
+        let src = -1;
+        for (let v = 0; v < pts.length && src < 0; v++) if (odd(v)) src = v;
+        if (src < 0) break;
+        const via = new Int32Array(pts.length).fill(-1);
+        const seen = new Uint8Array(pts.length);
+        const q = [src];
+        seen[src] = 1;
+        let found = -1;
+        for (let qi = 0; qi < q.length && found < 0; qi++) {
+          const v = q[qi];
+          for (const ei of vinc[v]) {
+            const o = other(ei, v);
+            if (seen[o] || off[o]) continue;
+            seen[o] = 1; via[o] = ei; q.push(o);
+            if (odd(o)) { found = o; break; }
+          }
+        }
+        if (found < 0) {                       // nothing left to pair with
+          for (const ei of vinc[src]) if (inF[ei]) { toggle(ei); break; }
+          continue;
+        }
+        let cur = found;
+        while (cur !== src) {
+          const ei = via[cur];
+          const nxt = other(ei, cur);
+          toggle(ei);
+          cur = nxt;
+        }
+      }
+
+      edges.forEach((e, i) => { if (inF[i]) e.type = 'f'; });
+      for (let v = 0; v < pts.length; v++) if (!loose(v) && fdeg[v] === 2) fermionAt[v] = 1;
+    }
 
     // ---- everything else is a vector, with scalars flipped in only where the
     //      vertex stays legal ----

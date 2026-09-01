@@ -57,9 +57,22 @@ the h∂h current is antisymmetric under swapping the legs, so hhZ and hhγ are
 zero. It exists only for *distinct* scalars (γH⁺H⁻, ZhG⁰, ZhA), which a single
 dash style cannot express, so the generator never produces it.
 
-Fermion content is closed loops and lines running between two loose ends;
-loops are held to six edges or more, so they read as a line curving back on
-itself rather than as a triangle.
+**Getting enough fermion line into the picture takes some work.** A fermion
+pair only meets one boson, so fermion lines need three-legged vertices — and a
+mesh full of four-legged ones leaves them nowhere to run. Deleting a leg to
+force trivalence cuts the mesh apart, so instead every four-legged vertex is
+**split** into two three-legged ones: its legs are dealt out two and two across
+the widest pair of gaps between them, joined by a short new edge. Nothing is
+disconnected and the sheet gets denser.
+
+On a three-legged vertex, hosting a fermion pair means choosing which single
+leg is *not* fermion — so choosing one leg per vertex, no vertex twice, is a
+**matching**, and every edge outside it is free to be fermion. The generator
+takes a greedy matching, improves it with short augmenting paths, then pairs
+off whatever it missed by walking the shortest route through the mesh and
+flipping edges along it. How much of the sheet carries fermion line is set by
+standing a share of vertices down before any of that (`fermionOptOut`), which
+is what balances solid against wavy.
 
 ### House rules the generator enforces
 

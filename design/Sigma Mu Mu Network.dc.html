@@ -47,7 +47,7 @@ a:hover { color: var(--color-accent); }
 </div>
 
 <div data-zone="text" style="position:absolute;left:64px;top:664px;font-size:50px;font-weight:800;letter-spacing:-.015em;text-transform:uppercase;white-space:nowrap;z-index:2">A Particle Physics Alumni Reunion</div>
-<div data-zone="text" style="position:absolute;left:64px;top:748px;font-size:18px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent);z-index:2">Cocktail hour · Research fair</div>
+<div data-zone="text" style="position:absolute;left:64px;top:748px;font-size:18px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent);z-index:2">Cocktail hour × Research fair</div>
 
 <div data-zone="text" style="position:absolute;left:64px;top:822px;width:532px;display:flex;flex-direction:column;gap:16px;z-index:2">
 <div style="display:flex;gap:16px;align-items:baseline"><span style="flex:0 0 auto;font-family:'Source Code Pro',monospace;font-size:14px;font-weight:600;letter-spacing:0;color:var(--color-accent)">if</span><span style="font-size:21px;line-height:1.16;font-weight:500;text-wrap:pretty">Were you a particle physicist in your previous career?</span></div>
@@ -86,7 +86,7 @@ a:hover { color: var(--color-accent); }
 </div>
 
 <div data-zone="text" style="position:absolute;left:56px;top:524px;font-size:46px;font-weight:800;letter-spacing:-.015em;text-transform:uppercase;white-space:nowrap;z-index:2">A Particle Physics Alumni Reunion</div>
-<div data-zone="text" style="position:absolute;left:56px;top:600px;font-size:22px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent);z-index:2">Cocktail hour · Research fair</div>
+<div data-zone="text" style="position:absolute;left:56px;top:600px;font-size:22px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent);z-index:2">Cocktail hour × Research fair</div>
 
 <div data-zone="text" style="position:absolute;left:56px;top:668px;width:740px;display:flex;flex-direction:column;gap:18px;z-index:2">
 <div style="display:flex;gap:18px;align-items:baseline"><span style="flex:0 0 auto;font-family:'Source Code Pro',monospace;font-size:19px;font-weight:600;letter-spacing:0;color:var(--color-accent)">if</span><span style="font-size:27px;line-height:1.16;font-weight:500;text-wrap:pretty">Were you a particle physicist in your previous career?</span></div>
@@ -112,7 +112,7 @@ a:hover { color: var(--color-accent); }
 <script type="text/x-dc" data-dc-script data-props="{&quot;animated&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Motion&quot;},&quot;density&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1,&quot;min&quot;:0.4,&quot;max&quot;:1.6,&quot;step&quot;:0.1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Network&quot;},&quot;inkBite&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0,&quot;min&quot;:0,&quot;max&quot;:1.4,&quot;step&quot;:0.05,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Paper&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#ec3013&quot;,&quot;options&quot;:[&quot;#ec3013&quot;,&quot;#b8240e&quot;,&quot;#201e1d&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Colour&quot;}}">
 const SHEETS = [
   {
-    key: 't', w: 1100, h: 1700, still: true, spacing: 35, keep: 0.72, speed: 135,
+    key: 't', w: 1100, h: 1700, still: true, spacing: 33, keep: 0.72, speed: 180,
     qr: { x: 874, y: 1326, s: 168 },
     mark: [['t-sigma', 560], ['t-mumu', 270]], logo: 't-logo',
     seeds: [
@@ -122,7 +122,7 @@ const SHEETS = [
     bands: [[0, 0.72], [225, 1.12], [560, 1.32], [700, 0.86], [1180, 0.74], [1700, 0.5]]
   },
   {
-    key: 'i', w: 1080, h: 1350, spacing: 33, keep: 0.72, speed: 125,
+    key: 'i', w: 1080, h: 1350, spacing: 31, keep: 0.72, speed: 175,
     qr: { x: 866, y: 1040, s: 158 },
     mark: [['i-sigma', 400], ['i-mumu', 195]], logo: 'i-logo',
     seeds: [
@@ -270,7 +270,7 @@ class Component extends DCLogic {
         clearance: 5, clearanceAt: y => (y < cfg.h * 0.66 ? 11 : 5), scaleAt: scaleAt, higgsQuads: 5,
         pad: 8,
         cornerR: Math.min(cfg.w, cfg.h) * 0.05, cornerWobble: 0.34,
-        maxLegs: 4, minSep: 0.52, minComponent: 8
+        maxLegs: 4, minSep: 0.52, minComponent: 8, fermionOptOut: 0.12
       });
       const s = {
         cfg: cfg, net: net, drawn: new Uint8Array(net.edges.length), head: 0, cycle: -1,
