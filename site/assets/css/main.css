@@ -77,8 +77,8 @@ main {
 .pane {
   padding: clamp(1.5rem, 4vw, 2.75rem);
   background: var(--glass);
-  backdrop-filter: blur(10.5px) saturate(1.25);
-  -webkit-backdrop-filter: blur(10.5px) saturate(1.25);
+  backdrop-filter: blur(12.75px) saturate(1.25);
+  -webkit-backdrop-filter: blur(12.75px) saturate(1.25);
   border: 1px solid rgba(32, 30, 29, 0.1);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset,
               0 18px 50px -30px rgba(32, 30, 29, 0.45);

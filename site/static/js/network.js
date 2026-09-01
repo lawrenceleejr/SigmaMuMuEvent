@@ -515,7 +515,7 @@
     edges.forEach(e => { vdeg[e.a]++; vdeg[e.b]++; });
     const vinc = pts.map(() => []);
     edges.forEach((e, i) => { vinc[e.a].push(i); vinc[e.b].push(i); });
-    edges.forEach(e => { e.type = null; e.special = false; });
+    edges.forEach(e => { e.type = null; });
 
     const other = (ei, v) => (edges[ei].a === v ? edges[ei].b : edges[ei].a);
     const shuffled = (arr) => {
@@ -578,7 +578,6 @@
       }
       if (!ok) return false;
       pure.push(v);
-      own.forEach(ei => { edges[ei].special = true; });
       return true;
     };
     let quartics = 0;
@@ -764,8 +763,8 @@
     let dash = null, color, lw;
     if (e.type === 'h') {
       dash = [6.5 * s, 6.5 * s];
-      color = e.special ? rgba(acc, t) : rgba(acc, 0.85 * t);
-      lw = (e.special ? 2.1 : 1.35) * lwf;
+      color = rgba(acc, 0.85 * t);
+      lw = 1.35 * lwf;
     } else if (e.type === 'b') {
       color = rgba(INK, 0.72 * t); lw = 1.15 * lwf;
     } else {
