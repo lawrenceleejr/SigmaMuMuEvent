@@ -18,7 +18,7 @@ const CASES = [
     seeds: [{ x: 858, y: 250 }, { x: 210, y: 890 }],
     bands: [[0, 0.7], [185, 1.08], [430, 1.28], [560, 0.84], [940, 0.72], [1350, 0.48]] },
 ];
-const MAX_LEGS = 4, MIN_SEP = 0.52, MIN_COMP = 8;
+const MAX_LEGS = 4, MIN_SEP = 0.42, MIN_COMP = 8;
 const angDiff = (a, b) => { let d = Math.abs(a - b) % (Math.PI * 2); return d > Math.PI ? Math.PI * 2 - d : d; };
 
 let bad = 0;

@@ -93,7 +93,7 @@ for (const c of CASES) {
       return b[b.length - 1][1];
     },
     higgsQuads: 5, cornerR: Math.min(c.w, c.h) * 0.05, cornerWobble: 0.34,
-    maxLegs: 4, minSep: 0.52, minComponent: 8, fermionOptOut: 0.12,
+    maxLegs: 4, minSep: 0.42, minComponent: 8, fermionOptOut: 0.12,
   });
 
   const legs = net.verts.map(() => []);
