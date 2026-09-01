@@ -39,7 +39,7 @@ a:hover { color: var(--color-accent); }
 
 <div data-zone="text" style="position:absolute;left:64px;top:48px;width:972px;display:flex;justify-content:space-between;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;z-index:2">
 <span style="margin-top:28px">USMCC Annual Meeting · Stanford</span>
-<img id="t-logo" src="assets/usmcc-logo.png" alt="US Muon Collider Collaboration" style="height:220px;width:auto;display:block">
+<img id="t-logo" src="assets/usmcc-logo.png" alt="US Muon Collider Collaboration" style="height:220px;width:auto;display:block;margin:22px 30px 0 0">
 </div>
 
 <div style="position:absolute;left:60px;top:104px;width:1000px;line-height:.8;font-family:'Libertinus Math','KaTeX Math',serif;font-weight:400;letter-spacing:0;z-index:2">
@@ -57,7 +57,7 @@ a:hover { color: var(--color-accent); }
 
 <div data-zone="text" style="position:absolute;left:64px;top:1306px;width:782px;z-index:2">
 <div style="font-size:50px;line-height:1;font-weight:800;letter-spacing:-.015em;text-transform:uppercase">Sunday 13 December 2026</div>
-<div style="margin-top:4px;font-size:22px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700)">4:30 – 6:30 p.m. · Stanford Campus</div>
+<div data-zone="text" data-pad="15" style="margin-top:4px;font-size:22px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700)">4:30 – 6:30 p.m. · Stanford Campus</div>
 <div style="margin-top:26px;font-size:28px;font-weight:800;letter-spacing:-.01em;color:var(--color-accent)">Contribute to tomorrow's collider, today.</div>
 <div style="margin-top:16px;font-size:12px;line-height:1.5;font-weight:500;color:var(--color-neutral-700);max-width:700px;text-wrap:pretty">Cash bar with a sponsored drink-ticket program. Sponsorship keeps the mixer free for every industry guest — get in touch about sponsorship and recruiting opportunities.</div>
 </div>
@@ -78,7 +78,7 @@ a:hover { color: var(--color-accent); }
 
 <div data-zone="text" style="position:absolute;left:56px;top:44px;width:968px;display:flex;justify-content:space-between;align-items:flex-start;font-size:20px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;z-index:2">
 <span style="margin-top:26px">USMCC Annual Meeting · Stanford</span>
-<img id="i-logo" src="assets/usmcc-logo.png" alt="US Muon Collider Collaboration" style="height:184px;width:auto;display:block">
+<img id="i-logo" src="assets/usmcc-logo.png" alt="US Muon Collider Collaboration" style="height:184px;width:auto;display:block;margin:20px 26px 0 0">
 </div>
 
 <div style="position:absolute;left:52px;top:110px;width:1000px;line-height:.8;font-family:'Libertinus Math','KaTeX Math',serif;font-weight:400;letter-spacing:0;z-index:2">
@@ -96,7 +96,7 @@ a:hover { color: var(--color-accent); }
 
 <div data-zone="text" style="position:absolute;left:56px;top:1040px;width:780px;z-index:2">
 <div style="font-size:52px;line-height:1;font-weight:800;letter-spacing:-.015em;text-transform:uppercase">Sunday 13 December 2026</div>
-<div style="margin-top:4px;font-size:26px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700)">4:30 – 6:30 p.m. · Stanford Campus</div>
+<div data-zone="text" data-pad="17" style="margin-top:4px;font-size:26px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700)">4:30 – 6:30 p.m. · Stanford Campus</div>
 <div style="margin-top:22px;font-size:32px;font-weight:800;letter-spacing:-.01em;color:var(--color-accent)">Contribute to tomorrow's collider, today.</div>
 </div>
 
@@ -223,9 +223,9 @@ class Component extends DCLogic {
         // Fractions measured off the artwork: disc centre (0.499, 0.399) with
         // radius 0.382 of the box, wordmark across the bottom fifth.
         pushDisc(r.left + r.width * 0.499, r.top + r.height * 0.399,
-                 r.height * 0.382 + r.height * 0.025);
-        push({ left: r.left + r.width * 0.15, top: r.top + r.height * 0.80,
-               width: r.width * 0.70, height: r.height * 0.19 });
+                 r.height * 0.382 + r.height * 0.075);
+        push({ left: r.left + r.width * 0.11, top: r.top + r.height * 0.775,
+               width: r.width * 0.78, height: r.height * 0.235 });
       }
     }
     out.push({ x: cfg.qr.x - 6, y: cfg.qr.y - 6, w: cfg.qr.s + 12, h: cfg.qr.s + 12 });
