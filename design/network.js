@@ -90,7 +90,11 @@
     const cornerWob = cfg.cornerWobble == null ? 0.3 : cfg.cornerWobble;
     const cornerPhase = R() * Math.PI * 2;
     const clearAt = cfg.clearanceAt || function () { return clear; };
+    // a zone is a rectangle, or a disc where the artwork is actually round
     const zones = (cfg.zones || []).map(z => {
+      if (z.r != null) {
+        return { disc: true, cx: z.cx, cy: z.cy, r: z.r + clearAt(z.cy) };
+      }
       const c = clearAt(z.y + z.h / 2);
       return { x: z.x - c, y: z.y - c, w: z.w + c * 2, h: z.h + c * 2 };
     });
@@ -112,7 +116,9 @@
       }
       for (let i = 0; i < zones.length; i++) {
         const z = zones[i];
-        if (x > z.x && x < z.x + z.w && y > z.y && y < z.y + z.h) return true;
+        if (z.disc) {
+          if (Math.hypot(x - z.cx, y - z.cy) < z.r) return true;
+        } else if (x > z.x && x < z.x + z.w && y > z.y && y < z.y + z.h) return true;
       }
       return false;
     }

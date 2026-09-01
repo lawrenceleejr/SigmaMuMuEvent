@@ -172,6 +172,9 @@ class Component extends DCLogic {
     const sr = sheet.getBoundingClientRect();
     const k = sr.width / cfg.w || 1;
     const out = [];
+    const pushDisc = (cx, cy, rad) => {
+      out.push({ cx: (cx - sr.left) / k, cy: (cy - sr.top) / k, r: rad / k });
+    };
     const push = r => {
       if (!r || r.width < 3 || r.height < 3) return;
       out.push({ x: (r.left - sr.left) / k, y: (r.top - sr.top) / k, w: r.width / k, h: r.height / k });
@@ -208,11 +211,15 @@ class Component extends DCLogic {
       const lg = document.getElementById(cfg.logo);
       if (lg) {
         const r = lg.getBoundingClientRect();
-        // the logo wants air around it, so the keep-out is the image box plus
-        // a margin -- not the inset box the artwork's own padding would imply
-        const outx = r.width * 0.05, outy = r.height * 0.035;
-        push({ left: r.left - outx, top: r.top - outy,
-               width: r.width + outx * 2, height: r.height + outy * 2 });
+        // The mark is a disc with a wordmark beneath it, not a square. Keeping
+        // the mesh off that shape rather than off the image box lets the lines
+        // wrap the top and right of the logo instead of stopping at a corner.
+        // Fractions measured off the artwork: disc centre (0.499, 0.399) with
+        // radius 0.382 of the box, wordmark across the bottom fifth.
+        pushDisc(r.left + r.width * 0.499, r.top + r.height * 0.399,
+                 r.height * 0.382 + r.height * 0.025);
+        push({ left: r.left + r.width * 0.15, top: r.top + r.height * 0.80,
+               width: r.width * 0.70, height: r.height * 0.19 });
       }
     }
     out.push({ x: cfg.qr.x - 6, y: cfg.qr.y - 6, w: cfg.qr.s + 12, h: cfg.qr.s + 12 });
