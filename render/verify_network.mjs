@@ -12,9 +12,11 @@ new Function('window', readFileSync(resolve(ROOT, 'design/network.js'), 'utf8'))
 // mirrors the SHEETS config in design/Sigma Mu Mu Network.dc.html
 const CASES = [
   { name: 'tabloid', w: 1100, h: 1700, spacing: 35, keep: 0.72, speed: 135,
-    seeds: [{ x: 862, y: 300 }, { x: 250, y: 1120 }], bands: [620, 1180, 1.35, 0.78, 0.5] },
+    seeds: [{ x: 862, y: 300 }, { x: 250, y: 1120 }],
+    bands: [[0, 0.72], [225, 1.12], [560, 1.32], [700, 0.86], [1180, 0.74], [1700, 0.5]] },
   { name: 'instagram', w: 1080, h: 1350, spacing: 33, keep: 0.72, speed: 125,
-    seeds: [{ x: 858, y: 250 }, { x: 210, y: 890 }], bands: [470, 940, 1.3, 0.76, 0.48] },
+    seeds: [{ x: 858, y: 250 }, { x: 210, y: 890 }],
+    bands: [[0, 0.7], [185, 1.08], [430, 1.28], [560, 0.84], [940, 0.72], [1350, 0.48]] },
 ];
 const MAX_LEGS = 4, MIN_SEP = 0.52, MIN_COMP = 8;
 const angDiff = (a, b) => { let d = Math.abs(a - b) % (Math.PI * 2); return d > Math.PI ? Math.PI * 2 - d : d; };
@@ -26,7 +28,16 @@ for (const c of CASES) {
     w: c.w, h: c.h, zones: [], seeds: c.seeds, seed: 7, spacing: c.spacing,
     keep: c.keep, speed: c.speed, darts: 120000, pad: 8, clearance: 5,
     clearanceAt: y => (y < c.h * 0.66 ? 11 : 5),
-    scaleAt: y => (y < b[0] ? b[2] : y < b[1] ? b[3] : b[4]),
+    scaleAt: y => {
+      if (y <= b[0][0]) return b[0][1];
+      for (let i = 1; i < b.length; i++) {
+        if (y <= b[i][0]) {
+          const y0 = b[i - 1][0], s0 = b[i - 1][1], y1 = b[i][0], s1 = b[i][1];
+          return s0 + (s1 - s0) * ((y - y0) / (y1 - y0 || 1));
+        }
+      }
+      return b[b.length - 1][1];
+    },
     higgsQuads: 5, cornerR: Math.min(c.w, c.h) * 0.05, cornerWobble: 0.34,
     maxLegs: MAX_LEGS, minSep: MIN_SEP, minComponent: MIN_COMP,
   });
