@@ -27,106 +27,44 @@ a:hover { color: var(--color-accent); }
 </helmet>
 
 <div style="display:flex;flex-direction:row;align-items:flex-start;gap:96px;padding:72px;background:var(--color-neutral-300);font-family:Archivo,sans-serif">
-<svg width="0" height="0" style="position:absolute;pointer-events:none" aria-hidden="true"><defs>
-<!-- Letterpress ink, as a filter stack rather than per-shape trickery:
-     roughen the edge against fractal noise, blur, then threshold the alpha so
-     the edge snaps back hard. Shapes that come within a blur radius of each
-     other fuse, which is what gives the pooling at junctions and inside tight
-     counters. A softer, wider copy of the same alpha rides underneath as the
-     wick into the paper. TYPE takes a heavier dose than LINE, because a
-     hairline would not survive the same threshold. -->
-<filter id="ink-type" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
-  <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" seed="11" result="grain"/>
-  <feDisplacementMap in="SourceGraphic" in2="grain" scale="1.1" xChannelSelector="R" yChannelSelector="G" result="rough"/>
-  <feGaussianBlur in="rough" stdDeviation="0.85" result="soft"/>
-  <feColorMatrix in="soft" type="matrix" result="solid"
-     values="1 0 0 0 0
-             0 1 0 0 0
-             0 0 1 0 0
-             0 0 0 12 -4.7"/>
-  <feComposite in="rough" in2="solid" operator="atop" result="ink"/>
-  <feGaussianBlur in="ink" stdDeviation="2.2" result="wick"/>
-  <feColorMatrix in="wick" type="matrix" result="halo"
-     values="1 0 0 0 0
-             0 1 0 0 0
-             0 0 1 0 0
-             0 0 0 0.42 0"/>
-  <feMerge><feMergeNode in="halo"/><feMergeNode in="ink"/></feMerge>
-</filter>
-<filter id="ink-line" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
-  <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="5" result="grain"/>
-  <feDisplacementMap in="SourceGraphic" in2="grain" scale="0.9" xChannelSelector="R" yChannelSelector="G" result="rough"/>
-  <feGaussianBlur in="rough" stdDeviation="0.55" result="soft"/>
-  <feColorMatrix in="soft" type="matrix" result="solid"
-     values="1 0 0 0 0
-             0 1 0 0 0
-             0 0 1 0 0
-             0 0 0 9 -2.6"/>
-  <feComposite in="rough" in2="solid" operator="atop" result="ink"/>
-  <feGaussianBlur in="ink" stdDeviation="1.7" result="wick"/>
-  <feColorMatrix in="wick" type="matrix" result="halo"
-     values="1 0 0 0 0
-             0 1 0 0 0
-             0 0 1 0 0
-             0 0 0 0.5 0"/>
-  <feMerge><feMergeNode in="halo"/><feMergeNode in="ink"/></feMerge>
-</filter>
-<filter id="ink-fine" x="-6%" y="-6%" width="112%" height="112%" color-interpolation-filters="sRGB">
-  <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="17" result="grain"/>
-  <feDisplacementMap in="SourceGraphic" in2="grain" scale="0.5" xChannelSelector="R" yChannelSelector="G" result="rough"/>
-  <feGaussianBlur in="rough" stdDeviation="0.34" result="soft"/>
-  <feColorMatrix in="soft" type="matrix" result="solid"
-     values="1 0 0 0 0
-             0 1 0 0 0
-             0 0 1 0 0
-             0 0 0 7 -2.4"/>
-  <feComposite in="rough" in2="solid" operator="atop" result="ink"/>
-  <feGaussianBlur in="ink" stdDeviation="1" result="wick"/>
-  <feColorMatrix in="wick" type="matrix" result="halo"
-     values="1 0 0 0 0
-             0 1 0 0 0
-             0 0 1 0 0
-             0 0 0 0.36 0"/>
-  <feMerge><feMergeNode in="halo"/><feMergeNode in="ink"/></feMerge>
-</filter>
-</defs></svg>
+
 
 
 <div style="display:flex;flex-direction:column;gap:16px">
 <div style="font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--color-neutral-700)">Tabloid 11 × 17 in · print master</div>
 <div id="t-sheet" data-screen-label="TABLOID" style="position:relative;width:1100px;height:1700px;background:var(--color-bg);overflow:hidden;color:var(--color-text)">
-<div class="ink-line" style="position:absolute;inset:0;filter:url(#ink-line)"><canvas id="t-grow" style="position:absolute;left:0;top:0;width:1100px;height:1700px;z-index:1"></canvas>
+<div style="position:absolute;inset:0"><canvas id="t-grow" style="position:absolute;left:0;top:0;width:1100px;height:1700px;z-index:1"></canvas>
 <canvas id="t-front" style="position:absolute;left:0;top:0;width:1100px;height:1700px;z-index:1"></canvas></div>
 
 
-<div data-zone="text" style="position:absolute;left:64px;top:48px;width:972px;display:flex;justify-content:space-between;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;z-index:2;filter:url(#ink-fine)">
+<div data-zone="text" style="position:absolute;left:64px;top:48px;width:972px;display:flex;justify-content:space-between;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;z-index:2">
 <span>USMCC Annual Meeting · Stanford</span>
 <img id="t-logo" src="assets/usmcc-logo.png" alt="US Muon Collider Collaboration" style="height:220px;width:auto;display:block">
 </div>
 
-<div style="position:absolute;left:60px;top:104px;width:1000px;line-height:.8;font-family:'Libertinus Math','KaTeX Math',serif;font-weight:400;letter-spacing:0;z-index:2;filter:url(#ink-type)">
+<div style="position:absolute;left:60px;top:104px;width:1000px;line-height:.8;font-family:'Libertinus Math','KaTeX Math',serif;font-weight:400;letter-spacing:0;z-index:2">
 <span id="t-sigma" style="font-size:560px">σ</span><span id="t-mumu" style="position:relative;top:66px;left:6px;font-size:270px">μμ</span>
 </div>
 
-<div data-zone="text" style="position:absolute;left:64px;top:664px;font-size:50px;font-weight:800;letter-spacing:-.015em;text-transform:uppercase;z-index:2;filter:url(#ink-type)">A Physics × Alumni Reunion</div>
-<div data-zone="text" style="position:absolute;left:64px;top:748px;font-size:18px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent);z-index:2;filter:url(#ink-fine)">Cocktail hour · Research fair</div>
+<div data-zone="text" style="position:absolute;left:64px;top:664px;font-size:50px;font-weight:800;letter-spacing:-.015em;text-transform:uppercase;z-index:2">A Physics × Alumni Reunion</div>
+<div data-zone="text" style="position:absolute;left:64px;top:748px;font-size:18px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent);z-index:2">Cocktail hour · Research fair</div>
 
-<div data-zone="text" style="position:absolute;left:64px;top:822px;width:532px;display:flex;flex-direction:column;gap:16px;z-index:2;filter:url(#ink-fine)">
+<div data-zone="text" style="position:absolute;left:64px;top:822px;width:532px;display:flex;flex-direction:column;gap:16px;z-index:2">
 <div style="display:flex;gap:16px;align-items:baseline"><span style="flex:0 0 auto;font-family:'Source Code Pro',monospace;font-size:14px;font-weight:600;letter-spacing:0;color:var(--color-accent)">if</span><span style="font-size:21px;line-height:1.16;font-weight:500;text-wrap:pretty">Were you a particle physicist in your previous career?</span></div>
 <div style="display:flex;gap:16px;align-items:baseline"><span style="flex:0 0 auto;font-family:'Source Code Pro',monospace;font-size:14px;font-weight:600;letter-spacing:0;color:var(--color-accent)">&&</span><span style="font-size:21px;line-height:1.16;font-weight:500;text-wrap:pretty">Work in tech and want to reconnect with the friends and physics of your HEP days?</span></div>
 <div style="display:flex;gap:16px;align-items:baseline"><span style="flex:0 0 auto;font-family:'Source Code Pro',monospace;font-size:14px;font-weight:600;letter-spacing:0;color:var(--color-accent)">&&</span><span style="font-size:21px;line-height:1.16;font-weight:500;text-wrap:pretty">Curious about the 10 TeV muon collider renaissance?</span></div>
 <div style="display:flex;gap:16px;align-items:baseline"><span style="flex:0 0 auto;font-family:'Source Code Pro',monospace;font-size:14px;font-weight:600;letter-spacing:0;color:var(--color-accent)">&&</span><span style="font-size:21px;line-height:1.16;font-weight:500;text-wrap:pretty">Want to help build or fund tomorrow's energy frontier?</span></div>
 </div>
 
-<div data-zone="text" style="position:absolute;left:64px;top:1306px;width:782px;z-index:2;filter:url(#ink-fine)">
+<div data-zone="text" style="position:absolute;left:64px;top:1306px;width:782px;z-index:2">
 <div style="font-size:50px;line-height:1;font-weight:800;letter-spacing:-.015em;text-transform:uppercase">Sunday 13 December 2026</div>
 <div style="margin-top:12px;font-size:18px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700)">4:30 – 6:30 p.m. · Stanford Campus</div>
 <div style="margin-top:26px;font-size:28px;font-weight:800;letter-spacing:-.01em;color:var(--color-accent)">Contribute to tomorrow's collider, today.</div>
 <div style="margin-top:16px;font-size:12px;line-height:1.5;font-weight:500;color:var(--color-neutral-700);max-width:700px;text-wrap:pretty">Cash bar with a sponsored drink-ticket program. Sponsorship keeps the mixer free for every industry guest — get in touch about sponsorship and recruiting opportunities.</div>
 </div>
 
-<div data-zone="text" style="position:absolute;left:874px;top:1502px;width:168px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;z-index:2;filter:url(#ink-fine)">RSVP · [link]</div>
-<div style="position:absolute;inset:0;filter:url(#ink-fine);z-index:2;pointer-events:none"><canvas id="t-qr" style="position:absolute;left:0;top:0;width:100%;height:100%"></canvas></div>
+<div data-zone="text" style="position:absolute;left:874px;top:1502px;width:168px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;z-index:2">RSVP · [link]</div>
+<div style="position:absolute;inset:0;z-index:2;pointer-events:none"><canvas id="t-qr" style="position:absolute;left:0;top:0;width:100%;height:100%"></canvas></div>
 <canvas id="t-top" style="position:absolute;left:0;top:0;width:1100px;height:1700px;mix-blend-mode:multiply;z-index:3;pointer-events:none"></canvas>
 </div>
 </div>
@@ -134,44 +72,44 @@ a:hover { color: var(--color-accent); }
 <div style="display:flex;flex-direction:column;gap:16px">
 <div style="font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--color-neutral-700)">Instagram 1080 × 1350</div>
 <div id="i-sheet" data-screen-label="INSTAGRAM" style="position:relative;width:1080px;height:1350px;background:var(--color-bg);overflow:hidden;color:var(--color-text)">
-<div class="ink-line" style="position:absolute;inset:0;filter:url(#ink-line)"><canvas id="i-grow" style="position:absolute;left:0;top:0;width:1080px;height:1350px;z-index:1"></canvas>
+<div style="position:absolute;inset:0"><canvas id="i-grow" style="position:absolute;left:0;top:0;width:1080px;height:1350px;z-index:1"></canvas>
 <canvas id="i-front" style="position:absolute;left:0;top:0;width:1080px;height:1350px;z-index:1"></canvas></div>
 
 
-<div data-zone="text" style="position:absolute;left:56px;top:44px;width:968px;display:flex;justify-content:space-between;align-items:flex-start;font-size:20px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;z-index:2;filter:url(#ink-fine)">
+<div data-zone="text" style="position:absolute;left:56px;top:44px;width:968px;display:flex;justify-content:space-between;align-items:flex-start;font-size:20px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;z-index:2">
 <span>USMCC Annual Meeting · Stanford</span>
 <img id="i-logo" src="assets/usmcc-logo.png" alt="US Muon Collider Collaboration" style="height:184px;width:auto;display:block">
 </div>
 
-<div style="position:absolute;left:52px;top:110px;width:1000px;line-height:.8;font-family:'Libertinus Math','KaTeX Math',serif;font-weight:400;letter-spacing:0;z-index:2;filter:url(#ink-type)">
+<div style="position:absolute;left:52px;top:110px;width:1000px;line-height:.8;font-family:'Libertinus Math','KaTeX Math',serif;font-weight:400;letter-spacing:0;z-index:2">
 <span id="i-sigma" style="font-size:400px">σ</span><span id="i-mumu" style="position:relative;top:50px;left:4px;font-size:195px">μμ</span>
 </div>
 
-<div data-zone="text" style="position:absolute;left:56px;top:522px;font-size:52px;font-weight:800;letter-spacing:-.015em;text-transform:uppercase;z-index:2;filter:url(#ink-type)">A Physics × Alumni Reunion</div>
-<div data-zone="text" style="position:absolute;left:56px;top:600px;font-size:22px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent);z-index:2;filter:url(#ink-fine)">Cocktail hour · Research fair</div>
+<div data-zone="text" style="position:absolute;left:56px;top:522px;font-size:52px;font-weight:800;letter-spacing:-.015em;text-transform:uppercase;z-index:2">A Physics × Alumni Reunion</div>
+<div data-zone="text" style="position:absolute;left:56px;top:600px;font-size:22px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent);z-index:2">Cocktail hour · Research fair</div>
 
-<div data-zone="text" style="position:absolute;left:56px;top:668px;width:740px;display:flex;flex-direction:column;gap:18px;z-index:2;filter:url(#ink-fine)">
+<div data-zone="text" style="position:absolute;left:56px;top:668px;width:740px;display:flex;flex-direction:column;gap:18px;z-index:2">
 <div style="display:flex;gap:18px;align-items:baseline"><span style="flex:0 0 auto;font-family:'Source Code Pro',monospace;font-size:19px;font-weight:600;letter-spacing:0;color:var(--color-accent)">if</span><span style="font-size:27px;line-height:1.16;font-weight:500;text-wrap:pretty">Were you a particle physicist in your previous career?</span></div>
 <div style="display:flex;gap:18px;align-items:baseline"><span style="flex:0 0 auto;font-family:'Source Code Pro',monospace;font-size:19px;font-weight:600;letter-spacing:0;color:var(--color-accent)">&&</span><span style="font-size:27px;line-height:1.16;font-weight:500;text-wrap:pretty">Work in tech and want to reconnect with the friends and physics of your HEP days?</span></div>
 <div style="display:flex;gap:18px;align-items:baseline"><span style="flex:0 0 auto;font-family:'Source Code Pro',monospace;font-size:19px;font-weight:600;letter-spacing:0;color:var(--color-accent)">&&</span><span style="font-size:27px;line-height:1.16;font-weight:500;text-wrap:pretty">Curious about the 10 TeV muon collider renaissance?</span></div>
 <div style="display:flex;gap:18px;align-items:baseline"><span style="flex:0 0 auto;font-family:'Source Code Pro',monospace;font-size:19px;font-weight:600;letter-spacing:0;color:var(--color-accent)">&&</span><span style="font-size:27px;line-height:1.16;font-weight:500;text-wrap:pretty">Want to help build or fund tomorrow's energy frontier?</span></div>
 </div>
 
-<div data-zone="text" style="position:absolute;left:56px;top:1040px;width:780px;z-index:2;filter:url(#ink-fine)">
+<div data-zone="text" style="position:absolute;left:56px;top:1040px;width:780px;z-index:2">
 <div style="font-size:52px;line-height:1;font-weight:800;letter-spacing:-.015em;text-transform:uppercase">Sunday 13 December 2026</div>
 <div style="margin-top:12px;font-size:22px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700)">4:30 – 6:30 p.m. · Stanford Campus</div>
 <div style="margin-top:22px;font-size:32px;font-weight:800;letter-spacing:-.01em;color:var(--color-accent)">Contribute to tomorrow's collider, today.</div>
 </div>
 
-<div data-zone="text" style="position:absolute;left:866px;top:1210px;width:170px;font-size:15px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;z-index:2;filter:url(#ink-fine)">RSVP · [link]</div>
-<div style="position:absolute;inset:0;filter:url(#ink-fine);z-index:2;pointer-events:none"><canvas id="i-qr" style="position:absolute;left:0;top:0;width:100%;height:100%"></canvas></div>
+<div data-zone="text" style="position:absolute;left:866px;top:1210px;width:170px;font-size:15px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;z-index:2">RSVP · [link]</div>
+<div style="position:absolute;inset:0;z-index:2;pointer-events:none"><canvas id="i-qr" style="position:absolute;left:0;top:0;width:100%;height:100%"></canvas></div>
 <canvas id="i-top" style="position:absolute;left:0;top:0;width:1080px;height:1350px;mix-blend-mode:multiply;z-index:3;pointer-events:none"></canvas>
 </div>
 </div>
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;animated&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Motion&quot;},&quot;density&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1,&quot;min&quot;:0.4,&quot;max&quot;:1.6,&quot;step&quot;:0.1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Network&quot;},&quot;inkBite&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0.55,&quot;min&quot;:0,&quot;max&quot;:1.4,&quot;step&quot;:0.05,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Letterpress&quot;},&quot;inkBleed&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0.4,&quot;min&quot;:0,&quot;max&quot;:2.5,&quot;step&quot;:0.1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Letterpress&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#ec3013&quot;,&quot;options&quot;:[&quot;#ec3013&quot;,&quot;#b8240e&quot;,&quot;#201e1d&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Letterpress&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;animated&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Motion&quot;},&quot;density&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1,&quot;min&quot;:0.4,&quot;max&quot;:1.6,&quot;step&quot;:0.1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Network&quot;},&quot;inkBite&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0,&quot;min&quot;:0,&quot;max&quot;:1.4,&quot;step&quot;:0.05,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Paper&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#ec3013&quot;,&quot;options&quot;:[&quot;#ec3013&quot;,&quot;#b8240e&quot;,&quot;#201e1d&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Colour&quot;}}">
 const SHEETS = [
   {
     key: 't', w: 1100, h: 1700, still: true, spacing: 35, keep: 0.72, speed: 135,
@@ -222,8 +160,7 @@ class Component extends DCLogic {
   opts() {
     return {
       accent: this.props.accent ?? '#ec3013',
-      bite: this.props.inkBite ?? 0.55,
-      bleed: this.props.inkBleed ?? 0.4,
+      bite: this.props.inkBite ?? 0,
       density: this.props.density ?? 1,
       anim: this.props.animated !== false
     };

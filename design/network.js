@@ -3,8 +3,7 @@
    -> thinned so every vertex keeps degree >= 3 (no dangling legs, no direction-only
    vertices) -> vertex legs capped at 4 and tight leg angles opened out
    -> line types assigned -> growth timed by graph distance from the roots.
-   Strokes print with an ink bleed: a soft halo under a wobbling line, so the
-   mesh reads as pressed into paper rather than plotted. */
+   Drawn crisp: every line is exactly the weight it says it is. */
 (function () {
   const INK = '#201e1d';
 
@@ -469,32 +468,24 @@
   }
 
   // ---- rendering ---------------------------------------------------------
-  // Every line is inked, not plotted: it wanders a little, wicks a soft halo into
-  // the paper, and pools where legs meet. All of it is a pure function of the
-  // edge's endpoints, so a sheet prints the same way twice.
-  function edgeSeed(e) { return (((e.a + 1) * 73856093) ^ ((e.b + 1) * 19349663)) >>> 0; }
-
+  // Clean, even linework: straight propagators, a drawn wave for the bosons,
+  // dashed for the scalars, a filled node at every junction and an x wherever a
+  // line ends in the vacuum. No spread, no halo -- what is drawn is what prints.
   function pathPoints(net, e) {
     if (e.__pts) return e.__pts;
     const a = net.verts[e.a], b = net.verts[e.b];
+    if (e.type !== 'b') { e.__pts = [a, b]; return e.__pts; }
     const s = e.s || 1;
     const dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy) || 1;
     const px = -dy / len, py = dx / len;
-    const w = rng(edgeSeed(e));
-    const p1 = w() * Math.PI * 2, p2 = w() * Math.PI * 2;
-    const k1 = 1 + w(), k2 = 2.2 + w() * 1.6;
-    const amp = (0.5 + w() * 0.7) * s;
-    const boson = e.type === 'b';
-    const lam = 15 * s, bAmp = 4.4 * s;
+    const lam = 15 * s, amp = 4.4 * s;
     const cycles = Math.max(1, Math.round(len / lam));
-    const steps = boson ? Math.max(18, Math.ceil(len / 1.6)) : Math.max(6, Math.ceil(len / 7));
+    const steps = Math.max(18, Math.ceil(len / 1.6));
     const out = [];
     for (let i = 0; i <= steps; i++) {
       const u = i / steps;
-      const taper = Math.sin(Math.PI * u);          // straight at the vertices
-      let off = (Math.sin(u * Math.PI * k1 + p1) * 0.62
-               + Math.sin(u * Math.PI * k2 + p2) * 0.38) * amp * taper;
-      if (boson) off += Math.sin(u * Math.PI * 2 * cycles) * bAmp * Math.min(1, taper * 2.2);
+      const taper = Math.min(1, Math.sin(Math.PI * u) * 2.2);
+      const off = Math.sin(u * Math.PI * 2 * cycles) * amp * taper;
       out.push([a[0] + dx * u + px * off, a[1] + dy * u + py * off]);
     }
     e.__pts = out;
@@ -517,36 +508,19 @@
 
   function drawEdge(ctx, net, e, frac, o) {
     const acc = o.accent, s = e.s || 1, lwf = 0.8 + 0.3 * s;
-    const bleed = o.bleed == null ? 1 : o.bleed;
     const pts = pathPoints(net, e);
-    const w = rng(edgeSeed(e) ^ 0x9e3779b9);
-    const dens = 0.86 + w() * 0.3;                  // uneven take-up, line to line
     let dash = null, color, lw;
     if (e.type === 'h') {
       dash = [6.5 * s, 6.5 * s];
-      color = e.special ? acc : rgba(acc, 0.78);
-      lw = (e.special ? 2 : 1.25) * lwf;
+      color = e.special ? acc : rgba(acc, 0.85);
+      lw = (e.special ? 2.1 : 1.35) * lwf;
     } else if (e.type === 'b') {
-      color = rgba(INK, 0.62); lw = 1.05 * lwf;
+      color = rgba(INK, 0.72); lw = 1.15 * lwf;
     } else {
-      color = rgba(INK, 0.8); lw = 1.25 * lwf;
+      color = rgba(INK, 0.88); lw = 1.35 * lwf;
     }
-    lw *= dens;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-
-    // ink wicking into the fibre: two faint, wider passes under the impression
-    if (bleed > 0) {
-      const halo = e.type === 'h' ? acc : INK;
-      ctx.setLineDash(dash || []);
-      ctx.strokeStyle = rgba(halo, 0.055 * bleed);
-      ctx.lineWidth = lw + (2.6 + 1.1 * s) * bleed;
-      stroke(ctx, pts, frac);
-      ctx.strokeStyle = rgba(halo, 0.1 * bleed);
-      ctx.lineWidth = lw + (1 + 0.5 * s) * bleed;
-      stroke(ctx, pts, frac);
-    }
-
     ctx.setLineDash(dash || []);
     ctx.strokeStyle = color;
     ctx.lineWidth = lw;
@@ -554,28 +528,17 @@
     ctx.setLineDash([]);
 
     if (frac >= 1) {
-      const rr = 1.7 * (0.72 + 0.5 * s) * (0.9 + 0.24 * w());
-      const dot = r => {
-        if (bleed > 0) {
-          ctx.fillStyle = rgba(INK, 0.13 * bleed);       // the pool around the node
-          ctx.beginPath(); ctx.arc(r[0], r[1], rr + (1.5 + 0.5 * s) * bleed, 0, Math.PI * 2);
-          ctx.fill();
-        }
-        ctx.fillStyle = rgba(INK, 0.85);
-        ctx.beginPath(); ctx.arc(r[0], r[1], rr, 0, Math.PI * 2); ctx.fill();
-      };
+      const rr = 1.8 * (0.72 + 0.5 * s);
+      const q = 3.4 * (0.72 + 0.5 * s);
+      ctx.fillStyle = rgba(INK, 0.92);
+      ctx.strokeStyle = rgba(INK, 0.88);
+      ctx.lineWidth = 1.3 * lwf;
+      const dot = r => { ctx.beginPath(); ctx.arc(r[0], r[1], rr, 0, Math.PI * 2); ctx.fill(); };
       const cross = r => {
-        const q = 3.4 * (0.72 + 0.5 * s);
-        const line = (lwv, alpha) => {
-          ctx.strokeStyle = rgba(INK, alpha);
-          ctx.lineWidth = lwv;
-          ctx.beginPath();
-          ctx.moveTo(r[0] - q, r[1] - q); ctx.lineTo(r[0] + q, r[1] + q);
-          ctx.moveTo(r[0] + q, r[1] - q); ctx.lineTo(r[0] - q, r[1] + q);
-          ctx.stroke();
-        };
-        if (bleed > 0) line(1.2 * lwf + 1.6 * bleed, 0.12 * bleed);
-        line(1.2 * lwf, 0.8);
+        ctx.beginPath();
+        ctx.moveTo(r[0] - q, r[1] - q); ctx.lineTo(r[0] + q, r[1] + q);
+        ctx.moveTo(r[0] + q, r[1] - q); ctx.lineTo(r[0] - q, r[1] + q);
+        ctx.stroke();
       };
       if (e.xa) cross(net.verts[e.a]); else dot(net.verts[e.a]);
       if (e.xb) cross(net.verts[e.b]); else dot(net.verts[e.b]);

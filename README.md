@@ -1,13 +1,13 @@
 # σμμ — A Physics × Alumni Reunion
 
-Artwork for **σμμ**, the US Muon Collider Collaboration's physics × industry
-mixer — Sunday 13 December 2026, 4:30–6:30 p.m., Stanford campus.
+Artwork for **σμμ**, the US Muon Collider Collaboration's physics × alumni
+reunion — Sunday 13 December 2026, 4:30–6:30 p.m., Stanford campus.
 
-The poster is a Feynman network printed letterpress-style: blue-noise vertices
-triangulated into a planar mesh, thinned into fermion, boson and Higgs lines,
-and grown outward from two seed points. Nothing on the sheet is left crisp —
-type, logo, QR and network all take the same ink treatment, so the whole page
-reads as pressed rather than plotted.
+The poster is a Feynman network drawn clean: blue-noise vertices triangulated
+into a planar mesh, thinned into fermion, boson and Higgs lines, and grown
+outward from two seed points. Straight propagators, drawn waves for the bosons,
+dashes for the scalars, a filled node at every junction and an × wherever a line
+ends in the vacuum. Every line is exactly the weight it says it is.
 
 ## Deliverables (`out/`)
 
@@ -35,27 +35,9 @@ files are earlier explorations from the same canvas.
 Fonts, the USMCC logo and the DC runtime's React build are vendored under
 `design/assets/`, so a sheet renders identically with no network access.
 
-Canvas controls (Claude Design's properties panel): `density`, `inkBite`
-(paper texture), `inkBleed` (how far the ink wicks), `accent`, `animated`.
-
-### How the ink works
-
-Bleed and pooling come from a filter stack rather than per-shape tricks. Each
-inked layer is roughened against fractal noise, blurred, then thresholded on
-alpha so the edge snaps back hard — shapes that come within a blur radius of
-each other fuse, which is what pools the junctions and fills tight counters.
-A wider, softer copy of the same alpha rides underneath as the wick into paper.
-
-Three strengths, because one threshold cannot serve 560px and 11px type:
-
-| Filter | Applied to |
-|---|---|
-| `#ink-type` | display type — the σμμ lockup, the headlines |
-| `#ink-fine` | body copy, small caps, the logo, the QR |
-| `#ink-line` | the network canvases, tuned so hairlines survive the threshold |
-
-Paper texture (uneven inking, tooth and fibres) sits above everything on an
-unfiltered multiply layer — that is paper, not ink.
+Canvas controls (Claude Design's properties panel): `density`, `accent`,
+`animated`, and `inkBite` — a paper-texture pass, off by default; raise it if
+you ever want the sheet roughed up again.
 
 ### House rules the generator enforces
 
@@ -100,7 +82,6 @@ genuinely 3× of line art rather than an upscale of something smaller.
 
 ```sh
 ./render/render-video.sh                       # 14s, 1080x1350, 60fps
-./render/render-video.sh --fast                # quick preview, ink filters off
 ./render/render-video.sh --fps 30              # half the frames, half the wait
 ./render/render-video.sh --scale 2             # 2160x2700 instead of 1080x1350
 ```
@@ -124,8 +105,8 @@ you would expect:
 - Chromium re-rasterises what it is asked to capture every single time. Under
   software rendering (a headless box with no GPU) a 1080×1350 sheet of large
   canvases and filtered layers costs seconds per frame; with a GPU it is far
-  quicker. The renderer already hides the artboards it is not shooting, which
-  roughly halves the work, and `--fast` drops the ink filters on top of that.
+  quicker. The renderer hides the artboards it is not shooting, which roughly
+  halves the work.
 
 Profiled per frame on a headless, GPU-less box: page clock stepping **8 ms**,
 screenshot **~3.4 s**. The screenshot is the whole cost, and it is the part
