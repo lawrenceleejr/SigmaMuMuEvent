@@ -1,6 +1,6 @@
-# σμμ — A Physics × Alumni Reunion
+# σμμ — A Particle Physics Alumni Reunion
 
-Artwork for **σμμ**, the US Muon Collider Collaboration's physics × alumni
+Artwork for **σμμ**, the US Muon Collider Collaboration's particle physics alumni
 reunion — Sunday 13 December 2026, 4:30–6:30 p.m., Stanford campus.
 
 The poster is a Feynman network drawn clean: blue-noise vertices triangulated
@@ -38,6 +38,28 @@ Fonts, the USMCC logo and the DC runtime's React build are vendored under
 Canvas controls (Claude Design's properties panel): `density`, `accent`,
 `animated`, and `inkBite` — a paper-texture pass, off by default; raise it if
 you ever want the sheet roughed up again.
+
+### Every vertex is a real Standard Model vertex
+
+`node render/audit_vertices.mjs` classifies every vertex by the multiset of
+line styles meeting at it, and fails if any is not an SM interaction. The
+legal list is **ffV**, **ffh**, **VVV**, **VVVV**, **hVV**, **hhVV**, **hhh**,
+**hhhh**. Two rules do most of the work:
+
+- a fermion line is continuous, so a vertex carries 0 or 2 fermion legs, never
+  an odd number — no `fff`, no line stopping mid-diagram;
+- the SM has no tree-level 4-point vertex involving fermions, so a fermion pair
+  only ever meets one boson. Fermion lines therefore run through three-legged
+  vertices only, which is why the mesh is biased trivalent.
+
+**hhV is excluded on purpose.** For two identical neutral scalars it vanishes —
+the h∂h current is antisymmetric under swapping the legs, so hhZ and hhγ are
+zero. It exists only for *distinct* scalars (γH⁺H⁻, ZhG⁰, ZhA), which a single
+dash style cannot express, so the generator never produces it.
+
+Fermion content is closed loops and lines running between two loose ends;
+loops are held to six edges or more, so they read as a line curving back on
+itself rather than as a triangle.
 
 ### House rules the generator enforces
 

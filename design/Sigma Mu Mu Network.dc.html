@@ -46,7 +46,7 @@ a:hover { color: var(--color-accent); }
 <span id="t-sigma" style="font-size:560px">σ</span><span id="t-mumu" style="position:relative;top:66px;left:6px;font-size:270px">μμ</span>
 </div>
 
-<div data-zone="text" style="position:absolute;left:64px;top:664px;font-size:50px;font-weight:800;letter-spacing:-.015em;text-transform:uppercase;z-index:2">A Physics × Alumni Reunion</div>
+<div data-zone="text" style="position:absolute;left:64px;top:664px;font-size:50px;font-weight:800;letter-spacing:-.015em;text-transform:uppercase;z-index:2">A Particle Physics Alumni Reunion</div>
 <div data-zone="text" style="position:absolute;left:64px;top:748px;font-size:18px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent);z-index:2">Cocktail hour · Research fair</div>
 
 <div data-zone="text" style="position:absolute;left:64px;top:822px;width:532px;display:flex;flex-direction:column;gap:16px;z-index:2">
@@ -85,7 +85,7 @@ a:hover { color: var(--color-accent); }
 <span id="i-sigma" style="font-size:400px">σ</span><span id="i-mumu" style="position:relative;top:50px;left:4px;font-size:195px">μμ</span>
 </div>
 
-<div data-zone="text" style="position:absolute;left:56px;top:522px;font-size:52px;font-weight:800;letter-spacing:-.015em;text-transform:uppercase;z-index:2">A Physics × Alumni Reunion</div>
+<div data-zone="text" style="position:absolute;left:56px;top:522px;font-size:52px;font-weight:800;letter-spacing:-.015em;text-transform:uppercase;z-index:2">A Particle Physics Alumni Reunion</div>
 <div data-zone="text" style="position:absolute;left:56px;top:600px;font-size:22px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent);z-index:2">Cocktail hour · Research fair</div>
 
 <div data-zone="text" style="position:absolute;left:56px;top:668px;width:740px;display:flex;flex-direction:column;gap:18px;z-index:2">
@@ -210,7 +210,7 @@ class Component extends DCLogic {
         const r = lg.getBoundingClientRect();
         // the logo wants air around it, so the keep-out is the image box plus
         // a margin -- not the inset box the artwork's own padding would imply
-        const outx = r.width * 0.14, outy = r.height * 0.1;
+        const outx = r.width * 0.05, outy = r.height * 0.035;
         push({ left: r.left - outx, top: r.top - outy,
                width: r.width + outx * 2, height: r.height + outy * 2 });
       }

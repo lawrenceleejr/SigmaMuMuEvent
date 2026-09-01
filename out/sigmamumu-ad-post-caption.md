@@ -7,7 +7,7 @@ Pair either caption with `sigmamumu-instagram-post-1080x1350.jpg` (portrait
 
 ## Instagram / general feed
 
-**σμμ — a physics × alumni reunion**
+**σμμ — a particle physics alumni reunion**
 
 Sunday 13 December 2026 · 4:30–6:30 p.m. · Stanford campus
 
@@ -27,7 +27,7 @@ Contribute to tomorrow's collider, today. RSVP → [link]
 
 ## LinkedIn / sponsor-facing
 
-**σμμ — A Physics × Alumni Reunion**
+**σμμ — A Particle Physics Alumni Reunion**
 Sunday 13 December 2026 · 4:30–6:30 p.m. · Stanford campus
 
 The US Muon Collider Collaboration is hosting an evening for physicists who
