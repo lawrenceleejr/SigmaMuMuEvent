@@ -26,7 +26,11 @@
 
   var SCALE = 2.8;           // diagram zoom: wave and dash geometry scale with it
   var SPACING = 24;          // times SCALE -> ~67px cells
-  var DPR = 0.9;             // the field is blurred; no need for device pixels
+  // Canvas resolution. What costs is the total pixel count, not the ratio, so
+  // budget pixels rather than capping the ratio: a phone (small viewport, dense
+  // screen) gets its full device resolution for less fill than a laptop at 2x.
+  // Never below 1, which is already native on an ordinary display.
+  var PIXEL_BUDGET = 3.5e6;
   var WALKERS = 2;
   var TRAVERSE = 34;         // seconds for a walker to cross its whole flood
   var TAIL_TOP = 0.18;       // tail as a fraction of the flood, at the top
@@ -41,7 +45,7 @@
   var accent = (getComputedStyle(document.documentElement)
     .getPropertyValue('--accent') || '#ec3013').trim();
 
-  var W = 0, H = 0, net = null, walkers = [], maxArrival = 1, raf = null;
+  var W = 0, H = 0, DPR = 1, net = null, walkers = [], maxArrival = 1, raf = null;
   var scrollP = 0;
 
   /* ---- the mesh ---------------------------------------------------------- */
@@ -53,10 +57,16 @@
     return { w: Math.max(320, Math.round(r.width)), h: Math.max(320, Math.round(r.height)) };
   }
 
+  function dprFor(w, h) {
+    var device = window.devicePixelRatio || 1;
+    return Math.min(device, Math.max(1, Math.sqrt(PIXEL_BUDGET / (w * h))));
+  }
+
   function build() {
     var v = viewport();
     W = v.w;
     H = v.h;
+    DPR = dprFor(W, H);
     // Only the backing store: the element's own box stays CSS-driven, so
     // measuring it back still reports the viewport rather than what we set.
     cv.width = Math.round(W * DPR);
