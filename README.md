@@ -99,11 +99,16 @@ genuinely 3× of line art rather than an upscale of something smaller.
 ## Rendering the video
 
 ```sh
-./render/render-video.sh                       # 14s, 1080x1350
+./render/render-video.sh                       # 14s, 1080x1350, 60fps
 ./render/render-video.sh --fast                # quick preview, ink filters off
-./render/render-video.sh --seconds 8 --fps 20  # shorter / cheaper
+./render/render-video.sh --fps 30              # half the frames, half the wait
 ./render/render-video.sh --scale 2             # 2160x2700 instead of 1080x1350
 ```
+
+The sketch draws at up to 60 Hz (it redraws no more often than every 15 ms), so
+60 fps capture yields a distinct frame every time — verified, no repeats. Frame
+count is what costs you wall-clock: 14 s at 60 fps is 840 screenshots, so drop
+`--fps` when you just want to check timing.
 
 The script finds Chrome/Chromium and ffmpeg for you, installs the one npm
 dependency, and writes `out/sigmamumu-instagram-post-1080x1350.mp4`.
@@ -115,7 +120,7 @@ you would expect:
 
 - Capturing a frame takes far longer than a frame lasts, so the renderer
   freezes the page clock and steps it by hand — one captured second is one
-  second of animation, at the cost of stepping serially.
+  second of animation, at the cost of stepping serially, one frame at a time.
 - Chromium re-rasterises what it is asked to capture every single time. Under
   software rendering (a headless box with no GPU) a 1080×1350 sheet of large
   canvases and filtered layers costs seconds per frame; with a GPU it is far

@@ -404,7 +404,7 @@ class Component extends DCLogic {
     this.raf = requestAnimationFrame(t => this.loop(t));
     const o = this.opts();
     if (!o.anim || !this.sheets) return;
-    if (this.last && ts - this.last < 34) return;
+    if (this.last && ts - this.last < 15) return;   // draw every frame at 60Hz
     this.last = ts;
     const el = (ts - this.t0) / 1000;
     this.sheets.forEach(s => { if (!s.cfg.still) this.step(s, el, o); });

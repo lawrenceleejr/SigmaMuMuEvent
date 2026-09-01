@@ -30,7 +30,7 @@ function args() {
   const mode = a.shift();
   const o = {
     mode, file: 'design/Sigma Mu Mu Network.dc.html', screen: 'TABLOID',
-    scale: 2, fps: 25, seconds: 14, out: 'out/dc.png', settle: 2500, start: 0, fast: '0',
+    scale: 2, fps: 60, seconds: 14, out: 'out/dc.png', settle: 2500, start: 0, fast: '0',
   };
   for (let i = 0; i < a.length; i += 2) o[a[i].replace(/^--/, '')] = a[i + 1];
   o.scale = parseFloat(o.scale); o.fps = parseInt(o.fps, 10);
@@ -175,9 +175,9 @@ async function main() {
     } else if (o.mode === 'video') {
       const n = Math.round(o.fps * o.seconds);
       const stepMs = 1000 / o.fps;
-      // the sketch throttles its own redraw at ~34ms, so a step below that
-      // would repeat frames; 25fps keeps playback at the designed speed
-      if (stepMs < 36) console.log(`[dc] warning: ${o.fps}fps steps ${stepMs.toFixed(1)}ms, below the sketch's 34ms redraw throttle`);
+      // the sketch redraws no faster than every 15ms; a shorter step than that
+      // would just repeat frames
+      if (stepMs < 15) console.log(`[dc] warning: ${o.fps}fps steps ${stepMs.toFixed(1)}ms, below the sketch's 15ms redraw throttle -- frames will repeat`);
       const w = Math.round(css.w * o.scale / 2) * 2;
       const h = Math.round(css.h * o.scale / 2) * 2;
       // One long-lived ffmpeg, fed jpeg frames: encoding a PNG per frame in the

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Render the animated σμμ Instagram post to MP4 on your own machine.
 #
-#   ./render/render-video.sh                       # 14s, 1080x1350, full quality
+#   ./render/render-video.sh                       # 14s, 1080x1350, 60fps
 #   ./render/render-video.sh --fast                # quick preview, no ink filters
 #   ./render/render-video.sh --seconds 8 --fps 20  # shorter / cheaper
 #   ./render/render-video.sh --scale 2             # 2160x2700 master
@@ -22,7 +22,7 @@ cd "$(dirname "$0")/.."
 
 SCREEN=INSTAGRAM
 OUT=out/sigmamumu-instagram-post-1080x1350.mp4
-FPS=25
+FPS=60
 SECONDS_LEN=14
 SCALE=1
 SETTLE=12000
