@@ -112,7 +112,7 @@ const html = `<!doctype html><html><head><meta charset="utf-8">
     <div class="rule"></div>
     <div class="foot">
       <span class="where">Stanford &middot; Dec. 13&ndash;16, 2026</span>
-      <span class="url">indico.muoncollider.us/event/66</span>
+      <span class="url">indico.muoncollider.us/e/usmcc2026</span>
     </div>
   </div>
 </div></body></html>`;
