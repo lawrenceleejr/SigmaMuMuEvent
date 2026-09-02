@@ -292,10 +292,14 @@ body > .header,
   padding-top: 0 !important;
   padding-bottom: 0 !important;
 }
-.confheader:has(.confLogoBannerBox) .confSubTitleContent:has(#event-search-box),
-.confheader:has(.confLogoBox) .confSubTitleContent:has(#event-search-box) {
-  padding: clamp(0.7rem, 1.8vw, 1rem) clamp(1.25rem, 3vw, 2rem) !important;
-  justify-content: flex-end !important;
+/* The search box was the last thing in that row. It goes too, so the masthead
+   is the banner and nothing else. display: none rather than the visually
+   hidden treatment used for the title and the dateline — this is a control,
+   and a focusable input nobody can see is worse than no input at all. An
+   event with no banner keeps its search. */
+.confheader:has(.confLogoBannerBox) #event-search-box,
+.confheader:has(.confLogoBox) #event-search-box {
+  display: none !important;
 }
 .confLogoBannerBox,
 .confLogoBox {
