@@ -237,8 +237,10 @@ body > .header,
    un-clipped from within — the banner would disappear with the words. The
    banner is a replaced element sized in per cent, so a zeroed font size does
    not touch it, and normal metrics are restored inside it regardless. */
+.confheader:has(.confLogoBannerBox) .confTitleBox,
 .confheader:has(.confLogoBannerBox) .confTitle,
 .confheader:has(.confLogoBannerBox) .confTitle *,
+.confheader:has(.confLogoBox) .confTitleBox,
 .confheader:has(.confLogoBox) .confTitle,
 .confheader:has(.confLogoBox) .confTitle * {
   /* The h1 carries its own font-size further up this file and the words sit in
@@ -248,6 +250,12 @@ body > .header,
   line-height: 0 !important;
   letter-spacing: 0 !important;
   margin: 0 !important;
+  /* Indico gives .confTitleBox a 90px min-height and the title link an
+     explicit height; left alone they hold the pane open as an empty chin
+     under the banner. */
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 0 !important;
 }
 /* Same specificity as the rule above and written after it, so it wins the tie
    wherever the banner turns out to live inside the title. */
@@ -263,8 +271,7 @@ body > .header,
    specificity, written after, so the bleed survives every nesting. */
 .confheader:has(.confLogoBannerBox) .confLogoBannerBox,
 .confheader:has(.confLogoBox) .confLogoBox {
-  margin: 0 calc(-1 * clamp(1.25rem, 3vw, 2rem))
-          clamp(1rem, 2.5vw, 1.6rem) !important;
+  margin: 0 calc(-1 * clamp(1.25rem, 3vw, 2rem)) 0 !important;
 }
 /* The banner is opaque and the pane it sits in is translucent, so an inset
    banner reads as a dark plate with a frame around it — the pane showing
@@ -273,9 +280,20 @@ body > .header,
    padding exactly, and its top padding goes when a banner is present.
    (To frame it instead, drop this block and give .confLogoBannerBox img a
    1px solid var(--smm-rule).) */
+/* With the title and the dateline both gone, everything below the banner is
+   empty pane — a grey chin under the masthead. Close the box up around the
+   banner. The search box shares that row and is real content, so where it
+   exists the row keeps its own padding; where it does not, the pane ends at
+   the banner. */
 .confheader:has(.confLogoBannerBox),
 .confheader:has(.confLogoBox) {
   padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+.confheader:has(.confLogoBannerBox) .confSubTitleContent:has(#event-search-box),
+.confheader:has(.confLogoBox) .confSubTitleContent:has(#event-search-box) {
+  padding: clamp(0.7rem, 1.8vw, 1rem) clamp(1.25rem, 3vw, 2rem) !important;
+  justify-content: flex-end !important;
 }
 .confLogoBannerBox,
 .confLogoBox {
