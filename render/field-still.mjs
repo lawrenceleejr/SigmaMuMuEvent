@@ -2,6 +2,7 @@
 /* Render the static Feynman field used as the background of the Indico skin.
  *
  *   node render/field-still.mjs                    # 2000x1500 -> site/static/img/field-still.png
+ *   node render/field-still.mjs --dark             # -> field-still-dark.png
  *   node render/field-still.mjs --w 2400 --h 1350 --scale 2.8
  *
  * It runs design/network.js, the generator that draws the poster, so the line
@@ -20,7 +21,8 @@ const a = process.argv.slice(2);
 const arg = (k, d) => { const i = a.indexOf('--' + k); return i < 0 ? d : Number(a[i + 1]); };
 const W = arg('w', 2000), H = arg('h', 1500), SCALE = arg('scale', 2.4);
 const SEED = arg('seed', 2026), COLORS = arg('colors', 64);
-const OUT = resolve(ROOT, 'site/static/img/field-still.png');
+const DARK = a.includes('--dark');
+const OUT = resolve(ROOT, `site/static/img/field-still${DARK ? '-dark' : ''}.png`);
 
 const chromePath = process.env.CHROME
   || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
@@ -30,11 +32,11 @@ page.on('pageerror', e => { console.error('page error:', e.message); process.exi
 await page.setContent('<canvas id="c"></canvas>');
 await page.addScriptTag({ content: await readFile(resolve(ROOT, 'design/network.js'), 'utf8') });
 
-const { png, edges } = await page.evaluate(({ W, H, SCALE, SEED }) => {
+const { png, edges } = await page.evaluate(({ W, H, SCALE, SEED, DARK }) => {
   const c = document.getElementById('c');
   c.width = W; c.height = H;
   const ctx = c.getContext('2d');
-  ctx.fillStyle = '#f5f0e1';
+  ctx.fillStyle = DARK ? '#141312' : '#f5f0e1';
   ctx.fillRect(0, 0, W, H);
   const net = window.SMMNet.build({
     w: W, h: H, zones: [], seed: SEED, seeds: [{ x: W * 0.5, y: H * 0.5 }],
@@ -45,10 +47,21 @@ const { png, edges } = await page.evaluate(({ W, H, SCALE, SEED }) => {
     higgsPure: 8, higgsQuartics: 2,
   });
   for (const e of net.edges) {
-    window.SMMNet.drawEdge(ctx, net, e, 1, { accent: '#ec3013', tone: 0.9 });
+    window.SMMNet.drawEdge(ctx, net, e, 1, { accent: DARK ? '#ff5230' : '#ec3013', tone: 0.9 });
+  }
+  if (DARK) {
+    // The generator inks in near-black; invert the linework onto the dark
+    // ground rather than teaching it a second palette.
+    const d = ctx.getImageData(0, 0, W, H);
+    for (let i = 0; i < d.data.length; i += 4) {
+      d.data[i] = 255 - d.data[i];
+      d.data[i + 1] = 255 - d.data[i + 1];
+      d.data[i + 2] = 255 - d.data[i + 2];
+    }
+    ctx.putImageData(d, 0, 0);
   }
   return { png: c.toDataURL('image/png').split(',')[1], edges: net.edges.length };
-}, { W, H, SCALE, SEED });
+}, { W, H, SCALE, SEED, DARK });
 
 await writeFile(OUT, Buffer.from(png, 'base64'));
 await browser.close();

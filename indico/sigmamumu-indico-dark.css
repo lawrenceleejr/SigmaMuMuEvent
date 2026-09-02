@@ -1,15 +1,19 @@
 @import url("https://hepalumni.muoncollider.us/fonts/fonts.css");
 
 /* ==========================================================================
-   σμμ — a skin for the Indico event page
+   σμμ — a skin for the Indico event page, dark
    A Particle Physics Alumni Reunion · USMCC annual meeting · Stanford
 
    Install: Event Management → Layout → Custom CSS → upload this file.
    Written against Indico 3.3.12, conference-type event.
 
-   It dresses Indico in the identity used by the poster and by
-   hepalumni.muoncollider.us: cream stock, warm near-black ink, one vermillion
-   accent, Archivo for the voice, and the Feynman network behind frosted glass.
+   The same identity read as a negative: near-black ground, warm bone type, a
+   hotter vermillion so the accent still carries, and the Feynman network
+   drawing itself in light lines behind smoked glass.
+
+   Generated from sigmamumu-indico.css by render/indico-dark.mjs — edit that
+   file, not this one, then re-run the script. Install one skin or the other,
+   never both.
 
    Indico's layout mechanics are left alone — only surfaces, type, spacing and
    colour change — so an upgrade should not break the page; it would just show
@@ -27,19 +31,19 @@
    ========================================================================== */
 
 :root {
-  --smm-paper: #f5f0e1;
-  --smm-ink: #201e1d;
-  --smm-accent: #ec3013;
-  --smm-muted: #605d5d;
-  --smm-rule: rgba(32, 30, 29, 0.18);
-  --smm-hair: rgba(32, 30, 29, 0.1);
-  --smm-glass: rgba(245, 240, 225, 0.62);
-  --smm-glass-solid: rgba(245, 240, 225, 0.95);
+  --smm-paper: #141312;
+  --smm-ink: #efe9da;
+  --smm-accent: #ff5230;
+  --smm-muted: #9b948a;
+  --smm-rule: rgba(239, 233, 218, 0.22);
+  --smm-hair: rgba(239, 233, 218, 0.14);
+  --smm-glass: rgba(28, 26, 24, 0.62);
+  --smm-glass-solid: rgba(28, 26, 24, 0.95);
   --smm-sans: Archivo, "Helvetica Neue", Arial, sans-serif;
-  --smm-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset,
-                0 18px 50px -30px rgba(32, 30, 29, 0.45);
+  --smm-shadow: 0 1px 0 rgba(239, 233, 218, 0.08) inset,
+                0 18px 50px -28px rgba(0, 0, 0, 0.85);
   /* How much cream sits over the field. Raise toward 1 for a quieter page. */
-  --smm-veil: 0.38;
+  --smm-veil: 0.45;
 }
 
 /* ---- the page ----------------------------------------------------------- */
@@ -48,9 +52,9 @@
 html {
   background-color: var(--smm-paper);
   background-image:
-    linear-gradient(rgba(245, 240, 225, var(--smm-veil)),
-                    rgba(245, 240, 225, var(--smm-veil))),
-    url("https://hepalumni.muoncollider.us/img/field-live.svg");
+    linear-gradient(rgba(20, 19, 18, var(--smm-veil)),
+                    rgba(20, 19, 18, var(--smm-veil))),
+    url("https://hepalumni.muoncollider.us/img/field-live-dark.svg");
   background-repeat: no-repeat, no-repeat;
   background-position: center center, center center;
   background-size: cover, cover;
@@ -76,9 +80,9 @@ input, select, textarea, button, .i-button {
 @media (prefers-reduced-motion: reduce) {
   html {
     background-image:
-      linear-gradient(rgba(245, 240, 225, var(--smm-veil)),
-                      rgba(245, 240, 225, var(--smm-veil))),
-      url("https://hepalumni.muoncollider.us/img/field-still.png");
+      linear-gradient(rgba(20, 19, 18, var(--smm-veil)),
+                      rgba(20, 19, 18, var(--smm-veil))),
+      url("https://hepalumni.muoncollider.us/img/field-still-dark.png");
   }
 }
 
@@ -121,13 +125,14 @@ body > .header,
 .page-header,
 .page-header-dark,
 .event-page-header {
-  background: var(--smm-ink) !important;
+  /* ink is the type colour on this skin, so the bars take their own tone */
+  background: #0c0b0b !important;
   border: 0;
   box-shadow: none;
 }
 .page-header a, .page-header .i-button, .page-header .text-color,
 #session-bar a, #session-bar .i-button {
-  color: var(--smm-paper) !important;
+  color: var(--smm-ink) !important;
   background: none !important;
   border: 0 !important;
   box-shadow: none !important;
@@ -137,7 +142,7 @@ body > .header,
 .page-header a:hover, .page-header .i-button:hover, #session-bar a:hover {
   color: var(--smm-accent) !important;
 }
-.page-header .separator { border-color: rgba(245, 240, 225, 0.25); }
+.page-header .separator { border-color: rgba(239, 233, 218, 0.22); }
 
 /* ---- masthead ----------------------------------------------------------- */
 /* One frosted pane carrying the title and the dateline, on the same column
@@ -397,7 +402,7 @@ body > .header,
 .confBodyBox .i-button.subtle, .ui.basic.button {
   background: none !important;
   color: var(--smm-ink) !important;
-  border: 1px solid rgba(32, 30, 29, 0.35) !important;
+  border: 1px solid rgba(239, 233, 218, 0.4) !important;
 }
 
 /* ---- registration form -------------------------------------------------- */
@@ -413,7 +418,7 @@ body > .header,
 .i-form input[type="text"], .i-form input[type="email"], .i-form input[type="number"],
 .i-form textarea, .i-form select,
 .ui.form input, .ui.form textarea, .ui.form select, .ui.input > input {
-  background: rgba(255, 255, 255, 0.55) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
   color: var(--smm-ink) !important;
   border: 1px solid var(--smm-rule) !important;
   border-radius: 0 !important;
@@ -495,7 +500,7 @@ body > .header,
    with it, without having to name each descendant. */
 .confBodyBox .ui.message,
 .confBodyBox .ui.info.message {
-  background: rgba(245, 240, 225, 0.55) !important;
+  background: rgba(34, 31, 29, 0.6) !important;
   color: var(--smm-ink) !important;
   border: 1px solid var(--smm-rule) !important;
   border-left: 3px solid var(--smm-accent) !important;
@@ -514,7 +519,7 @@ body > .header,
 
 /* ---- messages ----------------------------------------------------------- */
 .flashed-messages .message-box, .i-message {
-  background: rgba(245, 240, 225, 0.9) !important;
+  background: rgba(34, 31, 29, 0.9) !important;
   border: 1px solid var(--smm-rule) !important;
   border-left: 3px solid var(--smm-accent) !important;
   border-radius: 0 !important;
@@ -523,11 +528,11 @@ body > .header,
 
 /* ---- footer ------------------------------------------------------------- */
 .footer, .footer > .flexrow {
-  background: var(--smm-ink) !important;
-  color: rgba(245, 240, 225, 0.75);
+  background: #0c0b0b !important;
+  color: rgba(239, 233, 218, 0.7);
   border: 0;
 }
-.footer a, .footer-links a { color: rgba(245, 240, 225, 0.75) !important; }
+.footer a, .footer-links a { color: rgba(239, 233, 218, 0.7) !important; }
 .footer a:hover { color: var(--smm-accent) !important; }
 .footer, .footer-links {
   font-size: 0.74rem;
@@ -554,7 +559,10 @@ body > .header,
 
 /* ---- print -------------------------------------------------------------- */
 @media print {
+  /* paper is still paper, and bone type on white would vanish */
   html { background: #fff !important; }
+  body, .confTitle, .confTitle h1, .confSubTitle,
+  .confBodyBox, .conf_leftMenu, .confBodyBox * { color: #000 !important; }
   .confheader, .confBodyBox, .conf_leftMenu {
     background: #fff !important;
     backdrop-filter: none;

@@ -1,10 +1,18 @@
 # σμμ skin for Indico
 
-`sigmamumu-indico.css` dresses the Indico event page at
-<https://indico.muoncollider.us/e/hepalumni> in the same identity as the poster
-and <https://hepalumni.muoncollider.us>: cream stock, warm near-black ink, one
-vermillion accent, Archivo for the voice, and the Feynman network behind
-frosted glass.
+Two skins for the Indico event page at
+<https://indico.muoncollider.us/e/hepalumni>, in the same identity as the
+poster and <https://hepalumni.muoncollider.us>. **Install one, not both.**
+
+| file | look |
+| --- | --- |
+| `sigmamumu-indico.css` | cream stock, warm near-black ink, one vermillion accent |
+| `sigmamumu-indico-dark.css` | the same read as a negative: near-black ground, bone type, a hotter vermillion |
+
+The dark sheet is **generated** from the light one by `render/indico-dark.mjs`,
+which swaps values only — no selector is added or removed, so the two always
+cover the same ground. Edit `sigmamumu-indico.css`, re-run the script, and the
+dark sheet follows. Do not hand-edit the dark file.
 
 ## Installing it
 
@@ -25,18 +33,44 @@ Two assets are pulled from the event site, which must be published first:
 
 | what | where |
 | --- | --- |
-| Archivo + Libertinus Math | `https://hepalumni.muoncollider.us/fonts/fonts.css` |
-| the Feynman field | `https://hepalumni.muoncollider.us/img/field-still.png` |
+| Archivo + Libertinus Math | `/fonts/fonts.css` |
+| the animated field | `/img/field-live.svg`, `/img/field-live-dark.svg` |
+| the still field, for reduced motion | `/img/field-still.png`, `/img/field-still-dark.png` |
+
+all under `https://hepalumni.muoncollider.us`.
 
 Both are already in this repository under `site/static/`, so they go live with
 the site. Until then — or if that host is ever unreachable — the page falls
 back to a system grotesque on plain cream, which still reads correctly. Nothing
 breaks, it just loses the texture.
 
-`field-still.png` is generated from the same `design/network.js` that draws the
-poster, so its physics is the real thing: every vertex is a legal Standard
-Model vertex. To regenerate it at a different size or density, edit and re-run
-the snippet in `render/field-still.mjs`.
+## The background animates
+
+Indico only accepts a stylesheet, so the canvas that animates the website
+cannot run here. But an SVG referenced from CSS as a `background-image` is
+loaded in *secure animated mode* — scripts do not run, yet its own CSS
+animations do. So the motion is declared inside the file, and the field draws
+itself: lines grow out of their vertices in the order `build()` computes, hold,
+fade, and begin again on a 26-second loop. Each line's place in that order
+becomes a negative `animation-delay`, so the field is always mid-life somewhere
+rather than restarting in unison, and every vertex mark lands a beat before the
+lines that grow out of it.
+
+What this cannot reproduce is the website's scroll-driven flood with a
+dissolving tail — that needs per-frame control, which means JavaScript.
+
+Solid lines and boson waves draw themselves with `stroke-dashoffset`. Scalars
+are dashed and their `stroke-dasharray` is already spoken for, so they fade in
+instead. Under `prefers-reduced-motion` the SVG stops itself *and* the
+stylesheet swaps in the flat PNG — belt and braces.
+
+Both fields come from the same `design/network.js` that draws the poster, so
+the physics is the real thing: every vertex is a legal Standard Model vertex.
+
+    node render/field-svg.mjs                 # animated, light
+    node render/field-svg.mjs --theme dark
+    node render/field-still.mjs               # flat, light
+    node render/field-still.mjs --dark
 
 ## Two things CSS cannot fix
 
