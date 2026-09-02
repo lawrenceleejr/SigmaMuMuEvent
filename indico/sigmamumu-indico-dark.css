@@ -195,6 +195,24 @@ body > .header,
   text-transform: uppercase;
   line-height: 1.35;
 }
+/* The banner already carries the place and the dates, so the line underneath
+   says them twice. Hidden the same way as the title and under the same
+   condition — only where a banner exists, only visually, text left in the DOM.
+   The search box is a sibling inside the same row, so it is untouched. */
+.confheader:has(.confLogoBannerBox) .confSubTitle,
+.confheader:has(.confLogoBannerBox) .confSubTitle *,
+.confheader:has(.confLogoBox) .confSubTitle,
+.confheader:has(.confLogoBox) .confSubTitle * {
+  font-size: 0 !important;
+  line-height: 0 !important;
+  letter-spacing: 0 !important;
+  margin: 0 !important;
+}
+.confheader:has(.confLogoBannerBox) .confSubTitleBox,
+.confheader:has(.confLogoBox) .confSubTitleBox {
+  margin-top: 0 !important;
+}
+
 .confSubTitle .timezone-label,
 .confSubTitle .timezone,
 .confSubTitleBox .timezone-label,
@@ -416,6 +434,23 @@ body > .header,
 .confBodyBox .description font[color] {
   color: var(--smm-ink) !important;
 }
+/* The committee lists arrived a flat #555 that survived the rule above, so the
+   colour is not reaching us as an inline style — it may be a class, a font
+   tag, or a style block pasted along with the names. Rather than keep guessing
+   the mechanism, take every list in the description back to the palette
+   outright. Scoped to list items, so prose and headings keep their own
+   colour. */
+.confBodyBox .conferenceDetails li,
+.confBodyBox .conferenceDetails li *,
+.confBodyBox .editor-output li,
+.confBodyBox .editor-output li *,
+.confBodyBox .description li,
+.confBodyBox .description li * {
+  color: var(--smm-ink) !important;
+}
+.confBodyBox .conferenceDetails li a,
+.confBodyBox .editor-output li a,
+.confBodyBox .description li a { color: var(--smm-accent) !important; }
 /* links keep the accent even when they arrived with a colour of their own */
 .confBodyBox .editor-output a[style*="color"],
 .confBodyBox .description a[style*="color"] {
