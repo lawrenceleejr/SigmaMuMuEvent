@@ -111,7 +111,7 @@ const html = `<!doctype html><html><head><meta charset="utf-8">
     <h1>US Muon Collider<br>Collaboration Meeting</h1>
     <div class="rule"></div>
     <div class="foot">
-      <span class="where">Stanford &middot; Dec. 13&ndash;16, 2026</span>
+      <span class="where">Stanford, Dec. 13&ndash;16, 2026</span>
       <span class="url">indico.muoncollider.us/e/usmcc2026</span>
     </div>
   </div>
