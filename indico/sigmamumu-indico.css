@@ -328,6 +328,25 @@ body > .header,
 .confBodyBox a, .description a { color: var(--smm-accent); text-underline-offset: 0.18em; }
 .confBodyBox a:hover { text-decoration: underline; }
 
+/* Description text pasted from a document arrives carrying inline colours from
+   wherever it was copied — grey that looked like ordinary body text on white
+   and nearly vanishes on a dark ground. An author !important beats a
+   non-important inline style, so this takes those back to the palette.
+   Matching [style*="color"] leaves untouched anything that never had a colour
+   of its own; it does also flatten a deliberately coloured word, which is the
+   trade. The real fix is to clear the formatting in the description editor. */
+.confBodyBox .editor-output [style*="color"],
+.confBodyBox .description [style*="color"],
+.confBodyBox .editor-output font[color],
+.confBodyBox .description font[color] {
+  color: var(--smm-ink) !important;
+}
+/* links keep the accent even when they arrived with a colour of their own */
+.confBodyBox .editor-output a[style*="color"],
+.confBodyBox .description a[style*="color"] {
+  color: var(--smm-accent) !important;
+}
+
 /* ---- the date / location grid ------------------------------------------- */
 /* Indico lays these out as side-by-side columns; stacking them full width
    turns them into the poster's ruled rows. */

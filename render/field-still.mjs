@@ -47,18 +47,11 @@ const { png, edges } = await page.evaluate(({ W, H, SCALE, SEED, DARK }) => {
     higgsPure: 8, higgsQuartics: 2,
   });
   for (const e of net.edges) {
-    window.SMMNet.drawEdge(ctx, net, e, 1, { accent: DARK ? '#ff5230' : '#ec3013', tone: 0.9 });
-  }
-  if (DARK) {
-    // The generator inks in near-black; invert the linework onto the dark
-    // ground rather than teaching it a second palette.
-    const d = ctx.getImageData(0, 0, W, H);
-    for (let i = 0; i < d.data.length; i += 4) {
-      d.data[i] = 255 - d.data[i];
-      d.data[i + 1] = 255 - d.data[i + 1];
-      d.data[i + 2] = 255 - d.data[i + 2];
-    }
-    ctx.putImageData(d, 0, 0);
+    window.SMMNet.drawEdge(ctx, net, e, 1, {
+      accent: DARK ? '#ff5230' : '#ec3013',
+      ink: DARK ? '#efe9da' : undefined,
+      tone: 0.9,
+    });
   }
   return { png: c.toDataURL('image/png').split(',')[1], edges: net.edges.length };
 }, { W, H, SCALE, SEED, DARK });
