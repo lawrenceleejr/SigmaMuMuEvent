@@ -627,6 +627,44 @@ body > .header,
   border: 1px solid var(--smm-accent) !important;
 }
 
+/* Indico's action boxes — "the call for abstracts is open" and its siblings.
+   Four variants (highlight, warning, danger, disabled), each a pale panel with
+   a saturated border and saturated text: a light-page idiom that reads as a
+   bright card punched into this skin. Keep the semantics, take the surfaces —
+   the meaning moves to a coloured left edge, as it does on the messages above.
+   The two literal hues are mid-tone on purpose, so they carry on cream and on
+   near-black without needing a second value in the dark sheet. */
+.confBodyBox .action-box,
+.confBodyBox .action-box.highlight,
+.confBodyBox .action-box.warning,
+.confBodyBox .action-box.danger,
+.confBodyBox .action-box.disabled {
+  background: rgba(34, 31, 29, 0.6) !important;
+  color: var(--smm-ink) !important;
+  border: 1px solid var(--smm-rule) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+.confBodyBox .action-box.highlight { border-left: 3px solid var(--smm-accent) !important; }
+.confBodyBox .action-box.warning  { border-left: 3px solid #d9992f !important; }
+.confBodyBox .action-box.danger   { border-left: 3px solid #d94f2f !important; }
+.confBodyBox .action-box.disabled { border-left: 3px solid var(--smm-muted) !important; }
+/* The heading of these boxes is .section > .text > .label, two levels down, so
+   a child selector never reaches it — it kept Indico's blue, amber or red.
+   Everything in the section goes muted, the heading comes back to ink, and the
+   button is re-asserted last because it ties on specificity. */
+.confBodyBox .action-box .section,
+.confBodyBox .action-box .section * { color: var(--smm-muted) !important; }
+.confBodyBox .action-box .section .label { color: var(--smm-ink) !important; font-weight: 700; }
+.confBodyBox .action-box > .section:not(:first-child) {
+  border-top: 1px solid var(--smm-rule) !important;
+}
+/* the button in there is already an ink block; keep its label legible */
+.confBodyBox .action-box .i-button,
+.confBodyBox .action-box .i-button *,
+.confBodyBox .action-box button,
+.confBodyBox .action-box button * { color: var(--smm-paper) !important; }
+
 /* ---- tables, timetable, lists ------------------------------------------- */
 .i-table, table.infoTable, .timetable-item, .contribution-list .list-item {
   background: none !important;
