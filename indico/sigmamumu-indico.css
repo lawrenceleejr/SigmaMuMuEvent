@@ -205,25 +205,40 @@ body > .header,
    title underneath just says it again. Hide it — but only where a banner is
    actually present, so an event without one keeps its title, and only
    visually, so the page still has its h1 for assistive technology and search.
-   :has is the whole mechanism here: without support the rule is dropped and
-   the title stays, which is the safe way to fail. Delete this block to bring
-   the title back. */
+   :has is the whole mechanism: without support the rule is dropped and the
+   title stays, which is the safe way to fail. Delete this block to bring the
+   title back.
+
+   Zeroing the font rather than clipping the box, because Indico may render the
+   banner *inside* the title element, and a clipped ancestor cannot be
+   un-clipped from within — the banner would disappear with the words. The
+   banner is a replaced element sized in per cent, so a zeroed font size does
+   not touch it, and normal metrics are restored inside it regardless. */
 .confheader:has(.confLogoBannerBox) .confTitle,
-.confheader:has(.confLogoBox) .confTitle {
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  margin: -1px !important;
-  padding: 0 !important;
-  overflow: hidden !important;
-  clip: rect(0 0 0 0) !important;
-  clip-path: inset(50%) !important;
-  white-space: nowrap !important;
-  border: 0 !important;
+.confheader:has(.confLogoBannerBox) .confTitle *,
+.confheader:has(.confLogoBox) .confTitle,
+.confheader:has(.confLogoBox) .confTitle * {
+  /* The h1 carries its own font-size further up this file and the words sit in
+     a span inside it, so inheriting a zero reaches neither. Name every
+     descendant instead. */
+  font-size: 0 !important;
+  line-height: 0 !important;
+  letter-spacing: 0 !important;
+  margin: 0 !important;
+}
+/* Same specificity as the rule above and written after it, so it wins the tie
+   wherever the banner turns out to live inside the title. */
+.confheader:has(.confLogoBannerBox) .confLogoBannerBox,
+.confheader:has(.confLogoBannerBox) .confLogoBannerBox *,
+.confheader:has(.confLogoBox) .confLogoBox,
+.confheader:has(.confLogoBox) .confLogoBox * {
+  font-size: 1rem !important;
+  line-height: normal !important;
 }
 /* the banner is the masthead now, so let it sit edge to edge in the pane */
-.confLogoBannerBox { margin: 0 0 0.25rem !important; }
-.confLogoBannerBox img { display: block; }
+.confLogoBannerBox { margin: 0 0 0.35rem !important; }
+.confLogoBannerBox img,
+.confLogoBox img { display: block; max-width: 100%; height: auto; }
 
 /* ---- the two columns ---------------------------------------------------- */
 #confSectionsBox { max-width: 1000px !important; margin: 0 auto 3rem; }

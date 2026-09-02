@@ -13,6 +13,7 @@
  */
 import { chromium } from 'playwright-core';
 import { createServer } from 'node:http';
+import { spawn } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import { extname, join, resolve } from 'node:path';
 
@@ -146,5 +147,23 @@ await page.waitForTimeout(400);
 await page.screenshot({ path: OUT });
 await browser.close();
 server.close();
+
+// Palettise. Flat ground, one accent and a bone type set means 256 colours is
+// indistinguishable from truecolour here — checked against the gradient, which
+// is the only place banding could show — and it more than halves the file. A
+// banner is a logo upload, and some Indico deployments cap those.
+await new Promise((ok, no) => {
+  const p = spawn('python3', ['-c', `
+from PIL import Image
+import os
+p = ${JSON.stringify(OUT)}
+before = os.path.getsize(p) / 1024
+im = Image.open(p).convert('RGB')
+im.quantize(colors=256, method=Image.MEDIANCUT,
+            dither=Image.FLOYDSTEINBERG).save(p, optimize=True)
+print('  %d KB -> %d KB palettised' % (before, os.path.getsize(p) / 1024))
+`], { stdio: 'inherit' });
+  p.on('exit', c => c === 0 ? ok() : no(new Error('palettise failed: ' + c)));
+});
 console.log(`wrote ${OUT}`);
 console.log(`  ${W}x${H} ${THEME}, ${edges} edges behind the type`);
