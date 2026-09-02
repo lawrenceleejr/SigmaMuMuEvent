@@ -703,6 +703,63 @@ body > .header,
   margin-bottom: 0.5rem !important;
 }
 
+/* ---- timetable ---------------------------------------------------------- */
+/* The grid is drawn on white with dark labels, so on this skin it arrives as a
+   white sheet in the middle of the page. Canvas, gutter, day tabs and toolbar
+   come into the palette.
+
+   The session blocks deliberately do not. Their colours are assigned per
+   session by the organisers and carry meaning — here they separate the
+   accelerator, experiment and theory parallels — so recolouring them would
+   throw information away. They stay bright objects on a dark grid, which is
+   also the right reading order: the schedule is the content, the grid is
+   furniture. The exclusions below are what keeps the wildcard off them. */
+.confBodyBox [class*="timetable"]:not([class*="Block"]):not([class*="block"]),
+.confBodyBox [id*="timetable"],
+.confBodyBox .ui-tabs,
+.confBodyBox .ui-tabs-nav,
+.confBodyBox .ui-tabs li,
+.confBodyBox .ui-tabs li.ui-state-default,
+.confBodyBox .ui-tabs li.ui-state-default a {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: var(--smm-ink) !important;
+  border-color: var(--smm-rule) !important;
+  box-shadow: none !important;
+}
+.confBodyBox .ui-tabs-nav { border-bottom: 1px solid var(--smm-rule) !important; }
+.confBodyBox .ui-tabs li.ui-tabs-selected a,
+.confBodyBox .ui-tabs li.ui-state-active a,
+.confBodyBox .ui-tabs li.ui-tabs-active a {
+  color: var(--smm-accent) !important;
+  font-weight: 700;
+}
+/* Blocks keep their own background and their own dark text — the wildcard
+   above would otherwise hand them bone type on a pastel ground. */
+.confBodyBox .timetableBlock,
+.confBodyBox .timetableBlock * {
+  color: #202020 !important;
+}
+.confBodyBox .timetableBlock {
+  border: 1px solid rgba(0, 0, 0, 0.3) !important;
+  border-radius: 0 !important;
+}
+/* the Print / PDF / Full screen row sits above the grid */
+.confBodyBox .toolbar .i-button,
+.confBodyBox .toolbar .group .i-button {
+  background: transparent !important;
+  color: var(--smm-ink) !important;
+  border: 1px solid var(--smm-rule) !important;
+  border-radius: 0 !important;
+  letter-spacing: 0.08em;
+}
+.confBodyBox .toolbar .i-button:hover,
+.confBodyBox .toolbar .group .i-button:hover {
+  background: var(--smm-accent) !important;
+  color: var(--smm-paper) !important;
+  border-color: var(--smm-accent) !important;
+}
+
 /* ---- messages ----------------------------------------------------------- */
 .flashed-messages .message-box, .i-message {
   background: rgba(34, 31, 29, 0.9) !important;
