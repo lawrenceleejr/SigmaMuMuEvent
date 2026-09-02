@@ -34,6 +34,7 @@ const MUTED = DARK ? '#9b948a' : '#605d5d';
 
 const SITE = resolve(ROOT, 'site/static');
 const MIME = { '.css': 'text/css', '.woff2': 'font/woff2', '.js': 'text/javascript', '.png': 'image/png' };
+const MARK = `/img/usmcc-mark-${DARK ? 'white' : 'black'}.png`;
 const server = createServer(async (req, res) => {
   const p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
   try {
@@ -67,6 +68,16 @@ const html = `<!doctype html><html><head><meta charset="utf-8">
              : 'rgba(245,240,225,.96) 0%, rgba(245,240,225,.9) 44%, rgba(245,240,225,.6) 72%, rgba(245,240,225,.48) 100%'});
   }
   #type { padding: ${Math.round(H * 0.115)}px ${Math.round(W * 0.045)}px; display: flex; flex-direction: column; }
+  /* The official mark, on the far side from the type. It is the only other
+     thing competing with the title, so it sits well clear of it and stops
+     above the rule rather than straddling it. */
+  #mark {
+    position: absolute;
+    right: ${Math.round(W * 0.045)}px;
+    top: ${Math.round(H * 0.15)}px;
+    height: ${Math.round(H * 0.35)}px;
+    width: auto;
+  }
   .kicker {
     color: ${ACCENT};
     font-size: ${Math.round(H * 0.062)}px;
@@ -81,25 +92,30 @@ const html = `<!doctype html><html><head><meta charset="utf-8">
     font-weight: 800;
     line-height: 1.02;
     letter-spacing: -.022em;
-    max-width: ${Math.round(W * 0.72)}px;
+    max-width: ${Math.round(W * 0.6)}px;
   }
   .rule {
     margin-top: auto;
+    max-width: ${Math.round(W * 0.78)}px;
     height: ${Math.max(2, Math.round(H * 0.005))}px;
     background: ${ACCENT};
     width: 100%;
   }
   .foot {
+    max-width: ${Math.round(W * 0.78)}px;
     display: flex;
     justify-content: space-between;
     align-items: baseline;
     gap: 2em;
     margin-top: ${Math.round(H * 0.042)}px;
-    font-size: ${Math.round(H * 0.055)}px;
+    font-size: ${Math.round(H * 0.046)}px;
     font-weight: 600;
-    letter-spacing: .1em;
+    letter-spacing: .09em;
     text-transform: uppercase;
   }
+  /* neither half may wrap: the row is narrower now that the mark has the
+     right-hand end of the banner */
+  .foot > span { white-space: nowrap; }
   .where { color: ${INK}; }
   .url { color: ${INK}; opacity: .78; letter-spacing: .06em; text-transform: none; }
 </style></head><body>
@@ -107,6 +123,7 @@ const html = `<!doctype html><html><head><meta charset="utf-8">
   <canvas id="c" width="${W}" height="${H}"></canvas>
   <div id="veil"></div>
   <div id="veil2"></div>
+  <img id="mark" src="http://127.0.0.1:${port}${MARK}" alt="">
   <div id="type">
     <div class="kicker">3rd Annual</div>
     <h1>US Muon Collider<br>Collaboration Meeting</h1>
@@ -143,7 +160,33 @@ const edges = await page.evaluate(({ W, H, INK, ACCENT, DARK }) => {
 }, { W, H, INK, ACCENT, DARK });
 
 await page.evaluate(() => document.fonts.ready);
+await page.waitForFunction(() => {
+  const m = document.getElementById('mark');
+  return m && m.complete && m.naturalWidth > 0;
+});
 await page.waitForTimeout(400);
+// Nothing may wrap, overflow, or collide with the mark. A banner is a single
+// flat image — a layout fault here is invisible until it is on the page.
+const layout = await page.evaluate(() => {
+  const r = el => el.getBoundingClientRect();
+  const mark = r(document.getElementById('mark'));
+  const foot = [...document.querySelectorAll('.foot > span')].map(s => r(s));
+  const h1 = r(document.querySelector('h1'));
+  return {
+    markInside: mark.right <= innerWidth + 0.5 && mark.top >= -0.5 && mark.bottom <= innerHeight + 0.5,
+    footLines: foot.map(f => Math.round(f.height)),
+    footClearsMark: foot.every(f => f.right <= mark.left + 0.5 || f.bottom <= mark.top + 0.5),
+    titleClearsMark: h1.right <= mark.left + 0.5,
+    lineHeight: Math.round(parseFloat(getComputedStyle(document.querySelector('.foot')).fontSize) * 1.4),
+  };
+});
+const oneLine = layout.footLines.every(h => h <= layout.lineHeight);
+if (!layout.markInside || !oneLine || !layout.footClearsMark || !layout.titleClearsMark) {
+  console.error('  LAYOUT FAULT', JSON.stringify(layout));
+  process.exitCode = 1;
+} else {
+  console.log(`  layout ok: mark inside, footline on one line, nothing overlapping the mark`);
+}
 await page.screenshot({ path: OUT });
 await browser.close();
 server.close();
