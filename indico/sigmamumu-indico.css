@@ -429,12 +429,17 @@ body > .header,
   letter-spacing: -0.005em;
 }
 .description, .editor-output, .confBodyBox p {
-  max-width: 36rem;
   color: var(--smm-ink);
   font-size: 1rem;
   line-height: 1.55;
   text-wrap: pretty;
 }
+/* The measure is for running text. It used to sit on the description itself,
+   which capped a two-column table at 36rem inside a much wider pane. */
+.confBodyBox p, .editor-output li { max-width: 36rem; }
+/* Indico sets Roboto on editor output; the skin's face wins everywhere in it. */
+.confBodyBox .editor-output,
+.confBodyBox .editor-output *:not(code):not(pre) { font-family: var(--smm-sans) !important; }
 .confBodyBox a, .description a { color: var(--smm-accent); text-underline-offset: 0.18em; }
 .confBodyBox a:hover { text-decoration: underline; }
 
@@ -472,6 +477,71 @@ body > .header,
 .confBodyBox .editor-output a[style*="color"],
 .confBodyBox .description a[style*="color"] {
   color: var(--smm-accent) !important;
+}
+
+/* ---- description content ------------------------------------------------ */
+/* Descriptions come out of a rich-text editor, usually pasted from a document,
+   and arrive as layout: nested tables with hard-coded pixel heights, widths
+   over 100%, spacer rows, floated images the text wraps under, a <p> inside
+   every <li>. The words are the author's; the geometry is an accident. Strip
+   the geometry, keep the words, and lay any table out as columns that stack
+   on a phone. Everything here is !important because it is fighting inline
+   styles, which is exactly where pasted layout lives. */
+.confBodyBox .editor-output table,
+.confBodyBox .editor-output tbody,
+.confBodyBox .editor-output tr,
+.confBodyBox .editor-output td,
+.confBodyBox .editor-output th {
+  height: auto !important;
+  min-height: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+.confBodyBox .editor-output table {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  border-collapse: collapse !important;
+  table-layout: fixed;
+}
+.confBodyBox .editor-output col { width: auto !important; }
+.confBodyBox .editor-output td,
+.confBodyBox .editor-output th {
+  vertical-align: top !important;
+  text-align: left !important;
+  padding: 0 clamp(1.25rem, 3.5vw, 2.5rem) 0 0 !important;
+}
+.confBodyBox .editor-output td:last-child,
+.confBodyBox .editor-output th:last-child { padding-right: 0 !important; }
+.confBodyBox .editor-output img {
+  display: block;
+  max-width: 100% !important;
+  height: auto !important;
+  float: none !important;
+  margin: 0 0 1.25rem !important;
+}
+.confBodyBox .editor-output td > :first-child { margin-top: 0 !important; }
+.confBodyBox .editor-output h2 { margin: 1.6rem 0 0.8rem !important; }
+.confBodyBox .editor-output img + h2,
+.confBodyBox .editor-output p:has(> img:only-child) + h2 { margin-top: 0.4rem !important; }
+.confBodyBox .editor-output ul { margin: 0 0 1rem; padding-left: 1.1rem; }
+.confBodyBox .editor-output li { margin: 0.3rem 0; line-height: 1.4; }
+.confBodyBox .editor-output li > p { margin: 0 !important; }
+.confBodyBox .editor-output li::marker { color: var(--smm-accent); }
+/* a Mac paste brings its system font stack along; the skin's face wins */
+.confBodyBox .editor-output [style*="font-family"] { font-family: var(--smm-sans) !important; }
+.confBodyBox .editor-output [style*="font-size"] { font-size: inherit !important; }
+@media (max-width: 820px) {
+  .confBodyBox .editor-output table,
+  .confBodyBox .editor-output tbody,
+  .confBodyBox .editor-output tr,
+  .confBodyBox .editor-output td,
+  .confBodyBox .editor-output th {
+    display: block !important;
+    width: 100% !important;
+    padding: 0 !important;
+  }
+  .confBodyBox .editor-output td + td { margin-top: 1.75rem; }
 }
 
 /* ---- the date / location grid ------------------------------------------- */
