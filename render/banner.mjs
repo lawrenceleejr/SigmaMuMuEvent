@@ -34,11 +34,30 @@ const MUTED = DARK ? '#9b948a' : '#605d5d';
 
 const SITE = resolve(ROOT, 'site/static');
 const MIME = { '.css': 'text/css', '.woff2': 'font/woff2', '.js': 'text/javascript', '.png': 'image/png' };
-const MARK = `/img/usmcc-mark-${DARK ? 'white' : 'black'}.png`;
+// The mark is tinted to the title colour rather than left pure white, and the
+// tint is done here rather than shipped as a second file, so it tracks the
+// palette instead of drifting from it. One source shape serves both themes:
+// only its alpha channel matters.
+const MARK_SRC = resolve(ROOT, 'site/static/img/usmcc-mark-white.png');
+const MARK_OUT = resolve(ROOT, `out/.usmcc-mark-${THEME}.png`);
+await new Promise((ok, no) => {
+  const p = spawn('python3', ['-c', `
+from PIL import Image
+import numpy as np
+im = Image.open(${JSON.stringify(MARK_SRC)}).convert('RGBA')
+a = np.array(im)
+r, g, b = ${parseInt(INK.slice(1, 3), 16)}, ${parseInt(INK.slice(3, 5), 16)}, ${parseInt(INK.slice(5, 7), 16)}
+a[:, :, 0], a[:, :, 1], a[:, :, 2] = r, g, b     # alpha untouched: the shape
+Image.fromarray(a).save(${JSON.stringify(MARK_OUT)})
+print('  mark tinted to ${INK}')
+`], { stdio: 'inherit' });
+  p.on('exit', c => c === 0 ? ok() : no(new Error('tint failed: ' + c)));
+});
+const MARK = '/mark.png';
 const server = createServer(async (req, res) => {
   const p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
   try {
-    const b = await readFile(join(SITE, p));
+    const b = await readFile(p === '/mark.png' ? MARK_OUT : join(SITE, p));
     res.writeHead(200, { 'content-type': MIME[extname(p)] || 'application/octet-stream' });
     res.end(b);
   } catch { res.writeHead(404); res.end(); }
