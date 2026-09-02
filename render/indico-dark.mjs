@@ -40,10 +40,16 @@ swap('--smm-rule: rgba(32, 30, 29, 0.18);', '--smm-rule: rgba(239, 233, 218, 0.2
 swap('--smm-hair: rgba(32, 30, 29, 0.1);', '--smm-hair: rgba(239, 233, 218, 0.14);');
 swap('--smm-glass: rgba(245, 240, 225, 0.62);', '--smm-glass: rgba(28, 26, 24, 0.62);');
 swap('--smm-glass-solid: rgba(245, 240, 225, 0.95);', '--smm-glass-solid: rgba(28, 26, 24, 0.95);');
+// A shadow has less to work with on a dark ground — black on near-black
+// barely reads — so the dark skin needs a far heavier stack than the cream
+// one: a tight contact shadow, a mid lift, and a wide ambient pool, over a
+// faint bone highlight along the top edge to catch the pane lip.
 swap('--smm-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset,\n'
    + '                0 18px 50px -30px rgba(32, 30, 29, 0.45);',
-     '--smm-shadow: 0 1px 0 rgba(239, 233, 218, 0.08) inset,\n'
-   + '                0 18px 50px -28px rgba(0, 0, 0, 0.85);');
+     '--smm-shadow: 0 1px 0 rgba(239, 233, 218, 0.07) inset,\n'
+   + '                0 2px 6px rgba(0, 0, 0, 0.55),\n'
+   + '                0 14px 30px -6px rgba(0, 0, 0, 0.7),\n'
+   + '                0 44px 90px -24px rgba(0, 0, 0, 0.95);');
 swap('--smm-veil: 0.38;', '--smm-veil: 0.45;');
 
 // ---- literals that mean "the page ground" -------------------------------

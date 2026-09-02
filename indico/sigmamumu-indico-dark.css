@@ -40,8 +40,10 @@
   --smm-glass: rgba(28, 26, 24, 0.62);
   --smm-glass-solid: rgba(28, 26, 24, 0.95);
   --smm-sans: Archivo, "Helvetica Neue", Arial, sans-serif;
-  --smm-shadow: 0 1px 0 rgba(239, 233, 218, 0.08) inset,
-                0 18px 50px -28px rgba(0, 0, 0, 0.85);
+  --smm-shadow: 0 1px 0 rgba(239, 233, 218, 0.07) inset,
+                0 2px 6px rgba(0, 0, 0, 0.55),
+                0 14px 30px -6px rgba(0, 0, 0, 0.7),
+                0 44px 90px -24px rgba(0, 0, 0, 0.95);
   /* How much cream sits over the field. Raise toward 1 for a quieter page. */
   --smm-veil: 0.45;
 }
