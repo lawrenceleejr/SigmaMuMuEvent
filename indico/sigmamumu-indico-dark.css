@@ -240,10 +240,41 @@ body > .header,
   font-size: 1rem !important;
   line-height: normal !important;
 }
-/* the banner is the masthead now, so let it sit edge to edge in the pane */
-.confLogoBannerBox { margin: 0 0 0.35rem !important; }
+/* The zeroing rule above also flattens margins on everything inside the
+   title, which would stop the banner bleeding when it is nested there. Same
+   specificity, written after, so the bleed survives every nesting. */
+.confheader:has(.confLogoBannerBox) .confLogoBannerBox,
+.confheader:has(.confLogoBox) .confLogoBox {
+  margin: 0 calc(-1 * clamp(1.25rem, 3vw, 2rem))
+          clamp(1rem, 2.5vw, 1.6rem) !important;
+}
+/* The banner is opaque and the pane it sits in is translucent, so an inset
+   banner reads as a dark plate with a frame around it — the pane showing
+   through. Rather than fake a border, let the banner bleed to the pane's
+   edges and become the masthead: the side margins cancel the pane's own
+   padding exactly, and its top padding goes when a banner is present.
+   (To frame it instead, drop this block and give .confLogoBannerBox img a
+   1px solid var(--smm-rule).) */
+.confheader:has(.confLogoBannerBox),
+.confheader:has(.confLogoBox) {
+  padding-top: 0 !important;
+}
+.confLogoBannerBox,
+.confLogoBox {
+  margin: 0 calc(-1 * clamp(1.25rem, 3vw, 2rem))
+          clamp(1rem, 2.5vw, 1.6rem) !important;
+  padding: 0 !important;
+  float: none !important;
+  height: auto !important;
+}
 .confLogoBannerBox img,
-.confLogoBox img { display: block; max-width: 100%; height: auto; }
+.confLogoBox img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  margin: 0 !important;
+}
 
 /* ---- the two columns ---------------------------------------------------- */
 #confSectionsBox { max-width: 1000px !important; margin: 0 auto 3rem; }
