@@ -63,6 +63,8 @@ const E = EVENTS[EVENT];
 // lockup is a ratio of this. Sized so the mu mu's descender clears the rule,
 // which the layout audit checks rather than trusts.
 const SIG = Math.round(num('sig', 0.44) * H);
+// How far the title sits from the lockup.
+const GAP = Math.round(num('gap', 0.05) * W);
 if (!E) { console.error(`unknown --event ${EVENT}; try ${Object.keys(EVENTS).join(' or ')}`); process.exit(1); }
 const OUT = resolve(ROOT, str('out', `out/${E.slug}-${THEME}.png`));
 
@@ -166,8 +168,12 @@ const html = `<!doctype html><html><head><meta charset="utf-8">
      right so it tucks under the sigma's shoulder. */
   /* Shrink-wrapped, not full width: a block row would reach under the mark
      and there would be no way to tell a real collision from a wide box. */
+  /* The gap is a flex gap, so it measures from the lockup's layout box -- and
+     the mu mu reaches past the sigma inside that box while being offset down,
+     which is what made 31px of gap read as almost touching. The audit reports
+     the clearance that matters instead: mu mu ink to title ink. */
   #row { display: flex; align-self: flex-start; align-items: center;
-         gap: ${Math.round(W * 0.013)}px; margin-top: ${Math.round(H * 0.012)}px;
+         gap: ${GAP}px; margin-top: ${Math.round(H * 0.012)}px;
          flex: 1 1 auto; }
   /* The poster's own stack, in the poster's own order: design/Sigma Mu Mu
      Network.dc.html sets 'Libertinus Math','KaTeX Math',serif. The render
@@ -345,7 +351,8 @@ const layout = await page.evaluate(() => {
   const r = el => el.getBoundingClientRect();
   const mark = r(document.getElementById('mark'));
   const foot = [...document.querySelectorAll('.foot > span')].map(s => r(s));
-  const h1 = r(document.getElementById('row') || document.querySelector('h1'));
+  const row = document.getElementById('row');
+  const h1 = r(row ? (row.querySelector('h1') || row) : document.querySelector('h1'));
   // The mu mu hangs well below the sigma's baseline, so the lockup's box is
   // the thing that has to clear the rule -- not the row's, which stops at the
   // sigma. Measured off the ink, since a glyph box lies about descenders.
@@ -362,6 +369,8 @@ const layout = await page.evaluate(() => {
     titleClearsMark: h1.right <= mark.left + 0.5,
     lineHeight: Math.round(parseFloat(getComputedStyle(document.querySelector('.foot')).fontSize) * 1.4),
     lockupClearsRule: !mumu || mumu.bottom <= rule.top + 0.5,
+    // Ink to ink, which is the only clearance a reader sees.
+    titleGap: mumu ? Math.round(h1.left - mumu.right) : null,
     mumuBottom: mumu ? Math.round(mumu.bottom) : 0,
     ruleTop: Math.round(rule.top),
   };
@@ -383,7 +392,9 @@ if (!layout.markInside || !oneLine || !layout.footClearsMark || !layout.titleCle
   process.exitCode = 1;
 } else {
   console.log(`  layout ok: mark inside, footline stacked one line each, `
-    + `nothing overlapping the mark${E.lockup ? ', lockup clear of the rule' : ''}`);
+    + `nothing overlapping the mark${E.lockup
+        ? `, lockup clear of the rule, ${layout.titleGap}px of ink between the `
+          + `mu mu and the title` : ''}`);
 }
 await page.screenshot({ path: OUT });
 await browser.close();
