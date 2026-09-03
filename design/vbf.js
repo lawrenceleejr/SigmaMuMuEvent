@@ -76,10 +76,16 @@
     // Time runs left to right. A and B are the quark radiation vertices, C the
     // fusion, D the Higgs self-coupling. Laid out so the outgoing quarks open
     // wider than the Higgses they enclose, which keeps the whole thing planar.
-    const A = V(-1.7, -1.45), B = V(-1.7, 1.45), C = V(0.2, 0), D = V(2.0, 0);
-    const f1in = V(-5.2, -2.35), f1out = V(5.3, -3.0);
-    const f2in = V(-5.2, 2.35), f2out = V(5.3, 3.0);
-    const h1 = V(5.0, -1.35), h2 = V(5.0, 1.35);
+    // The external legs are kept short: they carry on into the grown field
+    // anyway, so their drawn length only sets how far out the first branch
+    // happens. The outgoing quarks stay the widest thing in the picture, which
+    // is what keeps the Higgses they enclose from crossing them — and they are
+    // the long ones by the topology, since a quark leaving A has to get past D
+    // before it can open out at all.
+    const A = V(-1.7, -1.45), B = V(-1.7, 1.45), C = V(0.1, 0), D = V(1.5, 0);
+    const f1in = V(-3.9, -2.0), f1out = V(3.3, -2.5);
+    const f2in = V(-3.9, 2.0), f2out = V(3.3, 2.5);
+    const h1 = V(2.7, -0.85), h2 = V(2.7, 0.85);
 
     E(f1in, A, 'f', CORE_S, 0); E(A, f1out, 'f', CORE_S, 0);
     E(f2in, B, 'f', CORE_S, 0); E(B, f2out, 'f', CORE_S, 0);
@@ -186,7 +192,9 @@
       if (verts[leg.v][1] < near) wy = 1; else if (verts[leg.v][1] > H - near) wy = -1;
       if (wx || wy) base = Math.atan2(Math.sin(base) + wy * 0.85, Math.cos(base) + wx * 0.85);
       const step = U * (0.95 - 0.07 * Math.min(gen, 9)) * (gen === 0 ? 1.15 : 1);
-      const tries = trunk ? 90 : (gen < MIN_GENS ? 24 : 1);
+      // The legs start nearer the middle now that they are short, so they
+      // are into each other's way sooner and it is worth looking harder.
+      const tries = trunk ? 200 : (gen < MIN_GENS ? 24 : 1);
 
       for (let k = 0; k < tries; k++) {
         const out = pick(RULES[leg.type]);

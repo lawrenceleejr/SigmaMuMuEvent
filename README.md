@@ -111,7 +111,14 @@ testing it meant a leg whose sibling left at a narrow angle was blocked in every
 direction and at every reach, permanently, by its own family. Crossings are
 caught by an exact segment test instead. Measured over thirty pictures, that
 took the legs from none in a hundred and eighty reaching eight generations to
-a hundred and seventy-seven.
+a hundred and seventy-two, the shortest of them running four.
+
+The legs themselves are drawn short. They carry on into the grown field
+anyway, so their drawn length only sets how far out the first branch happens.
+The outgoing quarks stay the widest thing in the picture — that is what keeps
+the Higgses they enclose from crossing them — and they are the long pair by
+the topology, since a quark leaving the radiation vertex has to get past the
+Higgs self-coupling before it can open out at all.
 
 `node render/slide-bg.mjs` puts a vector-boson-fusion diagram in the middle of
 the field — two quarks come in, each radiates a weak boson, the bosons fuse to
