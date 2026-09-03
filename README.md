@@ -51,6 +51,11 @@ the case that bites — the canvas steps its resolution down rather than
 stutter. The field is reseeded on every load, so it is never quite the same
 screen twice.
 
+Held in portrait the masthead re-sets itself: the type takes a larger share of
+the width, the footline stacks on the left edge under the rule, and the
+diagram — ten and a half units across, so a tall frame is limited by its width
+— shrinks to fit and drops clear of the type.
+
 ### The slide background
 
 `node render/slide-bg.mjs` puts a vector-boson-fusion diagram in the middle of

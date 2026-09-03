@@ -149,14 +149,12 @@
     h1 { font-size: 6vw; max-width: 72vw; margin-top: 1.2vh; }
     .rule { max-width: 100%; margin-top: 2.6vh; }
     /* Both halves of the footline stack — they will not sit side by side at
-       this width — but the URL still hangs off the right, so it and the end
-       of the rule share an edge the way they do on the banner. */
+       this width — and both hang off the left, on the same edge as the rule,
+       the kicker and the title. */
     .foot {
-      flex-direction: column; align-items: stretch;
+      flex-direction: column; align-items: flex-start;
       gap: 0.35em; font-size: 2.9vw; margin-top: 1.4vh; max-width: 100%;
     }
-    .foot .where { text-align: left; }
-    .foot .url { text-align: right; }
     #mark { width: 17vw; height: 8vh; top: 4vh; right: 5vw; }
     #say-wrap { padding: 0 5vw; }
     #bar { flex-wrap: wrap; }
