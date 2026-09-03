@@ -5,6 +5,7 @@
 #   ./render/render-video.sh --fast                # quick preview, no ink filters
 #   ./render/render-video.sh --seconds 8 --fps 20  # shorter / cheaper
 #   ./render/render-video.sh --scale 2             # 2160x2700 master
+#   ./render/render-video.sh --ss 1                # no supersampling (quicker, rougher type)
 #   ./render/render-video.sh --screen TABLOID --out out/tabloid.mp4
 #
 # Needs: node 18+, and a Chromium/Chrome. ffmpeg is found automatically if you
@@ -27,6 +28,10 @@ SECONDS_LEN=14
 SCALE=1
 SETTLE=12000
 FAST=0
+# Capture at twice the output size and downscale in the encode. At 1:1 the
+# sheet's 10px type gets its glyph positions rounded to whole pixels and the
+# letter gaps come out uneven -- most visibly in the URL under the QR.
+SS=2
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -37,6 +42,7 @@ while [[ $# -gt 0 ]]; do
     --seconds) SECONDS_LEN="$2"; shift 2 ;;
     --scale)   SCALE="$2"; shift 2 ;;
     --settle)  SETTLE="$2"; shift 2 ;;
+    --ss)      SS="$2"; shift 2 ;;
     -h|--help) sed -n '2,20p' "$0"; exit 0 ;;
     *) echo "unknown option: $1" >&2; exit 2 ;;
   esac
@@ -81,10 +87,10 @@ fi
 mkdir -p "$(dirname "$OUT")"
 echo "browser : $CHROMIUM_PATH"
 echo "ffmpeg  : $FFMPEG"
-echo "target  : $OUT  (${SECONDS_LEN}s @ ${FPS}fps, scale ${SCALE}x, fast=${FAST})"
+echo "target  : $OUT  (${SECONDS_LEN}s @ ${FPS}fps, scale ${SCALE}x, ss=${SS}x, fast=${FAST})"
 echo
 
 exec node render/dcrender.mjs video \
   --file "design/Sigma Mu Mu Network.dc.html" \
-  --screen "$SCREEN" --scale "$SCALE" --fps "$FPS" \
+  --screen "$SCREEN" --scale "$SCALE" --ss "$SS" --fps "$FPS" \
   --seconds "$SECONDS_LEN" --settle "$SETTLE" --fast "$FAST" --out "$OUT"

@@ -316,11 +316,22 @@ pixels (1100 × 1700 and 1080 × 1350) and `--scale N` renders them at N times
 that. The canvases inside the design follow the same ratio, so a 3× capture is
 genuinely 3× of line art rather than an upscale of something smaller.
 
+Video is a separate matter, because Instagram wants exactly 1080 × 1350 and
+that is 1:1 with the artboard's CSS pixels. At one device pixel per CSS pixel
+a browser rounds each glyph's position to a whole pixel, and the sheet's
+smallest type is 10 px: a hair of tracking that should be a fifth of a pixel
+lands as nothing or as a whole one, so the letter gaps in the URL under the QR
+came out uneven. So video captures at twice the output size and downscales in
+the encode -- `--ss 2`, the default. Measured on the URL, the mean gap between
+letters went from 2.28 px to 1.96 px, against 1.86 px for the 2× still that
+always looked right. `--ss 1` is the old, cheaper capture, fine for previews.
+
 ## Rendering the video
 
 ```sh
-./render/render-video.sh                       # 14s, 1080x1350, 60fps
+./render/render-video.sh                       # 14s, 1080x1350, 60fps, 2x supersampled
 ./render/render-video.sh --fps 30              # half the frames, half the wait
+./render/render-video.sh --ss 1                # no supersampling: quicker, rougher small type
 ./render/render-video.sh --scale 2             # 2160x2700 instead of 1080x1350
 ```
 
