@@ -799,7 +799,13 @@
       ctx.moveTo(r[0] + q, r[1] - q); ctx.lineTo(r[0] - q, r[1] + q);
       ctx.stroke();
     };
-    const mark = (vi, isX) => { if (isX) cross(net.verts[vi]); else dot(net.verts[vi]); };
+    // A vertex listed in net.bend is not a vertex: it is where one propagator
+    // was drawn with a kink to get past something, so no interaction happens
+    // there and nothing is marked.
+    const mark = (vi, isX) => {
+      if (net.bend && net.bend[vi]) return;
+      if (isX) cross(net.verts[vi]); else dot(net.verts[vi]);
+    };
     // The vertex a line grows out of is already there before the line is, so its
     // mark goes down from the first frame. The far end appears on arrival.
     mark(rev ? e.b : e.a, rev ? e.xb : e.xa);

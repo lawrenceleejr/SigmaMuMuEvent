@@ -91,6 +91,28 @@ diagram — ten and a half units across, so a tall frame is limited by its width
 
 ### The slide background
 
+The six legs run at least eight generations before any of them is allowed to
+stop in the vacuum. That cannot be a promise about every line: if each one
+branched in two every generation, the tips at generation *g* would number
+6·2^*g* and each would need its own clearance of arc, so they would have to sit
+on a ring of radius 6·2^*g*·sep/2π — 660px by generation 5, 1300 by 6, 5300 by
+8, against a frame whose half-diagonal is about 1100. Eight generations of that
+wants a picture ten thousand pixels across. What is promised is the six legs
+themselves; side branches try hard and are then allowed to end.
+
+Getting there took three things. The legs are laid first on an empty frame with
+their side branches deferred, since grown all together a leg is boxed in by its
+own siblings by generation four or five. A leg with nowhere to put a whole
+vertex bends instead of stopping — one propagator drawn with a kink, no
+interaction, so it takes no mark and the audit skips it. And the clearance test
+now exempts the stretch nearest the vertex a line is growing from: that stretch
+is already inside the keep-out of whatever else leaves that junction, and
+testing it meant a leg whose sibling left at a narrow angle was blocked in every
+direction and at every reach, permanently, by its own family. Crossings are
+caught by an exact segment test instead. Measured over thirty pictures, that
+took the legs from none in a hundred and eighty reaching eight generations to
+a hundred and seventy-seven.
+
 `node render/slide-bg.mjs` puts a vector-boson-fusion diagram in the middle of
 the field — two quarks come in, each radiates a weak boson, the bosons fuse to
 a Higgs, and that Higgs splits into the pair — and grows the rest of the

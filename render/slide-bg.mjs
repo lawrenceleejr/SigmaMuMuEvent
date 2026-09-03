@@ -131,8 +131,12 @@ const stats = await page.evaluate(({ W, H, INK, ACCENT, PAPER, SEED, CORE_S, MES
     const legs = net.verts.map(() => []);
     net.edges.forEach(e => { legs[e.a].push(e.type); legs[e.b].push(e.type); });
     const tally = {};
-    legs.forEach(l => {
-      if (l.length < 2) return;
+    legs.forEach((l, v) => {
+      if (l.length < 2) return;                       // an external line, not a vertex
+      // Nor is a kink: where a leg of the diagram had to bend to get past
+      // something, one propagator carries straight through and no interaction
+      // happens. Two legs, both the same line — nothing to classify.
+      if (net.bend && net.bend[v]) return;
       const k = l.slice().sort().join('');
       tally[k] = (tally[k] || 0) + 1;
     });

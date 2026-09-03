@@ -10,7 +10,15 @@
      a Higgs splits (hhh) or goes back to bosons (hVV)
 
    — refusing any placement that would come within a line's width of what is
-   already drawn, so no leg ever crosses another. The result hands back the
+   already drawn, or that would cross it, so the whole thing stays planar.
+
+   The six legs of the diagram are laid down first, on an empty frame, and
+   every side branch they throw off is set aside until they are finished; the
+   branches then fill in around them. Grown all together instead, a leg is
+   boxed in by its own siblings within four or five generations and has to
+   stop. That ordering, and a leg that bends rather than stopping when there
+   is nowhere to put a whole vertex, is what keeps each of them running the
+   `minGens` generations asked of it. The result hands back the
    same {verts, edges} shape design/network.js draws, so SMMNet.drawEdge takes
    it unchanged, plus `coreEdges` (how many of the edges are the hand-drawn
    diagram, which come first) and a `gen` on every edge: 0 for the diagram, 1
@@ -23,6 +31,16 @@
     b: [['b', 'b'], ['b', 'h']],                           // VVV, hVV
     h: [['h', 'h'], ['h', 'h'], ['b', 'b']],               // hhh, and back to bosons
   };
+
+    // Do two segments properly cross? Kept separate from the distance test
+  // below, which now ignores the stretch nearest the vertex being grown from.
+  function side(a, b, c) {
+    return Math.sign((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]));
+  }
+  function crosses(p1, p2, p3, p4) {
+    return side(p1, p2, p3) * side(p1, p2, p4) < 0
+        && side(p3, p4, p1) * side(p3, p4, p2) < 0;
+  }
 
   function ptSeg(p, s0, s1) {
     const vx = s1[0] - s0[0], vy = s1[1] - s0[1];
@@ -46,6 +64,7 @@
 
     const verts = [];
     const edges = [];
+    const bend = [];        // vertices that are a kink in one line, not a junction
     const V = (x, y) => { verts.push([CX + x * U, CY + y * U]); return verts.length - 1; };
     const E = (i, j, type, s, gen) => {
       const A = verts[i], B = verts[j];
@@ -88,13 +107,21 @@
     const SEP = (cfg.sep == null ? 0.42 : cfg.sep) * U;
     function placeable(from, to, skip) {
       if (to[0] < PAD || to[1] < PAD || to[0] > W - PAD || to[1] > H - PAD) return false;
+      const L = Math.hypot(to[0] - from[0], to[1] - from[1]) || 1;
       for (let i = 0; i < edges.length; i++) {
         const p = verts[edges[i].a], q = verts[edges[i].b];
+        if (crosses(from, to, p, q)) return false;
         const own = skip.indexOf(edges[i].a) >= 0 || skip.indexOf(edges[i].b) >= 0;
         const near = own ? SEP * 0.34 : SEP;
         for (let k = 0; k <= 12; k++) {
           const u = k / 12;
-          if (own && u < 0.25) continue;
+          // The stretch nearest the vertex being grown from is exempt. It is
+          // already inside the keep-out of whatever else leaves that junction
+          // — two legs of one vertex are meant to be close there — and testing
+          // it meant a leg whose sibling left at a narrow angle was blocked in
+          // every direction and at every reach, permanently, by its own
+          // family. Crossings are caught above instead, exactly.
+          if (u * L < (own ? L * 0.25 : SEP)) continue;
           const m = [from[0] + (to[0] - from[0]) * u, from[1] + (to[1] - from[1]) * u];
           if (ptSeg(m, p, q) < near) return false;
         }
@@ -107,55 +134,142 @@
     }
 
     const GENS = cfg.gens == null ? 10 : cfg.gens;
-    let frontier = tips;
-    for (let gen = 0; gen < GENS && frontier.length; gen++) {
-      const next = [];
-      // The step shortens as the field gets away from the centre, so it
-      // densifies outward rather than reaching the frame in three strides.
-      const step = U * (0.95 - 0.07 * gen) * (gen === 0 ? 1.15 : 1);
-      for (let li = 0; li < frontier.length; li++) {
-        const leg = frontier[li];
+    /* How many generations a leg of the diagram must run before it is allowed
+       to stop in the vacuum.
+
+       This cannot be a promise about every line. If each one branched in two
+       every generation, the tips at generation g would number 6·2^g and each
+       would need its own SEP of arc, so they would have to sit on a ring of
+       radius 6·2^g·SEP/2π — 660px by generation 5, 1300 by 6, 5300 by 8. The
+       frame's half-diagonal is about 1100px. Eight generations of that would
+       want a picture ten thousand pixels across.
+
+       What is promised instead is what was actually asked for: the six legs
+       of the diagram. Each one's own continuation — the fermion carrying on,
+       the scalar's first branch — is kept alive this many generations, trying
+       progressively harder for somewhere to put the vertex. Side branches try
+       harder too, they are simply allowed to end when there is nowhere left. */
+    const MIN_GENS = cfg.minGens == null ? 8 : cfg.minGens;
+
+    // One go at putting a vertex down: place every outgoing leg, or place none
+    // and leave the vertex list as it was found.
+    function attempt(leg, out, angles, reach) {
+      const placed = [];
+      for (let i = 0; i < out.length; i++) {
+        const L = reach * (0.82 + R() * 0.42);
+        const to = [verts[leg.v][0] + Math.cos(angles[i]) * L,
+                    verts[leg.v][1] + Math.sin(angles[i]) * L];
+        const skip = [leg.v].concat(placed.map(p => p.v));
+        if (!placeable(verts[leg.v], to, skip)) {
+          placed.forEach(() => verts.pop());
+          return null;
+        }
+        placed.push({ v: V((to[0] - CX) / U, (to[1] - CY) / U),
+                      type: out[i], dir: angles[i] });
+      }
+      return placed;
+    }
+
+    // One go at putting a vertex down, at a given reach and set of angles.
+    function search(leg, gen, trunk) {
+      const radial = Math.atan2(verts[leg.v][1] - CY, verts[leg.v][0] - CX);
+      let bias = radial - leg.dir;
+      while (bias > Math.PI) bias -= Math.PI * 2;
+      while (bias < -Math.PI) bias += Math.PI * 2;
+      let base = leg.dir + bias * 0.35;
+      // Near the frame that outward push walks the leg straight off it, which
+      // is where most of the ones that stopped short were stopping. Lean the
+      // heading back inside so it runs along the edge instead.
+      const near = U * 1.9;
+      let wx = 0, wy = 0;
+      if (verts[leg.v][0] < near) wx = 1; else if (verts[leg.v][0] > W - near) wx = -1;
+      if (verts[leg.v][1] < near) wy = 1; else if (verts[leg.v][1] > H - near) wy = -1;
+      if (wx || wy) base = Math.atan2(Math.sin(base) + wy * 0.85, Math.cos(base) + wx * 0.85);
+      const step = U * (0.95 - 0.07 * Math.min(gen, 9)) * (gen === 0 ? 1.15 : 1);
+      const tries = trunk ? 90 : (gen < MIN_GENS ? 24 : 1);
+
+      for (let k = 0; k < tries; k++) {
         const out = pick(RULES[leg.type]);
-        // Legs open around the direction this one was already going, nudged
-        // toward straight out from the centre so nothing folds back in.
-        const radial = Math.atan2(verts[leg.v][1] - CY, verts[leg.v][0] - CX);
-        let bias = radial - leg.dir;
-        while (bias > Math.PI) bias -= Math.PI * 2;
-        while (bias < -Math.PI) bias += Math.PI * 2;
-        const base = leg.dir + bias * 0.35;
-        // A fermion carries on nearly straight with the boson coming off it; a
-        // splitting scalar or boson opens symmetrically.
+        const ease = k / tries;
         const straight = leg.type === 'f' && out[0] === 'f';
         const wide = (0.34 + R() * 0.3) * (straight ? 1.55 : 1);
+        const spin = k ? (R() - 0.5) * 1.5 * ease : 0;
         const angles = straight
-          ? [base + (R() - 0.5) * 0.24, base + (R() < 0.5 ? -wide : wide)]
-          : [base - wide * (0.75 + R() * 0.5), base + wide * (0.75 + R() * 0.5)];
-        const placed = [];
-        for (let i = 0; i < out.length; i++) {
-          const L = step * (0.82 + R() * 0.42);
-          const to = [verts[leg.v][0] + Math.cos(angles[i]) * L,
-                      verts[leg.v][1] + Math.sin(angles[i]) * L];
-          const skip = [leg.v].concat(placed.map(p => p.v));
-          if (!placeable(verts[leg.v], to, skip)) continue;
-          placed.push({ v: V((to[0] - CX) / U, (to[1] - CY) / U),
-                        type: out[i], dir: angles[i] });
-        }
-        // A vertex is only legal whole: unless both legs went down, this leg
-        // stays a single line ending in the vacuum.
-        if (placed.length < out.length) { placed.forEach(() => verts.pop()); continue; }
-        const was = endMark.get(leg.v);
-        if (was) edges[was[0]][was[1]] = false;      // a junction now, not an end
-        const taper = Math.max(MESH_S, CORE_S - gen * 0.14);
-        placed.forEach(p => {
-          const ei = E(leg.v, p.v, p.type, taper, gen + 1);
-          edges[ei].xb = true;                       // until something grows out of it
-          endMark.set(p.v, [ei, 'xb']);
-          next.push(p);
-        });
+          ? [base + spin + (R() - 0.5) * 0.24, base + spin + (R() < 0.5 ? -wide : wide)]
+          : [base + spin - wide * (0.75 + R() * 0.5), base + spin + wide * (0.75 + R() * 0.5)];
+        // Never below about a separation and a half: a shorter reach puts the
+        // new vertex inside a neighbour's keep-out, so the shortest attempts
+        // could not have fitted whatever the angle.
+        const reach = Math.max(SEP * 1.45, step * (1 - 0.55 * ease));
+        const got = attempt(leg, out, angles, reach);
+        if (got) return got;
       }
-      frontier = next;
+      // A leg of the diagram with nowhere to put a whole vertex carries on as
+      // a kink instead: its side branch has nowhere to go, but a propagator
+      // drawn with a bend is still one propagator, no interaction, so there is
+      // nothing there to be legal or illegal about. It takes no mark, and the
+      // audit is told to skip it. Swept rather than sampled — one leg to place,
+      // so walk the forward arc and take the first gap.
+      if (trunk) {
+        for (let a = 0; a < 21; a++) {
+          const turn = (a % 2 ? -1 : 1) * Math.ceil(a / 2) * 0.14;
+          for (let r = 0; r < 3; r++) {
+            const reach = Math.max(SEP * 1.45, step * (1.15 - 0.3 * r));
+            const got = attempt(leg, [leg.type], [base + turn], reach);
+            if (got) { bend[leg.v] = 1; return got; }
+          }
+        }
+      }
+      return null;
     }
-    return { verts: verts, edges: edges, coreEdges: coreEdges,
+
+    function lay(leg, gen, placed) {
+      const was = endMark.get(leg.v);
+      if (was) edges[was[0]][was[1]] = false;        // a junction now, not an end
+      const taper = Math.max(MESH_S, CORE_S - gen * 0.14);
+      placed.forEach(p => {
+        const ei = E(leg.v, p.v, p.type, taper, gen + 1);
+        edges[ei].xb = true;                         // until something grows out of it
+        endMark.set(p.v, [ei, 'xb']);
+      });
+    }
+
+    /* The six legs go down first, on an empty frame.
+       Grown all together with everything else, a leg is boxed in by its own
+       siblings' branches within four or five generations and has to stop —
+       measured, before this: not one leg in a hundred and eighty reached
+       eight. So the legs are laid first, alone, and every side branch they
+       throw off is set aside; those fill in around them afterwards, into
+       whatever room is left, and may end where they run out. */
+    const deferred = [];
+    let trunkFront = tips.map(t => ({ v: t.v, type: t.type, dir: t.dir }));
+    for (let gen = 0; gen < MIN_GENS && trunkFront.length; gen++) {
+      const next = [];
+      for (let i = 0; i < trunkFront.length; i++) {
+        const leg = trunkFront[i];
+        const placed = search(leg, gen, true);
+        if (!placed) continue;
+        lay(leg, gen, placed);
+        next.push(placed[0]);                        // the leg carries on
+        for (let j = 1; j < placed.length; j++) {
+          deferred.push({ leg: placed[j], gen: gen + 1 });
+        }
+      }
+      trunkFront = next;
+    }
+
+    // Then everything hanging off them, into what is left.
+    const queue = deferred;
+    for (let qi = 0; qi < queue.length; qi++) {
+      const item = queue[qi];
+      if (item.gen >= GENS) continue;
+      const placed = search(item.leg, item.gen, false);
+      if (!placed) continue;
+      lay(item.leg, item.gen, placed);
+      placed.forEach(p => queue.push({ leg: p, gen: item.gen + 1 }));
+    }
+
+    return { verts: verts, edges: edges, coreEdges: coreEdges, bend: bend,
              unit: U, gens: GENS, cx: CX, cy: CY };
   }
 
