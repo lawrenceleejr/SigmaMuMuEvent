@@ -205,6 +205,9 @@
 <script src="https://js-cdn.music.apple.com/musickit/v3/musickit.js" async></script>
 {{ end }}
 {{ end }}
+{{ if eq .Params.diagram false }}
+<script>window.SMM_BG_DIAGRAM = false;</script>
+{{ end }}
 <script src="{{ "js/network.js" | relURL }}"></script>
 <script src="{{ "js/vbf.js" | relURL }}"></script>
 <script src="{{ "js/bg.js" | relURL }}" defer></script>

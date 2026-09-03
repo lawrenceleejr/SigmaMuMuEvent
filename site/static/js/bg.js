@@ -1,17 +1,21 @@
 /* The presenter screen at /bg.
  *
- * Two canvases. The back one carries the generated mesh and animates on the
- * website's rules — site/static/js/field.js — because giving every line its
- * own looping clock, which is what this page did first, bunches them up and
- * the whole field re-emerges at once. Instead one or two walkers flood the
- * mesh from a single vertex each, a direction-biased Dijkstra so the front
- * travels rather than spreading as a disc, and a line only starts drawing
- * when the flood reaches it — out of the vertex it arrived at, on the
- * poster's growth curve. Behind the head the field holds, and the tail fades
- * it out again. The front one carries the hand-drawn VBF diagram and the legs
- * grown out of it; that is painted once and left, because it is the thing on
- * the screen meant to be read and it should not blink out halfway through a
- * coffee break.
+ * This is the website's background — site/static/js/field.js — put on a
+ * screen for the room, and it is deliberately the same mechanic and nothing
+ * more. One or two walkers flood the generated mesh from a single vertex
+ * each, by a direction-biased Dijkstra so the front travels rather than
+ * spreading as a disc; a line starts drawing only when the flood reaches it,
+ * out of the vertex it arrived at, on the poster's growth curve; behind the
+ * head the field holds and the tail fades it out again. The website takes the
+ * tail length from the scroll, and there is nothing to scroll here, so it is
+ * held at a fixed generous value.
+ *
+ * The one addition is the VBF diagram, nine hand-drawn lines held still in
+ * the middle on their own canvas with the mesh kept off them. An earlier
+ * version grew a whole legal tree out of its six legs, which took the picture
+ * a long way from the website it is supposed to match; that is gone. Set
+ * `diagram: false` in site/content/bg.md and the page is the website's field
+ * exactly.
  *
  * Painting is batched the way site/static/js/field.js batches it: same-tone,
  * same-type lines go into one Path2D and are stroked together, marks once per
@@ -36,6 +40,7 @@
   var FADE = 0.34;               // fraction of the tail spent fading out
   var BUCKETS = 12;
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var wantDiagram = window.SMM_BG_DIAGRAM !== false;
 
   var W = 0, H = 0, DPR = 1, U = 0, MESH_S = 1;
   var drawn = null, mesh = null, baseTone = null, walkers = null;
@@ -97,10 +102,13 @@
     MESH_S = 2.1 * ref;
     CX = W / 2;
     CY = H > W ? H * 0.56 : H / 2;      // held tall: down, clear of the masthead
-    drawn = window.SMMVBF.build({ w: W, h: H, unit: U, cx: CX, cy: CY,
-      seed: (Math.random() * 1e9) | 0, coreScale: CORE_S, meshScale: MESH_S });
+    // gens/minGens 0 stops after the nine hand-drawn lines: no growth, which
+    // is what took this away from the website's design in the first place.
+    drawn = wantDiagram ? window.SMMVBF.build({ w: W, h: H, unit: U, cx: CX, cy: CY,
+      seed: (Math.random() * 1e9) | 0, coreScale: CORE_S, meshScale: MESH_S,
+      gens: 0, minGens: 0 }) : null;
     mesh = window.SMMNet.build({
-      w: W, h: H, zones: window.SMMVBF.zones(drawn, U * 0.3),
+      w: W, h: H, zones: drawn ? window.SMMVBF.zones(drawn, U * 0.3) : [],
       seed: (Math.random() * 1e9) | 0, seeds: [{ x: CX, y: CY }],
       // build() multiplies spacing by scaleAt, which is also the line weight,
       // so the separation is asked for in units of the frame and divided back
@@ -141,18 +149,11 @@
     paintStill();
   }
 
-  // The diagram and its grown legs, once.
+  // The diagram, once.
   function paintStill() {
     sx.clearRect(0, 0, W, H);
-    for (var i = drawn.edges.length - 1; i >= drawn.coreEdges; i--) {
-      var e = drawn.edges[i];
-      var p = drawn.verts[e.a], q = drawn.verts[e.b];
-      var d = Math.hypot(((p[0] + q[0]) / 2 - CX) / (W / 2),
-                         ((p[1] + q[1]) / 2 - CY) / (H / 2));
-      window.SMMNet.drawEdge(sx, drawn, e, 1,
-        { accent: ACCENT, ink: INK, tone: 0.88 * (1 - 0.34 * Math.min(1, d)) });
-    }
-    for (var j = 0; j < drawn.coreEdges; j++) {
+    if (!drawn) return;
+    for (var j = 0; j < drawn.edges.length; j++) {
       window.SMMNet.drawEdge(sx, drawn, drawn.edges[j], 1,
         { accent: ACCENT, ink: INK, tone: 1 });
     }

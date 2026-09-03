@@ -15,6 +15,9 @@ params:
   # The playlist is its catalogue id, the pl.xxxxxxxx in its share link.
   music_token: ""
   music_playlist: ""
+  # The nine hand-drawn lines of the VBF diagram, held still in the middle.
+  # false leaves the page as the website's field and nothing else.
+  diagram: true
 # Unlinked: nothing on the site points here and it stays out of the sitemap.
 # It is a screen to put up in the room, not a page of the site.
 _build:
