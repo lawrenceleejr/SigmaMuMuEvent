@@ -59,8 +59,16 @@ lines that grow out of it.
 What this cannot reproduce is the website's scroll-driven flood with a
 dissolving tail — that needs per-frame control, which means JavaScript.
 
-Solid lines and boson waves draw themselves with `stroke-dashoffset`. Scalars
-are dashed and their `stroke-dasharray` is already spoken for, so they fade in
+Solid lines and boson waves draw themselves with `stroke-dashoffset`, on the
+same growth curve the website uses — `1 - (1 - t)^5.5`, fast out of the vertex
+then a long decay. A CSS animation between two keyframes is linear and
+`animation-timing-function` only offers cubic-béziers, which cannot hold an
+initial slope of 5.5 without distorting the tail, so the generator traces the
+curve as keyframes instead: 23 stops, placed where it actually bends (almost
+all of them in the first tenth of the loop) and linear in between, which lands
+within 0.2% of the exact curve. Every drawn path carries `pathLength="1"`, so
+one shared set of stops fits a 20px edge and a 200px one alike. Scalars are
+dashed and their `stroke-dasharray` is already spoken for, so they fade in
 instead. Under `prefers-reduced-motion` the SVG stops itself *and* the
 stylesheet swaps in the flat PNG — belt and braces.
 

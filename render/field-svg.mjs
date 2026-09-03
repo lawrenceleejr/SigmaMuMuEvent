@@ -81,6 +81,59 @@ const len = pts => {
 
 const maxT = net.edges.reduce((m, e) => Math.max(m, e.t0 || 0), 0) || 1;
 
+/* The growth curve.
+ *
+ * The website grows each line on grow = 1 - (1 - t)^5.5: fast out of the
+ * vertex, then a long decay. A CSS animation between two keyframes is linear,
+ * and animation-timing-function only offers cubic-beziers, which cannot hold
+ * an initial slope of 5.5 without distorting the tail. So the curve is traced
+ * as keyframes instead — sampled where it actually bends, which is almost all
+ * at the start, and left to interpolate linearly in between.
+ *
+ * The value animated is stroke-dashoffset, the part of the line still hidden,
+ * so it follows (1 - u)^5.5 down to zero. pathLength="1" on every drawn path
+ * means these are plain numbers rather than fractions of each line's length.
+ */
+const GROW_EXP = 5.5;             // the exponent the poster and the site use
+const GROW_END = 26;              // % of the loop the growth occupies
+const TOL = 0.002;                // keyframes within 0.2% of a line's length
+const curve = u => Math.pow(1 - u, GROW_EXP);
+
+let us = [0, 1];
+for (let pass = 0; pass < 14; pass++) {
+  const next = [us[0]];
+  let split = false;
+  for (let i = 1; i < us.length; i++) {
+    const a = us[i - 1], b = us[i], m = (a + b) / 2;
+    if (Math.abs((curve(a) + curve(b)) / 2 - curve(m)) > TOL) { next.push(m); split = true; }
+    next.push(b);
+  }
+  us = next;
+  if (!split) break;
+}
+// What the browser will actually draw, against the curve it is tracing.
+let worst = 0;
+for (let i = 0; i <= 2000; i++) {
+  const u = i / 2000;
+  let j = 1;
+  while (j < us.length - 1 && us[j] < u) j++;
+  const a = us[j - 1], b = us[j];
+  const lerp = curve(a) + (curve(b) - curve(a)) * ((u - a) / (b - a));
+  worst = Math.max(worst, Math.abs(lerp - curve(u)));
+}
+// One sorted list, so the generated file reads in the order it plays: the
+// growth stops, the opacity fade-in that overlaps them, then hold and fade.
+const frames = us.map((u, i) => ({
+  pct: +(u * GROW_END).toFixed(3),
+  decls: `stroke-dashoffset: ${+curve(u).toFixed(4)};`
+       + (i === 0 ? ' opacity: 0;' : i === us.length - 1 ? ' opacity: 1;' : ''),
+}));
+frames.push({ pct: 3, decls: 'opacity: 1;' });
+frames.push({ pct: 82, decls: 'stroke-dashoffset: 0; opacity: 1;' });
+frames.push({ pct: 100, decls: 'stroke-dashoffset: 0; opacity: 0;' });
+frames.sort((a, b) => a.pct - b.pct);
+const growStops = frames.map(f => `    ${f.pct}% { ${f.decls} }`).join('\n');
+
 // The node dots and the x marks that end a line in the vacuum. Each takes the
 // timing of the earliest line that touches it, minus a lead, so the vertex is
 // already there before anything grows out of it — the same rule the website
@@ -110,8 +163,12 @@ for (const e of net.edges) {
     faded++;
   } else {
     const cls = e.type === 'b' ? 'b' : 'f';
+    // pathLength normalises every line to 1 unit, so the dash pattern and the
+    // growth keyframes are the same numbers for a 20px edge and a 200px one.
+    // Without it each path needs its own length in a custom property and the
+    // keyframes have to be written as calc() against it.
     body += `<path class="${cls}" d="${d}" stroke-width="${r2((e.type === 'b' ? 1.15 : 1.35) * lwf)}"`
-          + ` stroke-dasharray="${L}" style="--l:${L};animation-delay:${r2(delay)}s"/>`;
+          + ` pathLength="1" stroke-dasharray="1" style="animation-delay:${r2(delay)}s"/>`;
     drawn++;
   }
 }
@@ -139,11 +196,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" wid
   .s { animation: glow ${SECONDS}s linear infinite; }
   .n, .x { animation: glow ${SECONDS}s linear infinite; }
   @keyframes draw {
-    0%   { stroke-dashoffset: var(--l); opacity: 0; }
-    3%   { opacity: 1; }
-    26%  { stroke-dashoffset: 0; opacity: 1; }
-    82%  { stroke-dashoffset: 0; opacity: 1; }
-    100% { stroke-dashoffset: 0; opacity: 0; }
+${growStops}
   }
   @keyframes glow {
     0%       { opacity: 0; }
@@ -163,3 +216,9 @@ await writeFile(OUT, svg);
 console.log(`wrote ${OUT}`);
 console.log(`  ${W}x${H} ${THEME}, ${net.edges.length} edges (${drawn} drawn, ${faded} faded), `
   + `${marks.size} vertex marks, ${(svg.length / 1024).toFixed(0)} KB, ${SECONDS}s loop`);
+console.log(`  growth 1-(1-t)^${GROW_EXP} over ${GROW_END}% of the loop, traced by ${us.length} `
+  + `keyframes, worst deviation ${(worst * 100).toFixed(2)}% of a line`);
+if (worst > TOL * 1.5) {
+  console.error('  CURVE FAULT: keyframes do not follow the growth curve');
+  process.exitCode = 1;
+}
