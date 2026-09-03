@@ -45,6 +45,7 @@
   var W = 0, H = 0, DPR = 1, U = 0, MESH_S = 1;
   var drawn = null, mesh = null, baseTone = null, walkers = null;
   var eGrow = null, eTone = null, eRev = null, vIsX = null;
+  var meshBend = null, joins = 0;
 
   function sizeOf() {
     W = Math.max(320, window.innerWidth);
@@ -83,6 +84,255 @@
       paintStill();
       frameEma = 1 / 60;
     }
+  }
+
+  /* ---- wiring the diagram into the field --------------------------------- */
+  /* The diagram used to stop dead: six legs ending in a vacuum × while the
+     mesh went about its business around them, which reads as a diagram pasted
+     on top of a field rather than part of one.
+
+     Joining them looks impossible at first, because every mesh vertex is
+     already a legal interaction of degree three or four and hanging another
+     leg on one makes it four or five — and five is never legal. For a fermion
+     leg the arithmetic closes off completely: to land on a legal four-leg
+     vertex the mesh vertex would have to be carrying one fermion and two
+     bosons, and a fermion line is continuous, so no vertex anywhere ever has
+     an odd number of fermion legs.
+
+     But the mesh has loose ends of its own — that is what its own × marks are
+     — and there are two legal things to do with one:
+
+       · An end of the same kind as the leg is not a vertex at all. It is one
+         propagator carrying on, with a kink where the two halves were drawn
+         from opposite ends. Nothing interacts there, so there is nothing to be
+         legal or illegal about, and both × marks go. This is what the two
+         Higgs legs get.
+
+       · A loose boson or Higgs end landing partway along a fermion leg is ffV
+         or a Yukawa: the mesh's dangling photon, gluon or Higgs turns out to
+         have been radiated by our own quark. A real interaction, marked with a
+         dot, and legal — bff and ffh are both in the table. This is what the
+         four fermion legs get, and it is why they can be joined at all: the
+         mesh has no loose fermion end to offer them, ever.
+
+       · A leg can also run straight into an existing mesh vertex, if what that
+         vertex is then carrying is itself a legal interaction. The table is
+         asked rather than second-guessed, which is what makes this safe: it
+         admits a Higgs leg onto an hVV or an hhh (giving hhVV, hhhh) and turns
+         every fermion attempt down flat, because a legal vertex never carries
+         an odd number of fermion legs.
+
+     Both kinds go in as mesh edges rather than onto the diagram's static
+     canvas, so the flood runs through them and the field visibly reaches out
+     and takes hold of the diagram as the front arrives. Each loose end serves
+     one leg. */
+  function joinDiagram(core, mesh, U) {
+    if (!core) return 0;
+
+    var clear = U * 0.26;     // and the berth the join keeps from everything else
+    var minRun = U * 0.16;    // shorter than this and there is no line to see
+
+    function side(a, b, c) {
+      return Math.sign((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]));
+    }
+    function crosses(p1, p2, p3, p4) {
+      return side(p1, p2, p3) * side(p1, p2, p4) < 0
+          && side(p3, p4, p1) * side(p3, p4, p2) < 0;
+    }
+    function ptSeg(p, s0, s1) {
+      var vx = s1[0] - s0[0], vy = s1[1] - s0[1];
+      var wx = p[0] - s0[0], wy = p[1] - s0[1];
+      var L2 = vx * vx + vy * vy || 1;
+      var t = Math.max(0, Math.min(1, (wx * vx + wy * vy) / L2));
+      return Math.hypot(wx - vx * t, wy - vy * t);
+    }
+    /* Clear of every line except the two it is being made between.
+       The berth is not asked for near the join's own ends. Lines that meet at
+       a vertex are touching there by definition, so measuring the distance to
+       them from the last stretch of the join always fails — which had every
+       one of these joins turned down flat at the junction it was aimed at.
+       Crossings are still tested along the whole length; it is only the
+       keep-out that stops at the doorstep. */
+    function ok(from, to, skipMesh, skipCore) {
+      var pairs = [[mesh, skipMesh], [core, skipCore]];
+      var free = clear * 1.15;
+      for (var L = 0; L < pairs.length; L++) {
+        var net = pairs[L][0], skip = pairs[L][1];
+        for (var i = 0; i < net.edges.length; i++) {
+          if (i === skip) continue;
+          var p = net.verts[net.edges[i].a], q = net.verts[net.edges[i].b];
+          if (crosses(from, to, p, q)) return false;
+          for (var k = 1; k < 10; k++) {
+            var u = k / 10;
+            var m = [from[0] + (to[0] - from[0]) * u, from[1] + (to[1] - from[1]) * u];
+            if (Math.hypot(m[0] - from[0], m[1] - from[1]) < free) continue;
+            if (Math.hypot(m[0] - to[0], m[1] - to[1]) < free) continue;
+            if (ptSeg(m, p, q) < clear) return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    // Every legal Standard Model vertex, as render/audit_vertices.mjs has it.
+    var LEGAL = { bff: 1, bbff: 1, ffh: 1, bbb: 1, bbbb: 1, bbh: 1, bbhh: 1,
+                  hhh: 1, hhhh: 1 };
+    function legal(types, add) {
+      var t = types.concat([add]);
+      return t.length <= 4 && !!LEGAL[t.slice().sort().join('')];
+    }
+
+    // The mesh's vertices: what meets each, and which single line where that
+    // is a loose end.
+    // Plain arrays, not typed ones: the joins add vertices as they go, and
+    // these have to grow with them.
+    var mdeg = [], mone = [], mtypes = [];
+    for (var q = 0; q < mesh.verts.length; q++) { mdeg.push(0); mone.push(-1); mtypes.push([]); }
+    mesh.edges.forEach(function (e, i) {
+      mdeg[e.a]++; mdeg[e.b]++; mone[e.a] = i; mone[e.b] = i;
+      mtypes[e.a].push(e.type); mtypes[e.b].push(e.type);
+    });
+    var ends = [];
+    for (var v = 0; v < mesh.verts.length; v++) {
+      if (mdeg[v] === 1 && mone[v] >= 0) {
+        ends.push({ v: v, e: mone[v], type: mesh.edges[mone[v]].type, used: false });
+      }
+    }
+
+    // The diagram's leg tips: its degree-one vertices, and the leg each ends.
+    var deg = {}, one = {};
+    core.edges.forEach(function (e, i) {
+      deg[e.a] = (deg[e.a] || 0) + 1; deg[e.b] = (deg[e.b] || 0) + 1;
+      one[e.a] = i; one[e.b] = i;
+    });
+    var legs = Object.keys(deg).filter(function (k) { return deg[k] === 1; })
+      .map(function (k) { return { v: +k, e: one[+k] }; });
+
+    // The diagram end of a join is always either a kink or a vertex the still
+    // canvas has already drawn, so it never wants a mark of its own. The mesh
+    // end wants one only where the join makes a real vertex there — hence
+    // `kink`, which paint() reads to decide.
+    function addJoin(from, to, type, s, kink) {
+      var tip = mesh.verts.push([from[0], from[1]]) - 1;
+      mesh.edges.push({
+        a: tip, b: to, type: type, s: s, xa: false, xb: false,
+        len: Math.hypot(mesh.verts[to][0] - from[0], mesh.verts[to][1] - from[1]),
+        join: true, kink: !!kink,
+      });
+      mtypes[to].push(type); mdeg[to]++;
+      mtypes.push([type]); mdeg.push(1); mone.push(mesh.edges.length - 1);
+      return tip;
+    }
+
+    var joined = 0;
+    function tryLeg(leg, reach) {
+      var ce = core.edges[leg.e], want = ce.type;
+      var tipEnd = ce.a === leg.v ? 'xa' : 'xb';
+      var from = core.verts[leg.v];
+
+      // First choice: an end of the same kind, met head on.
+      var best = null, bd = reach;
+      ends.forEach(function (en) {
+        if (en.used || en.type !== want) return;
+        var d = Math.hypot(mesh.verts[en.v][0] - from[0], mesh.verts[en.v][1] - from[1]);
+        if (d < bd && d > minRun && ok(from, mesh.verts[en.v], en.e, leg.e)) { bd = d; best = en; }
+      });
+      if (best) {
+        addJoin(from, best.v, want, mesh.edges[best.e].s, true);
+        ce[tipEnd] = false;                    // one propagator, so no × either side
+        best.used = true; joined++;
+        return true;
+      }
+
+      // Second choice: straight into a mesh vertex that can legally take it.
+      // Our own tip becomes a kink — the propagator carries on and interacts
+      // over there — so its × goes and the mark at the far end is the mesh's
+      // own, already drawn.
+      var at = -1, ad = reach;
+      for (var v2 = 0; v2 < mesh.verts.length; v2++) {
+        if (!mtypes[v2].length || !legal(mtypes[v2], want)) continue;
+        var d2 = Math.hypot(mesh.verts[v2][0] - from[0], mesh.verts[v2][1] - from[1]);
+        if (d2 >= ad || d2 <= minRun) continue;
+        if (!ok(from, mesh.verts[v2], -1, leg.e)) continue;
+        ad = d2; at = v2;
+      }
+      if (at >= 0) {
+        // A mesh kink is a bend, not an interaction; making it carry a third
+        // line makes it one, so it gets its dot back.
+        if (mesh.bend && mesh.bend[at]) mesh.bend[at] = 0;
+        addJoin(from, at, want, mesh.edges[mone[at] >= 0 ? mone[at] : 0].s, false);
+        ce[tipEnd] = false;
+        joined++;
+        return true;
+      }
+      if (want !== 'f') return false;
+
+      // Otherwise, for a fermion: a loose boson end radiated off the leg. The
+      // landing point is where that end comes closest to the leg, held away
+      // from both of its ends so the new vertex is not on top of another.
+      var other = core.verts[ce.a === leg.v ? ce.b : ce.a];
+      var vx = from[0] - other[0], vy = from[1] - other[1];
+      var L2 = vx * vx + vy * vy || 1;
+      var pick = null, pd = reach, pAt = null;
+      ends.forEach(function (en) {
+        if (en.used || en.type === 'f') return;
+        if (!legal([want, want], en.type)) return;      // ffV or a Yukawa
+        var q = mesh.verts[en.v];
+        var t = ((q[0] - other[0]) * vx + (q[1] - other[1]) * vy) / L2;
+        t = Math.max(0.34, Math.min(0.82, t));
+        var P = [other[0] + vx * t, other[1] + vy * t];
+        var d = Math.hypot(q[0] - P[0], q[1] - P[1]);
+        // A Higgs tap is legal (ffh, a Yukawa) but it draws in the accent and
+        // dashes, so a handful of them around the diagram reads as a different
+        // picture. Weighted back, it wins only when it is clearly the nearer.
+        var w = d * (en.type === 'h' ? 1.7 : 1);
+        if (w < pd && d > minRun && ok(P, q, en.e, leg.e)) { pd = w; pick = en; pAt = P; }
+      });
+      // And failing that, a boson the leg radiates into a mesh vertex that can
+      // legally carry one. Same interaction at our end, ffV; the difference is
+      // only that the line is new rather than one the mesh had left dangling,
+      // which is why it comes last — a tap tidies away one of the mesh's own
+      // × marks, and this does not.
+      if (!pick) {
+        for (var v3 = 0; v3 < mesh.verts.length; v3++) {
+          if (!mtypes[v3].length || !legal(mtypes[v3], 'b')) continue;
+          var r = mesh.verts[v3];
+          var t3 = ((r[0] - other[0]) * vx + (r[1] - other[1]) * vy) / L2;
+          t3 = Math.max(0.34, Math.min(0.82, t3));
+          var P3 = [other[0] + vx * t3, other[1] + vy * t3];
+          var d3 = Math.hypot(r[0] - P3[0], r[1] - P3[1]);
+          if (d3 >= pd || d3 <= minRun || !ok(P3, r, -1, leg.e)) continue;
+          pd = d3; pAt = P3;
+          pick = { v: v3, e: mone[v3], type: 'b', fresh: true };
+        }
+      }
+      if (!pick) return false;
+
+      // Split the leg at the landing point. Fermions are drawn as a plain
+      // stroke, so the two halves read as the one straight line they were.
+      var mid = core.verts.push(pAt) - 1;
+      var far = { a: mid, b: leg.v, type: want, s: ce.s, len: 0, xa: false, xb: ce[tipEnd] };
+      far.len = Math.hypot(from[0] - pAt[0], from[1] - pAt[1]);
+      if (ce.a === leg.v) ce.a = mid; else ce.b = mid;
+      ce[tipEnd] = false;                      // the × moved out to the new far half
+      ce.len = Math.hypot(other[0] - pAt[0], other[1] - pAt[1]);
+      ce.__p2d = ce.__pts = ce.__ptsR = null;
+      core.edges.push(far);
+
+      if (pick.fresh && mesh.bend && mesh.bend[pick.v]) mesh.bend[pick.v] = 0;
+      addJoin(pAt, pick.v, pick.type,
+              mesh.edges[pick.e >= 0 ? pick.e : 0].s, !pick.fresh);
+      pick.used = true; joined++;
+      return true;
+    }
+
+    // Everything close by first — a leg that has a neighbour should take it,
+    // not lose it to a leg on the far side reaching across. Then one longer
+    // look for whatever is left over, so a leg is only abandoned when there
+    // really is nothing it can legally meet.
+    var left = legs.filter(function (l) { return !tryLeg(l, U * 3.6); });
+    left.forEach(function (l) { tryLeg(l, U * 5.6); });
+    return joined;
   }
 
   var CX = 0, CY = 0;
@@ -124,6 +374,8 @@
       higgsPure: 7, higgsQuartics: 2,
     });
 
+    joins = joinDiagram(drawn, mesh, U);
+
     mesh.inc = mesh.verts.map(function () { return []; });
     mesh.edges.forEach(function (e, i) { mesh.inc[e.a].push(i); mesh.inc[e.b].push(i); });
 
@@ -141,6 +393,15 @@
     vTone = new Float32Array(mesh.verts.length);
     vIsX = new Uint8Array(mesh.verts.length);
     mesh.edges.forEach(function (e) { if (e.xa) vIsX[e.a] = 1; if (e.xb) vIsX[e.b] = 1; });
+    // The diagram end of every join is either a kink or a vertex the still
+    // canvas draws, so it is never marked here. The mesh end is marked unless
+    // the join made a kink of it, where one line simply carries on.
+    meshBend = new Uint8Array(mesh.verts.length);
+    mesh.edges.forEach(function (e) {
+      if (!e.join) return;
+      meshBend[e.a] = 1;
+      if (e.kink) meshBend[e.b] = 1;
+    });
 
     // The first walker starts at the diagram, so the page opens by growing out
     // of it; the ones that follow start wherever, and wander.
@@ -329,7 +590,7 @@
     // one mark per vertex, at the strongest tone of any line touching it
     var rr = 1.8 * (0.72 + 0.5 * MESH_S), q = 3.4 * (0.72 + 0.5 * MESH_S);
     for (var v = 0; v < vTone.length; v++) {
-      if (vTone[v] < 0.02) continue;
+      if (vTone[v] < 0.02 || meshBend[v]) continue;
       var bk = bucketOf(vTone[v]), P = mesh.verts[v];
       if (vIsX[v]) {
         crosses[bk].moveTo(P[0] - q, P[1] - q); crosses[bk].lineTo(P[0] + q, P[1] + q);
