@@ -8,7 +8,8 @@
  * out of the vertex it arrived at, on the poster's growth curve; behind the
  * head the field holds and the tail fades it out again. The website takes the
  * tail length from the scroll, and there is nothing to scroll here, so it is
- * held at a fixed generous value.
+ * fixed — short, so the picture is always turning over rather than filling
+ * the plane and sitting there for the rest of the coffee break.
  *
  * The one addition is the VBF diagram, nine hand-drawn lines held still in
  * the middle on their own canvas with the mesh kept off them. An earlier
@@ -31,13 +32,22 @@
   var INK = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim();
   var ACCENT = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
   var PIXEL_BUDGET = 3.5e6;      // past this the fill rate costs more than the sharpness
-  var WALKERS = 2;               // out of phase, so the field is never empty
+  var WALKERS = 3;               // out of phase, so the field is never empty
   var TRAVERSE = 30;             // seconds for a walker to cross its whole flood
-  var TAIL = 0.85;               // tail as a fraction of the flood. The website
-                                 // takes this from the scroll; there is nothing
-                                 // to scroll here, so it is held generous: a
-                                 // wide lit region with a front and a wake.
-  var FADE = 0.34;               // fraction of the tail spent fading out
+  var TAIL = 0.3;                // tail as a fraction of the flood, which is
+                                 // how long a line lives: TAIL * TRAVERSE
+                                 // seconds, so nine. Long, and the field fills
+                                 // up and holds; this short, a band travels
+                                 // through it and two thirds of what is lit
+                                 // now was dark ten seconds ago. Measured over
+                                 // a range of these: 0.85 left 79% of the lit
+                                 // picture unchanged over ten seconds and then
+                                 // drained the frame to almost nothing before
+                                 // refilling, which is the fill-and-sit this
+                                 // replaces.
+  var FADE = 0.5;                // fraction of the tail spent fading out. A
+                                 // short tail wants more of it spent fading,
+                                 // or lines snap off rather than leave.
   var BUCKETS = 12;
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var wantDiagram = window.SMM_BG_DIAGRAM !== false;
@@ -405,8 +415,15 @@
 
     // The first walker starts at the diagram, so the page opens by growing out
     // of it; the ones that follow start wherever, and wander.
+    //
+    // Spread over the whole cycle rather than over one traverse. A walker's
+    // life is 1 + TAIL traverses, not one, so phases at k/WALKERS bunch them
+    // into the front of it and leave a trough at the end — which is what had
+    // the frame draining to almost nothing between one pass and the next.
     walkers = [];
-    for (var k = 0; k < WALKERS; k++) walkers.push(seedWalker(k / WALKERS, k === 0));
+    for (var k = 0; k < WALKERS; k++) {
+      walkers.push(seedWalker(k / WALKERS * (1 + TAIL), k === 0));
+    }
     paintStill();
   }
 
