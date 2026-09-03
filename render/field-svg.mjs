@@ -142,17 +142,59 @@ const growTimes = us.map(u => +(u * GROW_END / 100).toFixed(5));
 const growValues = us.map(u => +curve(u).toFixed(4));
 growTimes.push(1);              // holds at zero for the rest of the loop
 growValues.push(0);
-const DASH_TIMES = growTimes.join(';');
-const DASH_VALUES = growValues.join(';');
+/* --fps resamples the curve onto a fixed grid and switches to
+   calcMode="discrete", so the value holds still between steps.
+
+   Measured, and it does not help: stepping the growth at 24 fps ran at 29.5
+   fps against 29.8 for smooth interpolation, and cost 190 KB of file. Blink
+   re-rasters the whole image on every animation tick whether the computed
+   value changed or not, so holding a value still buys nothing. Left in as an
+   option and a record -- there is no frame-rate knob in SMIL, and this is the
+   obvious thing to reach for. What does reduce the bill is animating fewer
+   things: see --churn and --buckets below, both of which scale it. */
+const FPS = num('fps', 0);
+function resample(times, values, hz) {
+  if (!hz) return [times, values];
+  const at = t => {                       // the curve these stops describe
+    if (t <= times[0]) return values[0];
+    for (let i = 1; i < times.length; i++) {
+      if (t <= times[i]) {
+        const f = (t - times[i - 1]) / (times[i] - times[i - 1] || 1);
+        return values[i - 1] + (values[i] - values[i - 1]) * f;
+      }
+    }
+    return values[values.length - 1];
+  };
+  const T = [], V = [];
+  const n = Math.round(SECONDS * hz);
+  let last = null;
+  for (let i = 0; i < n; i++) {
+    const t = i / n;
+    const v = +at(t).toFixed(4);
+    // A step that repeats a value is a step nothing has to be repainted for.
+    if (v === last) continue;
+    T.push(+t.toFixed(5)); V.push(v);
+    last = v;
+  }
+  if (T[0] !== 0) { T.unshift(0); V.unshift(+at(0).toFixed(4)); }
+  T.push(1); V.push(V[V.length - 1]);
+  return [T, V];
+}
+const [dashT, dashV] = resample(growTimes, growValues, FPS);
+const DASH_TIMES = dashT.join(';');
+const DASH_VALUES = dashV.join(';');
+const CALC = FPS ? 'discrete' : 'linear';
 
 // Opacity is its own animation: up over the first 3% so a line does not blink
 // into existence at full strength, held, then out at the end. On a group this
 // multiplies through to every line inside it.
-const FADE_TIMES = '0;0.03;0.82;1';
-const FADE_VALUES = '0;1;1;0';
+const [fadeT, fadeV] = resample([0, 0.03, 0.82, 1], [0, 1, 1, 0], FPS);
+const FADE_TIMES = fadeT.join(';');
+const FADE_VALUES = fadeV.join(';');
 // The scalars and the vertex marks only fade -- their dasharray is spoken for.
-const GLOW_TIMES = '0;0.04;0.82;1';
-const GLOW_VALUES = '0;1;1;0';
+const [glowT, glowV] = resample([0, 0.04, 0.82, 1], [0, 1, 1, 0], FPS);
+const GLOW_TIMES = glowT.join(';');
+const GLOW_VALUES = glowV.join(';');
 
 /* One animation per timing group instead of one per line. The delays build()
    produces are continuous, so they are quantised into BUCKETS steps across the
@@ -165,6 +207,22 @@ const GLOW_VALUES = '0;1;1;0';
    drawing in the same instant. 40 is 0.7s of granularity and about fifteen
    lines to a group. */
 const BUCKETS = num('buckets', 40);
+
+/* How much of the field is alive at all. Every line fading out and redrawing
+   once a loop costs the most and, oddly, reads as the least: the whole picture
+   blinks. Leaving some of it standing gives the field a structure that stays
+   put with activity threaded through it, and the cost falls with the share
+   that moves, because a line with no animation on it never invalidates. */
+const CHURN = num('churn', 0.55);
+// A small deterministic generator, so the same seed gives the same field.
+let pickState = (SEED ^ 0x5eed) >>> 0;
+const pick = () => {
+  pickState = (pickState + 0x6d2b79f5) >>> 0;
+  let t = pickState;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+};
 const bucketOf = t0 => Math.min(BUCKETS - 1, Math.floor((t0 / maxT) * BUCKETS));
 const beginOf = b => -r2(((b + 0.5) / BUCKETS) * SECONDS);
 
@@ -187,11 +245,25 @@ for (const e of net.edges) {
    draw themselves, and the scalars and vertex marks that only fade. */
 const drawGroups = Array.from({ length: BUCKETS }, () => '');
 const glowGroups = Array.from({ length: BUCKETS }, () => '');
-let drawn = 0, faded = 0;
+let still = '';                            // the part of the field that stays put
+let drawn = 0, faded = 0, moving = 0;
+const alive = new Map();                   // per vertex: does anything here move
 for (const e of net.edges) {
   const d = 'M' + e.pts.map(p => r2(p[0]) + ' ' + r2(p[1])).join('L');
   const lwf = 0.8 + 0.3 * e.s;
   const b = bucketOf(e.t0 || 0);
+  if (pick() >= CHURN) {
+    // Standing: drawn once, at full strength, with nothing animating it. The
+    // dasharray has to go too, or the line shows as a dash pattern.
+    const cls = e.type === 'h' ? 's' : (e.type === 'b' ? 'b' : 'f');
+    const dash = e.type === 'h' ? ` stroke-dasharray="${r2(6.5 * e.s)} ${r2(6.5 * e.s)}"` : '';
+    still += `<path class="${cls}" d="${d}"`
+           + ` stroke-width="${r2((e.type === 'b' ? 1.15 : 1.35) * lwf)}"${dash}/>`;
+    if (e.type === 'h') faded++; else drawn++;
+    continue;
+  }
+  moving++;
+  for (const v of [e.pts[0], e.pts[e.pts.length - 1]]) alive.set(r2(v[0]) + ',' + r2(v[1]), true);
   if (e.type === 'h') {
     const dash = r2(6.5 * e.s);
     glowGroups[b] += `<path class="s" d="${d}" stroke-width="${r2(1.35 * lwf)}"`
@@ -213,6 +285,13 @@ for (const m of marks.values()) {
   const rr = r2(1.8 * (0.72 + 0.5 * m.s)), q = r2(3.4 * (0.72 + 0.5 * m.s));
   const x = r2(m.x), y = r2(m.y);
   // a beat early, which is one bucket back
+  const shape = m.isX
+    ? `<path class="x" d="M${r2(x - q)} ${r2(y - q)}L${r2(x + q)} ${r2(y + q)}M${r2(x + q)} ${r2(y - q)}L${r2(x - q)} ${r2(y + q)}" stroke-width="${r2(1.3 * (0.8 + 0.3 * m.s))}"/>`
+    : `<circle class="n" cx="${x}" cy="${y}" r="${rr}"/>`;
+  // A vertex only comes and goes if one of its lines does; otherwise it is
+  // part of the standing structure, which is also what stops a mark blinking
+  // on its own while every line touching it stays put.
+  if (!alive.get(x + ',' + y)) { still += shape; continue; }
   const b = Math.max(0, bucketOf(m.t0 || 0) - Math.round((LEAD / SECONDS) * BUCKETS));
   glowGroups[b] += m.isX
     ? `<path class="x" d="M${r2(x - q)} ${r2(y - q)}L${r2(x + q)} ${r2(y + q)}M${r2(x + q)} ${r2(y - q)}L${r2(x - q)} ${r2(y + q)}" stroke-width="${r2(1.3 * (0.8 + 0.3 * m.s))}"/>`
@@ -223,9 +302,10 @@ for (const m of marks.values()) {
 // pair of <animate> elements on the group drives everything inside it.
 const anim = (attr, times, values, begin) =>
   `<animate attributeName="${attr}" dur="${SECONDS}s" repeatCount="indefinite"`
-  + ` calcMode="linear" keyTimes="${times}" values="${values}" begin="${begin}s"/>`;
+  + ` calcMode="${CALC}" keyTimes="${times}" values="${values}" begin="${begin}s"/>`;
 
-let body = '', groups = 0;
+let body = still ? `<g>${still}</g>\n` : '';
+let groups = 0;
 for (let b = 0; b < BUCKETS; b++) {
   const begin = beginOf(b);
   if (drawGroups[b]) {
@@ -272,6 +352,10 @@ console.log(`  growth 1-(1-t)^${GROW_EXP} over ${GROW_END}% of the loop, traced 
   + `SMIL values, worst deviation ${(worst * 100).toFixed(2)}% of a line`);
 console.log(`  ${groups} timing groups over ${BUCKETS} buckets `
   + `(${r2(SECONDS / BUCKETS)}s of stagger granularity)`);
+console.log(`  ${CALC} timing${FPS ? ` at ${FPS} fps` : ''}: `
+  + `${dashV.length} growth steps, ${fadeV.length} fade steps`);
+console.log(`  ${moving} of ${net.edges.length} lines move (churn ${CHURN}); `
+  + `the rest stand`);
 if (worst > TOL * 1.5) {
   console.error('  CURVE FAULT: keyframes do not follow the growth curve');
   process.exitCode = 1;
