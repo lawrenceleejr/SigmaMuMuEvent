@@ -59,6 +59,10 @@ const EVENTS = {
   },
 };
 const E = EVENTS[EVENT];
+// The lockup's sigma, and with it the whole mark: everything else in the
+// lockup is a ratio of this. Sized so the mu mu's descender clears the rule,
+// which the layout audit checks rather than trusts.
+const SIG = Math.round(num('sig', 0.44) * H);
 if (!E) { console.error(`unknown --event ${EVENT}; try ${Object.keys(EVENTS).join(' or ')}`); process.exit(1); }
 const OUT = resolve(ROOT, str('out', `out/${E.slug}-${THEME}.png`));
 
@@ -93,7 +97,14 @@ const server = createServer(async (req, res) => {
   const p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
   try {
     const b = await readFile(p === '/mark.png' ? MARK_OUT : join(SITE, p));
-    res.writeHead(200, { 'content-type': MIME[extname(p)] || 'application/octet-stream' });
+    res.writeHead(200, {
+      'content-type': MIME[extname(p)] || 'application/octet-stream',
+      // Fonts are fetched under CORS, and setContent gives the page no origin
+      // of its own, so every @font-face here failed with ERR_FAILED and the
+      // whole banner quietly set in the browser's fallback sans. Nothing said
+      // so; it just was not Archivo.
+      'access-control-allow-origin': '*',
+    });
     res.end(b);
   } catch { res.writeHead(404); res.end(); }
 });
@@ -156,12 +167,17 @@ const html = `<!doctype html><html><head><meta charset="utf-8">
   /* Shrink-wrapped, not full width: a block row would reach under the mark
      and there would be no way to tell a real collision from a wide box. */
   #row { display: flex; align-self: flex-start; align-items: center;
-         gap: ${Math.round(W * 0.022)}px; margin-top: ${Math.round(H * 0.012)}px;
+         gap: ${Math.round(W * 0.013)}px; margin-top: ${Math.round(H * 0.012)}px;
          flex: 1 1 auto; }
+  /* The poster's own stack, in the poster's own order: design/Sigma Mu Mu
+     Network.dc.html sets 'Libertinus Math','KaTeX Math',serif. The render
+     asserts the first one actually loaded, because a silent fall back to a
+     system serif is exactly the kind of thing nobody notices until it is
+     printed beside the poster. */
   .lockup {
     flex: none;
     color: ${INK};
-    font-family: "Libertinus Math", Cambria, Georgia, serif;
+    font-family: "Libertinus Math", "KaTeX Math", serif;
     font-weight: 400;
     line-height: .8;
     white-space: nowrap;
@@ -169,12 +185,18 @@ const html = `<!doctype html><html><head><meta charset="utf-8">
   /* Big. On the poster the sigma carries the whole sheet, and a banner that
      sets it at the same rank as the title throws away the one mark somebody
      recognises from across a room. */
-  .lockup .sig { font-size: ${Math.round(H * 0.56)}px; }
+  /* The poster sets 560 / 270 with the mu mu 66 down and 6 across. Held as
+     ratios of the sigma rather than of the frame, the lockup is one shape that
+     can be scaled to fit: the mu mu is .482 of the sigma, dropped .118 of it
+     and nudged .011 across. Straight pixel-for-pixel from the poster the mu mu
+     hangs through the rule, because the poster has a 1700px sheet to drop into
+     and a 2.4:1 banner has a third of that. */
+  .lockup .sig { font-size: ${SIG}px; }
   .lockup .mumu {
-    font-size: ${Math.round(H * 0.27)}px;
+    font-size: ${Math.round(SIG * 0.482)}px;
     position: relative;
-    top: ${-Math.round(H * 0.034)}px;
-    left: ${Math.round(H * 0.008)}px;
+    top: ${Math.round(SIG * 0.118)}px;
+    left: ${Math.round(SIG * 0.011)}px;
   }
   #row h1 { margin-top: 0; font-size: ${Math.round(H * 0.1)}px;
             text-transform: uppercase; letter-spacing: -.015em;
@@ -194,20 +216,21 @@ const html = `<!doctype html><html><head><meta charset="utf-8">
     background: ${ACCENT};
     width: 100%;
   }
+  /* Stacked, both starting on the left edge the kicker, the title and the
+     rule share. Set across from each other the URL had nothing to align to
+     and floated in the middle of the frame. */
   .foot {
     max-width: ${Math.round(W * 0.78)}px;
     display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 2em;
-    margin-top: ${Math.round(H * 0.042)}px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: ${Math.round(H * 0.012)}px;
+    margin-top: ${Math.round(H * 0.036)}px;
     font-size: ${Math.round(H * 0.046)}px;
     font-weight: 600;
     letter-spacing: .09em;
     text-transform: uppercase;
   }
-  /* neither half may wrap: the row is narrower now that the mark has the
-     right-hand end of the banner */
   .foot > span { white-space: nowrap; }
   .where { color: ${INK}; }
   .url { color: ${INK}; opacity: .78; letter-spacing: .06em; text-transform: none; }
@@ -261,6 +284,24 @@ const edges = await page.evaluate(({ W, H, INK, ACCENT, DARK, SEED }) => {
 }, { W, H, INK, ACCENT, DARK, SEED: E.seed });
 
 await page.evaluate(() => document.fonts.ready);
+{
+  const ok = await page.evaluate(() => document.fonts.check('800 100px Archivo'));
+  if (!ok) {
+    console.error('  FONT FAULT: Archivo did not load; the type would set in a '
+      + 'fallback sans and stop matching the identity');
+    process.exit(1);
+  }
+  console.log('  type set in Archivo');
+}
+if (E.lockup) {
+  const ok = await page.evaluate(() => document.fonts.check('400 100px "Libertinus Math"'));
+  if (!ok) {
+    console.error('  FONT FAULT: Libertinus Math did not load; the lockup would '
+      + 'fall back to a system serif and stop matching the poster');
+    process.exit(1);
+  }
+  console.log('  lockup set in Libertinus Math, as the poster is');
+}
 await page.waitForFunction(() => {
   const m = document.getElementById('mark');
   return m && m.complete && m.naturalWidth > 0;
@@ -273,6 +314,12 @@ const layout = await page.evaluate(() => {
   const mark = r(document.getElementById('mark'));
   const foot = [...document.querySelectorAll('.foot > span')].map(s => r(s));
   const h1 = r(document.getElementById('row') || document.querySelector('h1'));
+  // The mu mu hangs well below the sigma's baseline, so the lockup's box is
+  // the thing that has to clear the rule -- not the row's, which stops at the
+  // sigma. Measured off the ink, since a glyph box lies about descenders.
+  const lock = document.querySelector('.lockup');
+  const rule = r(document.querySelector('.rule'));
+  const mumu = lock ? r(lock.querySelector('.mumu')) : null;
   return {
     markInside: mark.right <= innerWidth + 0.5 && mark.top >= -0.5 && mark.bottom <= innerHeight + 0.5,
     footLines: foot.map(f => Math.round(f.height)),
@@ -282,15 +329,20 @@ const layout = await page.evaluate(() => {
       || f.bottom <= mark.top + 0.5 || f.top >= mark.bottom - 0.5),
     titleClearsMark: h1.right <= mark.left + 0.5,
     lineHeight: Math.round(parseFloat(getComputedStyle(document.querySelector('.foot')).fontSize) * 1.4),
+    lockupClearsRule: !mumu || mumu.bottom <= rule.top + 0.5,
+    mumuBottom: mumu ? Math.round(mumu.bottom) : 0,
+    ruleTop: Math.round(rule.top),
   };
 });
 const oneLine = layout.footLines.every(h => h <= layout.lineHeight);
-if (!layout.markInside || !oneLine || !layout.footClearsMark || !layout.titleClearsMark) {
+if (!layout.markInside || !oneLine || !layout.footClearsMark || !layout.titleClearsMark
+    || !layout.lockupClearsRule) {
   console.error('  LAYOUT FAULT', JSON.stringify(layout));
   console.error('  rects', JSON.stringify(await page.evaluate(() => {
     const r = el => { const b = el.getBoundingClientRect();
       return { x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width), h: Math.round(b.height) }; };
     const out = { mark: r(document.getElementById('mark')) };
+    out.rule = r(document.querySelector('.rule'));
     const row = document.getElementById('row');
     if (row) { out.row = r(row); out.lockup = r(row.querySelector('.lockup')); out.h1 = r(row.querySelector('h1')); }
     document.querySelectorAll('.foot > span').forEach((s, i) => out['foot' + i] = r(s));
@@ -298,7 +350,8 @@ if (!layout.markInside || !oneLine || !layout.footClearsMark || !layout.titleCle
   })));
   process.exitCode = 1;
 } else {
-  console.log(`  layout ok: mark inside, footline on one line, nothing overlapping the mark`);
+  console.log(`  layout ok: mark inside, footline stacked one line each, `
+    + `nothing overlapping the mark${E.lockup ? ', lockup clear of the rule' : ''}`);
 }
 await page.screenshot({ path: OUT });
 await browser.close();
