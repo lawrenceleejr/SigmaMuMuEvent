@@ -5,3 +5,8 @@ site/public/
 site/.hugo_build.lock
 site/resources/_gen/
 site/.docker-build-hash
+
+# Screenshot harnesses that build an output path from an unset variable land
+# here. It has happened three times; ignoring it keeps 3MB of scratch PNGs from
+# looking like project files.
+undefined/
