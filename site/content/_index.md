@@ -41,6 +41,7 @@ affiliation = "Fieldwork Partners"
 [[params.organizers]]
 name = "Kiley Kennedy"
 affiliation = "Tufts University"
+email = "Kiley.Kennedy@tufts.edu"
 
 [[params.organizers]]
 name = "Lawrence Lee"
