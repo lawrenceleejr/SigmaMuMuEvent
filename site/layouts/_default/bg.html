@@ -117,15 +117,6 @@
   body.present #bar { display: none; }
   body.present { cursor: none; -webkit-user-select: none; user-select: none; }
 
-  /* How to get out, said once and then left alone. A tap anywhere works, so
-     nobody can be stuck behind a hidden cursor. */
-  #exit-hint {
-    position: fixed; z-index: 5; left: 0; right: 0; bottom: 3.4vh;
-    text-align: center; color: var(--muted);
-    font-size: 0.86rem; letter-spacing: 0.14em; text-transform: uppercase;
-    opacity: 0; transition: opacity 0.7s ease; pointer-events: none;
-  }
-  body.present.hint-on #exit-hint { opacity: 0.8; }
   #say-input {
     flex: 1 1 34rem; max-width: 44rem;
     padding: 0.6rem 0.8rem;
@@ -152,17 +143,22 @@
      the width, which on a tall frame leaves it far too small to read, so it
      takes a larger share of it and the footline stacks instead of spanning. */
   @media (max-aspect-ratio: 1 / 1) {
-    #type { padding: 4vh 6vw; }
+    #type { padding: 4vh 5vw; }
     .kicker { font-size: 3.4vw; }
     /* Narrow enough to clear the mark in the corner rather than run under it. */
     h1 { font-size: 6vw; max-width: 72vw; margin-top: 1.2vh; }
-    .rule { max-width: 88vw; margin-top: 2.6vh; }
+    .rule { max-width: 100%; margin-top: 2.6vh; }
+    /* Both halves of the footline stack — they will not sit side by side at
+       this width — but the URL still hangs off the right, so it and the end
+       of the rule share an edge the way they do on the banner. */
     .foot {
-      flex-direction: column; align-items: flex-start;
-      gap: 0.45em; font-size: 2.9vw; margin-top: 1.4vh;
+      flex-direction: column; align-items: stretch;
+      gap: 0.35em; font-size: 2.9vw; margin-top: 1.4vh; max-width: 100%;
     }
-    #mark { width: 17vw; height: 8vh; top: 4vh; right: 6vw; }
-    #say-wrap { padding: 0 6vw; }
+    .foot .where { text-align: left; }
+    .foot .url { text-align: right; }
+    #mark { width: 17vw; height: 8vh; top: 4vh; right: 5vw; }
+    #say-wrap { padding: 0 5vw; }
     #bar { flex-wrap: wrap; }
   }
 </style>
@@ -186,7 +182,6 @@
 <div id="mark" aria-hidden="true"></div>
 
 <div id="say-wrap"><div id="say"></div></div>
-<div id="exit-hint" aria-hidden="true">Tap anywhere, or press Esc, to exit</div>
 
 <div id="bar">
   <input id="say-input" type="text" autocomplete="off" spellcheck="false"

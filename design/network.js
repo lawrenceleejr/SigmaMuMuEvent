@@ -722,7 +722,12 @@
     const px = -dy / len, py = dx / len;
     const lam = 15 * s, amp = 4.4 * s;
     const cycles = Math.max(1, Math.round(len / lam));
-    const steps = Math.max(18, Math.ceil(len / 1.6));
+    // Sampling every 1.6 units is plenty for a long wavelength and nowhere
+    // near enough for a short one: on a phone, where the whole geometry is
+    // scaled down, that left about five points to a cycle and the waves came
+    // out as zigzags. Ask for a fixed number of points per cycle as well, and
+    // take whichever is finer.
+    const steps = Math.max(18, cycles * 28, Math.ceil(len / 1.6));
     const out = [];
     for (let i = 0; i <= steps; i++) {
       const u = i / steps;

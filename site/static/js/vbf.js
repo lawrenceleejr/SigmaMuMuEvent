@@ -37,7 +37,10 @@
     const U = cfg.unit || H / 17;
     const CORE_S = cfg.coreScale == null ? 2.9 : cfg.coreScale;
     const MESH_S = cfg.meshScale == null ? 2.1 : cfg.meshScale;
-    const CX = W / 2, CY = H / 2;
+    // Where the diagram sits. Middle of the frame unless told otherwise — a
+    // tall screen wants it lower, under the masthead.
+    const CX = cfg.cx == null ? W / 2 : cfg.cx;
+    const CY = cfg.cy == null ? H / 2 : cfg.cy;
     const R = window.SMMNet.rng(cfg.seed == null ? 2026 : cfg.seed);
     const pick = arr => arr[Math.floor(R() * arr.length) % arr.length];
 
@@ -152,7 +155,8 @@
       }
       frontier = next;
     }
-    return { verts: verts, edges: edges, coreEdges: coreEdges, unit: U, gens: GENS };
+    return { verts: verts, edges: edges, coreEdges: coreEdges,
+             unit: U, gens: GENS, cx: CX, cy: CY };
   }
 
   /* Keep-out for the generated mesh: build() takes rectangles and discs, so a

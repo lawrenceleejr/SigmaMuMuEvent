@@ -69,17 +69,26 @@
     }
   }
 
+  var CX = 0, CY = 0;
   function build() {
     sizeOf();
-    U = H / 17;
-    var ref = W / 1920;
+    // The diagram is ten and a half units across, so on a tall screen the
+    // width is what limits it, not the height. Taking the smaller of the two
+    // keeps it inside the frame instead of running off both edges.
+    U = Math.min(H / 17, W / 13);
+    // And the line scale follows that unit rather than the screen width. Tied
+    // to width, a phone got a scale of 0.2 while the geometry stayed sized off
+    // height: eleven wave cycles along an edge the desktop draws with three.
+    var ref = U / (1080 / 17);
     var CORE_S = 2.9 * ref;
     MESH_S = 2.1 * ref;
-    drawn = window.SMMVBF.build({ w: W, h: H, unit: U, seed: (Math.random() * 1e9) | 0,
-      coreScale: CORE_S, meshScale: MESH_S });
+    CX = W / 2;
+    CY = H > W ? H * 0.56 : H / 2;      // held tall: down, clear of the masthead
+    drawn = window.SMMVBF.build({ w: W, h: H, unit: U, cx: CX, cy: CY,
+      seed: (Math.random() * 1e9) | 0, coreScale: CORE_S, meshScale: MESH_S });
     mesh = window.SMMNet.build({
       w: W, h: H, zones: window.SMMVBF.zones(drawn, U * 0.3),
-      seed: (Math.random() * 1e9) | 0, seeds: [{ x: W / 2, y: H / 2 }],
+      seed: (Math.random() * 1e9) | 0, seeds: [{ x: CX, y: CY }],
       // build() multiplies spacing by scaleAt, which is also the line weight,
       // so the separation is asked for in units of the frame and divided back
       // out — otherwise a 4K screen gets a field twice as coarse as a laptop.
@@ -101,8 +110,8 @@
     mesh.edges.forEach(function (e, i) {
       phase[i] = maxT ? e.t0 / maxT : 0;
       var p = mesh.verts[e.a], q = mesh.verts[e.b];
-      var d = Math.hypot(((p[0] + q[0]) / 2 - W / 2) / (W / 2),
-                         ((p[1] + q[1]) / 2 - H / 2) / (H / 2));
+      var d = Math.hypot(((p[0] + q[0]) / 2 - CX) / (W / 2),
+                         ((p[1] + q[1]) / 2 - CY) / (H / 2));
       baseTone[i] = 0.5 * (1 - 0.4 * Math.min(1, d));   // the vignette
       e.__p2d = null;
     });
@@ -117,8 +126,8 @@
     for (var i = drawn.edges.length - 1; i >= drawn.coreEdges; i--) {
       var e = drawn.edges[i];
       var p = drawn.verts[e.a], q = drawn.verts[e.b];
-      var d = Math.hypot(((p[0] + q[0]) / 2 - W / 2) / (W / 2),
-                         ((p[1] + q[1]) / 2 - H / 2) / (H / 2));
+      var d = Math.hypot(((p[0] + q[0]) / 2 - CX) / (W / 2),
+                         ((p[1] + q[1]) / 2 - CY) / (H / 2));
       window.SMMNet.drawEdge(sx, drawn, e, 1,
         { accent: ACCENT, ink: INK, tone: 0.88 * (1 - 0.34 * Math.min(1, d)) });
     }
@@ -282,18 +291,17 @@
      state: the chrome goes on a class, and real full screen is asked for on
      top of that only where it exists. A tap or a click anywhere leaves, which
      is the only gesture a phone has; Esc leaves too, and so does the browser
-     dropping out of full screen by itself. */
+     dropping out of full screen by itself. Nothing on screen says so — the
+     bar says it before you go in, and a screen in a room should be clean. */
   var btn = document.getElementById('fs');
-  var presenting = false, enteredAt = 0, hintTimer = 0;
+  var presenting = false, enteredAt = 0;
 
   function isFull() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
 
   function enter() {
     presenting = true;
     enteredAt = Date.now();
-    body.classList.add('present', 'hint-on');
-    clearTimeout(hintTimer);
-    hintTimer = setTimeout(function () { body.classList.remove('hint-on'); }, 2600);
+    body.classList.add('present');
     var el = document.documentElement;
     var req = el.requestFullscreen || el.webkitRequestFullscreen;
     if (req) { try { req.call(el); } catch (e) { /* denied is fine — the chrome is gone anyway */ } }
@@ -304,7 +312,7 @@
 
   function leave() {
     presenting = false;
-    body.classList.remove('present', 'hint-on');
+    body.classList.remove('present');
     document.removeEventListener('click', leaveOnTap, true);
     if (isFull()) {
       var ex = document.exitFullscreen || document.webkitExitFullscreen;
