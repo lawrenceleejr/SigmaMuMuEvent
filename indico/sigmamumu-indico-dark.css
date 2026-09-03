@@ -61,7 +61,7 @@ html {
   background-image:
     linear-gradient(rgba(20, 19, 18, var(--smm-veil)),
                     rgba(20, 19, 18, var(--smm-veil))),
-    url("https://hepalumni.muoncollider.us/img/field-live-dark.svg");
+    url("https://hepalumni.muoncollider.us/img/field-live-dark.svg?v=2");
   background-repeat: no-repeat, no-repeat;
   background-position: center center, center center;
   background-size: cover, cover;
@@ -79,7 +79,12 @@ input, select, textarea, button, .i-button {
   html { background-attachment: scroll, scroll; background-size: cover, 200vw auto; }
 }
 
-/* The field draws itself: field-live.svg carries its own SMIL animation, and
+/* The ?v= on the field is a cache-buster, and it earns its keep: the file's
+   name did not change when its animation did, so a browser holding the old
+   copy went on showing the old behaviour -- which, in Safari, was no
+   animation at all. Bump it whenever the SVG is regenerated.
+
+   The field draws itself: field-live.svg carries its own SMIL animation, and
    an SVG used as a background-image runs that (it is loaded without scripts,
    but not frozen). It used to carry CSS keyframes instead, which Chrome and
    iOS ran and Safari on the desktop did not — it rendered the first frame and
@@ -93,7 +98,7 @@ input, select, textarea, button, .i-button {
     background-image:
       linear-gradient(rgba(20, 19, 18, var(--smm-veil)),
                       rgba(20, 19, 18, var(--smm-veil))),
-      url("https://hepalumni.muoncollider.us/img/field-still-dark.png");
+      url("https://hepalumni.muoncollider.us/img/field-still-dark.png?v=2");
   }
 }
 
@@ -408,13 +413,17 @@ body > .header,
   margin: 0;
 }
 .conf_leftMenu li:first-child { border-top: 0 !important; }
+/* Indico sets these on `#outer li a`, and an id beats any number of classes,
+   so without !important the menu keeps Indico's Verdana at 10pt however
+   specific the selector here gets. */
 .conf_leftMenu li a, .conf_leftMenu .menuConfTitle a {
   display: block;
   padding: 0.65rem 0.2rem;
   background: none !important;
   color: var(--smm-ink) !important;
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-family: var(--smm-sans) !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
   text-decoration: none;
 }
 .conf_leftMenu li a:hover { color: var(--smm-accent) !important; }
@@ -438,12 +447,12 @@ body > .header,
    form and that one gets it too. */
 .conf_leftMenu li a[href*="/registration"]:not([href*="participants"]) {
   color: var(--smm-accent) !important;
-  padding-top: 0.85rem;
-  padding-bottom: 0.85rem;
-  font-size: 1.32rem;
-  font-weight: 800;
-  letter-spacing: -0.015em;
-  line-height: 1.15;
+  padding-top: 0.9rem !important;
+  padding-bottom: 0.9rem !important;
+  font-size: 1.75rem !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em !important;
+  line-height: 1.1 !important;
 }
 .conf_leftMenu li a[href*="/registration"]:not([href*="participants"]):hover {
   text-decoration: underline;
@@ -453,8 +462,8 @@ body > .header,
    back to the selected-item styling, which is set for a one-line item. */
 .conf_leftMenu .menuConfSelected > a[href*="/registration"]:not([href*="participants"]),
 .conf_leftMenu li.selected > a[href*="/registration"]:not([href*="participants"]) {
-  font-size: 1.32rem;
-  font-weight: 800;
+  font-size: 1.75rem !important;
+  font-weight: 800 !important;
 }
 
 /* ---- headings and copy -------------------------------------------------- */

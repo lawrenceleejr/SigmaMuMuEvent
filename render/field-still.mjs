@@ -20,8 +20,10 @@ const ROOT = resolve(new URL('..', import.meta.url).pathname);
 const a = process.argv.slice(2);
 const arg = (k, d) => { const i = a.indexOf('--' + k); return i < 0 ? d : Number(a[i + 1]); };
 const W = arg('w', 2000), H = arg('h', 1500), SCALE = arg('scale', 2.4);
-const SEED = arg('seed', 2026), COLORS = arg('colors', 64);
 const DARK = a.includes('--dark');
+// The same two seeds render/field-svg.mjs uses, so the still a reduced-motion
+// reader gets is the field that theme actually animates, not a different one.
+const SEED = arg('seed', DARK ? 4271 : 2026), COLORS = arg('colors', 64);
 const OUT = resolve(ROOT, `site/static/img/field-still${DARK ? '-dark' : ''}.png`);
 
 const chromePath = process.env.CHROME

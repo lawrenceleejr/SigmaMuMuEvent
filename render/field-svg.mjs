@@ -43,7 +43,10 @@ const THEME = str('theme', 'light');
 const DARK = THEME === 'dark';
 const W = num('w', 1800), H = num('h', 1350);
 const SCALE = num('scale', 2.4), SPACING = num('spacing', 30);
-const SEED = num('seed', 2026), SECONDS = num('seconds', 26);
+// The two themes get different fields. Same generator, same rules, different
+// mesh: seeded alike they came out identical, which makes the dark skin look
+// like a recolour of the light one rather than its own artwork.
+const SEED = num('seed', DARK ? 4271 : 2026), SECONDS = num('seconds', 26);
 const OUT = resolve(ROOT, `site/static/img/field-live${DARK ? '-dark' : ''}.svg`);
 
 const PAPER = DARK ? '#141312' : '#f5f0e1';
