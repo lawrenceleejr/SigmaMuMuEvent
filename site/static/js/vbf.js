@@ -111,8 +111,8 @@
 
     const PAD = U * 0.28;
     const SEP = (cfg.sep == null ? 0.42 : cfg.sep) * U;
-    function placeable(from, to, skip) {
-      if (to[0] < PAD || to[1] < PAD || to[0] > W - PAD || to[1] > H - PAD) return false;
+    function placeable(from, to, skip, beyond) {
+      if (!beyond && (to[0] < PAD || to[1] < PAD || to[0] > W - PAD || to[1] > H - PAD)) return false;
       const L = Math.hypot(to[0] - from[0], to[1] - from[1]) || 1;
       for (let i = 0; i < edges.length; i++) {
         const p = verts[edges[i].a], q = verts[edges[i].b];
@@ -156,6 +156,15 @@
        progressively harder for somewhere to put the vertex. Side branches try
        harder too, they are simply allowed to end when there is nowhere left. */
     const MIN_GENS = cfg.minGens == null ? 8 : cfg.minGens;
+    /* Every line that stops has to say so with an ×, and a tree that forks at
+       every step is half ends: 400 lines came with 200 marks, against the
+       generated mesh's one in twenty-three. So a step is only sometimes a
+       vertex; the rest of the time the line carries on as a kink, which adds
+       reach without adding another end. Ends then count the chains rather
+       than the leaves. */
+    const BRANCH = cfg.branch == null ? 0.25 : cfg.branch;
+    // And a side branch runs this many steps before it may stop.
+    const SIDE_RUN = cfg.sideRun == null ? 3 : cfg.sideRun;
 
     // One go at putting a vertex down: place every outgoing leg, or place none
     // and leave the vertex list as it was found.
@@ -194,9 +203,12 @@
       const step = U * (0.95 - 0.07 * Math.min(gen, 9)) * (gen === 0 ? 1.15 : 1);
       // The legs start nearer the middle now that they are short, so they
       // are into each other's way sooner and it is worth looking harder.
-      const tries = trunk ? 200 : (gen < MIN_GENS ? 24 : 1);
+      const tries = trunk ? 200 : 24;
+      // Only sometimes a vertex. A leg of the diagram always tries for one
+      // first, since the dots along it are what make it read as a diagram.
+      const forking = trunk || R() < BRANCH;
 
-      for (let k = 0; k < tries; k++) {
+      for (let k = 0; forking && k < tries; k++) {
         const out = pick(RULES[leg.type]);
         const ease = k / tries;
         const straight = leg.type === 'f' && out[0] === 'f';
@@ -212,15 +224,16 @@
         const got = attempt(leg, out, angles, reach);
         if (got) return got;
       }
-      // A leg of the diagram with nowhere to put a whole vertex carries on as
-      // a kink instead: its side branch has nowhere to go, but a propagator
-      // drawn with a bend is still one propagator, no interaction, so there is
-      // nothing there to be legal or illegal about. It takes no mark, and the
-      // audit is told to skip it. Swept rather than sampled — one leg to place,
-      // so walk the forward arc and take the first gap.
-      if (trunk) {
-        for (let a = 0; a < 21; a++) {
-          const turn = (a % 2 ? -1 : 1) * Math.ceil(a / 2) * 0.14;
+      // Carry on as a kink instead: either because this step was never going
+      // to be a vertex, or because there was nowhere to put a whole one — a
+      // vertex is only legal whole and its side branch had nowhere to go.
+      // Either way a propagator drawn with a bend is still one propagator, no
+      // interaction, so there is nothing there to be legal or illegal about.
+      // It takes no mark, and the audits are told to skip it. Swept rather
+      // than sampled: one leg to place, so walk the forward arc for a gap.
+      {
+        for (let a = 0; a < 31; a++) {
+          const turn = (a % 2 ? -1 : 1) * Math.ceil(a / 2) * 0.11;
           for (let r = 0; r < 3; r++) {
             const reach = Math.max(SEP * 1.45, step * (1.15 - 0.3 * r));
             const got = attempt(leg, [leg.type], [base + turn], reach);
@@ -229,6 +242,49 @@
         }
       }
       return null;
+    }
+
+    /* A chain that has run its length leaves the picture rather than stopping
+       inside it. Extended past the frame edge, its far end — and the × that
+       would have marked it — lands off the canvas, which is how the generated
+       mesh already meets the boundary: it is given a negative pad and simply
+       runs off. Nothing is claimed either way about a line that leaves the
+       frame, which is the honest reading; a line that stops where you can see
+       it stopping is the one that has to say so. */
+    function toFrame(p, dir) {
+      const cx = Math.cos(dir), cy = Math.sin(dir);
+      let t = Infinity;
+      if (cx > 1e-6) t = Math.min(t, (W - p[0]) / cx);
+      if (cx < -1e-6) t = Math.min(t, -p[0] / cx);
+      if (cy > 1e-6) t = Math.min(t, (H - p[1]) / cy);
+      if (cy < -1e-6) t = Math.min(t, -p[1] / cy);
+      return t;
+    }
+    function escape(leg, gen) {
+      const out = Math.atan2(verts[leg.v][1] - CY, verts[leg.v][0] - CX);
+      const base = Math.atan2(Math.sin(leg.dir) + Math.sin(out) * 0.7,
+                              Math.cos(leg.dir) + Math.cos(out) * 0.7);
+      for (let a = 0; a < 25; a++) {
+        const dir = base + (a % 2 ? -1 : 1) * Math.ceil(a / 2) * 0.13;
+        const d = toFrame(verts[leg.v], dir);
+        // Worth a long run: the clearance and crossing tests below refuse any
+        // that cannot get out cleanly, and a line leaving the picture reads
+        // better than a cluster of × where several chains ran out together.
+        if (!isFinite(d) || d > U * 6) continue;
+        const reach = d + U * 0.8;
+        const to = [verts[leg.v][0] + Math.cos(dir) * reach,
+                    verts[leg.v][1] + Math.sin(dir) * reach];
+        if (!placeable(verts[leg.v], to, [leg.v], true)) continue;
+        const vi = V((to[0] - CX) / U, (to[1] - CY) / U);
+        const was = endMark.get(leg.v);
+        if (was) edges[was[0]][was[1]] = false;
+        const taper = Math.max(MESH_S, CORE_S - gen * 0.14);
+        const ei = E(leg.v, vi, leg.type, taper, gen + 1);  // no mark: off the picture
+        edges[ei].esc = true;                         // and a thin keep-out, see zones()
+        bend[leg.v] = 1;                              // and no junction either
+        return true;
+      }
+      return false;
     }
 
     function lay(leg, gen, placed) {
@@ -260,21 +316,23 @@
         lay(leg, gen, placed);
         next.push(placed[0]);                        // the leg carries on
         for (let j = 1; j < placed.length; j++) {
-          deferred.push({ leg: placed[j], gen: gen + 1 });
+          deferred.push({ leg: placed[j], gen: gen + 1, run: 0 });
         }
       }
       trunkFront = next;
     }
+    // The legs have run their promised generations; let them out of the frame.
+    trunkFront.forEach(leg => escape(leg, MIN_GENS));
 
     // Then everything hanging off them, into what is left.
     const queue = deferred;
     for (let qi = 0; qi < queue.length; qi++) {
       const item = queue[qi];
-      if (item.gen >= GENS) continue;
+      if (item.gen >= GENS || item.run >= SIDE_RUN) { escape(item.leg, item.gen); continue; }
       const placed = search(item.leg, item.gen, false);
-      if (!placed) continue;
+      if (!placed) { escape(item.leg, item.gen); continue; }
       lay(item.leg, item.gen, placed);
-      placed.forEach(p => queue.push({ leg: p, gen: item.gen + 1 }));
+      placed.forEach(p => queue.push({ leg: p, gen: item.gen + 1, run: item.run + 1 }));
     }
 
     return { verts: verts, edges: edges, coreEdges: coreEdges, bend: bend,
@@ -292,7 +350,13 @@
     for (let i = 0; i < net.edges.length; i++) {
       const e = net.edges[i];
       const p = net.verts[e.a], q = net.verts[e.b];
-      const r = e.gen === 0 ? keep * 2.1 : keep;
+      // A line on its way out of the picture gets a narrow corridor rather
+      // than a wide one. Given the wide one, a few of them crossing the frame
+      // cut the mesh into fragments, and a fragment has dangling ends — so
+      // letting a line out of the picture only moved its × into the mesh.
+      // The discs are spaced off their own radius, so a narrow corridor is
+      // still an unbroken barrier: nothing can cross it, it just runs closer.
+      const r = e.gen === 0 ? keep * 2.1 : (e.esc ? keep * 0.42 : keep);
       const L = Math.hypot(q[0] - p[0], q[1] - p[1]);
       const n = Math.max(1, Math.ceil(L / (r * 0.8)));
       for (let k = 0; k <= n; k++) {

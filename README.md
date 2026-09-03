@@ -113,6 +113,25 @@ caught by an exact segment test instead. Measured over thirty pictures, that
 took the legs from none in a hundred and eighty reaching eight generations to
 a hundred and seventy-two, the shortest of them running four.
 
+Every line that stops has to say so with an ×, and a tree that forks at every
+step is half ends: four hundred lines arrived with two hundred marks, against
+the generated mesh's one in twenty-two. Three things brought that down to
+about eighty-five over eleven hundred lines. A growth step is only sometimes a
+vertex — the rest of the time the line carries on as a kink, which adds reach
+without adding another end, so the ends count the chains rather than the
+leaves. A chain that has run its length leaves the picture rather than stopping
+in it, extended past the frame edge so its end and the × that would have
+marked it land off the canvas, which is how the mesh already meets the
+boundary. And side branches run three steps rather than to the generation
+limit.
+
+Letting them run much further out does not help, and it is worth knowing why:
+any line that reaches the frame edge cuts the mesh region in two, and a
+fragment has dangling ends of its own, so the × simply moves from the tree
+into the mesh. Measured across escape distances of six to sixteen units the
+total sat at ninety-odd every time. Narrowing the corridor those lines claim
+does not fix it either — the division is topological, not a matter of width.
+
 The legs themselves are drawn short. They carry on into the grown field
 anyway, so their drawn length only sets how far out the first branch happens.
 The outgoing quarks stay the widest thing in the picture — that is what keeps
