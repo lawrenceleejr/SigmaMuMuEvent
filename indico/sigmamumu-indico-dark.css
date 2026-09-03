@@ -891,6 +891,23 @@ div.exclusivePopup {
    an ink block here would have recoloured the text and left the pale
    background — a greyed Submit reading as cream-on-grey. They get their own
    muted panel below instead. */
+/* A dialog packs several buttons into one row — the author picker is four
+   wide — and the row spilled out past its field. The width was mostly the
+   page's tracking and generous padding rather than the type size, so those
+   come in and the size stays where the rest of the identity has it; a
+   shade smaller, and nothing wraps. Measured at the field width these
+   dialogs get on a phone: 504px of buttons plus their gaps in a 510px
+   field, which is what spilled; now 388. */
+.ui-dialog .i-button,
+.ui-dialog .ui.button,
+.ui-dialog input[type="submit"],
+div.exclusivePopup .i-button,
+div.exclusivePopup .ui.button {
+  padding: 0.55em 0.9em !important;
+  font-size: 0.78rem !important;
+  letter-spacing: 0.05em !important;
+  white-space: nowrap !important;
+}
 .ui-dialog .i-button:not(.disabled):not(:disabled),
 div.exclusivePopup .i-button:not(.disabled):not(:disabled) {
   background: var(--smm-ink) !important;
@@ -948,8 +965,13 @@ div.exclusivePopup .i-button:disabled:not(.borderless) {
   background-color: var(--smm-hair) !important;
   border-bottom: 1px solid var(--smm-rule) !important;
 }
-.wmd-button { color: var(--smm-ink) !important; }
-.wmd-button:hover { color: var(--smm-accent) !important; }
+.wmd-button,
+.wmd-button > span { color: var(--smm-ink) !important; }
+.wmd-button:hover,
+.wmd-button:hover > span { color: var(--smm-accent) !important; }
+/* The icon font is a hairline at its default size, which on a phone reads
+   as grey mush however bright the colour is. A size up. */
+.wmd-button > span { font-size: 1.25em; }
 .wmd-spacer { background-color: var(--smm-rule) !important; }
 .wmd-input.has-length-info { border-bottom-color: var(--smm-paper) !important; }
 .md-preview-wrapper pre,
@@ -985,12 +1007,30 @@ div.exclusivePopup .i-button:disabled:not(.borderless) {
 }
 .tox .tox-tbtn,
 .tox .tox-tbtn--select,
+.tox .tox-tbtn__select-label,
 .tox .tox-collection__item,
 .tox .tox-statusbar,
 .tox .tox-statusbar a { color: var(--smm-ink) !important; }
+/* The icons are SVG with a hard-coded near-black fill rather than
+   currentColor, so recolouring the button did nothing to them: on this
+   toolbar they were black on black. The format picker is a pale pill of
+   its own, and every hover, focus and active state is a pale blue wash. */
+.tox .tox-tbtn svg,
+.tox .tox-split-button svg,
+.tox .tox-collection__item-icon svg { fill: var(--smm-ink) !important; }
+.tox .tox-tbtn--bespoke { background: var(--smm-hair) !important; }
 .tox .tox-tbtn:hover,
+.tox .tox-tbtn:focus,
+.tox .tox-tbtn--enabled,
+.tox .tox-tbtn--enabled:hover,
+.tox .tox-collection--list .tox-collection__item--active,
 .tox .tox-collection__item--active,
-.tox .tox-collection__item--enabled { background-color: var(--smm-accent-wash) !important; }
+.tox .tox-collection__item--enabled {
+  background: var(--smm-accent-wash) !important;
+  color: var(--smm-ink) !important;
+}
+.tox .tox-tbtn:hover svg,
+.tox .tox-tbtn--enabled svg { fill: var(--smm-accent) !important; }
 .tox .tox-statusbar { border-top-color: var(--smm-rule) !important; }
 
 /* ---- pop-up balloons (qtip) ----------------------------------------------
