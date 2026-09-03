@@ -24,6 +24,11 @@
    diagram, which come first) and a `gen` on every edge: 0 for the diagram, 1
    and up for each generation grown out of it.
 
+   Escapes -- lines leaving the picture -- take `escapeReach` (units; beyond
+   it a line wanders out in kinked steps rather than running straight),
+   `escapeScale` (their line weight; default tapers from the core's) and
+   `escapeTypes` (which kinds of leg may leave; default all).
+
    Requires design/network.js for its seeded rng. */
 (function () {
   const RULES = {
@@ -260,17 +265,78 @@
       if (cy < -1e-6) t = Math.min(t, -p[1] / cy);
       return t;
     }
+    /* A line leaving the picture. Straight, where the edge is near: one run
+       to just past the frame. Where it is far -- the presenter page sets its
+       unit off the height so the frame is thirty-odd units across -- a
+       straight run that long is a bar drawn over the field, so the line
+       wanders out instead, a step or two at a time with the heading drifting,
+       each turn a kink in one propagator rather than a vertex. That is how
+       the mesh's own long fermion lines move, and it is what lets a quark
+       leave the diagram without anything to mark where it stopped: it does
+       not stop, it goes off the edge like the rest of them. */
+    const ESC_REACH = (cfg.escapeReach == null ? 6 : cfg.escapeReach) * U;
+    const ESC_SCALE = cfg.escapeScale == null ? null : cfg.escapeScale;
+    const ESC_TYPES = cfg.escapeTypes || null;      // null: every leg may leave
+    function wander(leg, gen) {
+      let v = leg.v, dir = leg.dir;
+      const taper = ESC_SCALE != null ? ESC_SCALE : Math.max(MESH_S, CORE_S - gen * 0.14);
+      const was = endMark.get(leg.v);
+      const first = edges.length, firstV = verts.length;
+      for (let step = 0; step < 80; step++) {
+        const p = verts[v];
+        const out = Math.atan2(p[1] - CY, p[0] - CX);
+        // Keep heading roughly outward, drifting, never folding back. The
+        // steps are the mesh's own length and the turns its own size: at
+        // twice the step and a quarter of the turn this came out as two
+        // rails across the frame with a kink apiece, which is not a line
+        // wandering out, it is a bar.
+        const want = Math.atan2(Math.sin(dir) * 0.6 + Math.sin(out) * 0.5,
+                                Math.cos(dir) * 0.6 + Math.cos(out) * 0.5);
+        let placed = false;
+        for (let a = 0; a < 14 && !placed; a++) {
+          const d = want + (a % 2 ? -1 : 1) * Math.ceil(a / 2) * 0.22 + (R() - 0.5) * 0.7;
+          const run = U * (0.9 + R() * 0.9);
+          const toEdge = toFrame(p, d);
+          const last = isFinite(toEdge) && toEdge < run + U * 0.6;
+          const reach = last ? toEdge + U * 0.8 : run;
+          const to = [p[0] + Math.cos(d) * reach, p[1] + Math.sin(d) * reach];
+          if (!placeable(p, to, [v], true)) continue;
+          const vi = V((to[0] - CX) / U, (to[1] - CY) / U);
+          const ei = E(v, vi, leg.type, taper, gen + 1);
+          edges[ei].esc = true;
+          bend[v] = 1;                                 // a kink, not a junction
+          v = vi; dir = d; placed = true;
+          if (last) {
+            if (was) edges[was[0]][was[1]] = false;    // off the picture: no mark
+            return true;
+          }
+        }
+        if (!placed) break;
+      }
+      // Could not get out: take the attempt back rather than leave a tail
+      // ending in the middle of the frame. bend is indexed by vertex, so it is
+      // cut back with them or a stale kink would land on whatever vertex next
+      // takes that index.
+      edges.length = first;
+      verts.length = firstV;
+      bend.length = Math.min(bend.length, firstV);
+      bend[leg.v] = 0;
+      return false;
+    }
+
     function escape(leg, gen) {
+      if (ESC_TYPES && ESC_TYPES.indexOf(leg.type) < 0) return false;
       const out = Math.atan2(verts[leg.v][1] - CY, verts[leg.v][0] - CX);
       const base = Math.atan2(Math.sin(leg.dir) + Math.sin(out) * 0.7,
                               Math.cos(leg.dir) + Math.cos(out) * 0.7);
+      if (toFrame(verts[leg.v], base) > ESC_REACH) return wander(leg, gen);
       for (let a = 0; a < 25; a++) {
         const dir = base + (a % 2 ? -1 : 1) * Math.ceil(a / 2) * 0.13;
         const d = toFrame(verts[leg.v], dir);
         // Worth a long run: the clearance and crossing tests below refuse any
         // that cannot get out cleanly, and a line leaving the picture reads
         // better than a cluster of × where several chains ran out together.
-        if (!isFinite(d) || d > U * 6) continue;
+        if (!isFinite(d) || d > ESC_REACH) continue;
         const reach = d + U * 0.8;
         const to = [verts[leg.v][0] + Math.cos(dir) * reach,
                     verts[leg.v][1] + Math.sin(dir) * reach];
@@ -278,13 +344,13 @@
         const vi = V((to[0] - CX) / U, (to[1] - CY) / U);
         const was = endMark.get(leg.v);
         if (was) edges[was[0]][was[1]] = false;
-        const taper = Math.max(MESH_S, CORE_S - gen * 0.14);
+        const taper = ESC_SCALE != null ? ESC_SCALE : Math.max(MESH_S, CORE_S - gen * 0.14);
         const ei = E(leg.v, vi, leg.type, taper, gen + 1);  // no mark: off the picture
         edges[ei].esc = true;                         // and a thin keep-out, see zones()
         bend[leg.v] = 1;                              // and no junction either
         return true;
       }
-      return false;
+      return wander(leg, gen);
     }
 
     function lay(leg, gen, placed) {
