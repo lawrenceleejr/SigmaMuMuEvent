@@ -32,9 +32,15 @@ sitemap — it is a screen, not a page.
 
 Two controls sit in a bar along the bottom. A text field puts an announcement
 on the screen, sized to fit the band it is given, so **Back at 10:45** fills it
-and a whole sentence steps down until it fits. A button goes full screen and
-takes the bar with it; Esc leaves, and a mouse move brings the bar back for a
-few seconds so an announcement can be typed without dropping out.
+and a whole sentence steps down until it fits. A button presents: the bar goes,
+and a tap, a click or Esc brings it back.
+
+Presenting is the page's own state, not the Fullscreen API's. iPhone Safari has
+no Fullscreen API — not on the document element, not prefixed — so a mode that
+waits for `requestFullscreen` never starts there and the controls stay on
+screen. The chrome goes on a class either way, and real full screen is asked
+for on top of that where it exists. Added to a phone's home screen the page
+runs without the browser's bars, which is as close as an iPhone gets.
 
 The diagram and its grown legs are painted once onto their own canvas and left
 alone; only the generated mesh animates, each line drawing itself on the

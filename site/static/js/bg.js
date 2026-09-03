@@ -275,36 +275,68 @@
   }
   input.addEventListener('input', fitSoon);
 
-  /* ---- full screen ------------------------------------------------------ */
+  /* ---- presenting ------------------------------------------------------- */
+  /* iPhone Safari has no Fullscreen API — not on the document element, not
+     prefixed — so a presenting mode that waits for requestFullscreen simply
+     never starts, and the controls stay on screen. So presenting is our own
+     state: the chrome goes on a class, and real full screen is asked for on
+     top of that only where it exists. A tap or a click anywhere leaves, which
+     is the only gesture a phone has; Esc leaves too, and so does the browser
+     dropping out of full screen by itself. */
   var btn = document.getElementById('fs');
-  var peekTimer = 0;
+  var presenting = false, enteredAt = 0, hintTimer = 0;
+
   function isFull() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
-  btn.addEventListener('click', function () {
-    if (isFull()) {
-      (document.exitFullscreen || document.webkitExitFullscreen).call(document);
-    } else {
-      var el = document.documentElement;
-      (el.requestFullscreen || el.webkitRequestFullscreen).call(el);
-    }
-  });
-  function syncFull() {
-    body.classList.toggle('full', isFull());
-    btn.textContent = isFull() ? 'Exit full screen' : 'Full screen';
+
+  function enter() {
+    presenting = true;
+    enteredAt = Date.now();
+    body.classList.add('present', 'hint-on');
+    clearTimeout(hintTimer);
+    hintTimer = setTimeout(function () { body.classList.remove('hint-on'); }, 2600);
+    var el = document.documentElement;
+    var req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req) { try { req.call(el); } catch (e) { /* denied is fine — the chrome is gone anyway */ } }
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    // On a later tick, or the click that started this would end it.
+    setTimeout(function () { document.addEventListener('click', leaveOnTap, true); }, 0);
   }
-  document.addEventListener('fullscreenchange', syncFull);
-  document.addEventListener('webkitfullscreenchange', syncFull);
-  // Esc leaves full screen on its own; this is only so the controls can be
-  // reached again without leaving it, which is the whole point during a break.
-  window.addEventListener('mousemove', function () {
-    if (!isFull()) return;
-    body.classList.add('peek');
-    clearTimeout(peekTimer);
-    peekTimer = setTimeout(function () { body.classList.remove('peek'); }, 2600);
+
+  function leave() {
+    presenting = false;
+    body.classList.remove('present', 'hint-on');
+    document.removeEventListener('click', leaveOnTap, true);
+    if (isFull()) {
+      var ex = document.exitFullscreen || document.webkitExitFullscreen;
+      if (ex) { try { ex.call(document); } catch (e) {} }
+    }
+  }
+
+  function leaveOnTap(ev) {
+    if (Date.now() - enteredAt < 350) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    leave();
+  }
+
+  btn.addEventListener('click', function () { if (presenting) leave(); else enter(); });
+  document.addEventListener('keydown', function (e) {
+    if (presenting && (e.key === 'Escape' || e.key === 'Esc')) leave();
   });
+  // Where full screen is real, Esc is handled by the browser: follow it out.
+  function followBrowser() { if (presenting && !isFull()) leave(); }
+  document.addEventListener('fullscreenchange', followBrowser);
+  document.addEventListener('webkitfullscreenchange', followBrowser);
 
   /* ---- go --------------------------------------------------------------- */
-  var resizeTimer = 0;
+  var resizeTimer = 0, lastW = 0, lastH = 0;
   window.addEventListener('resize', function () {
+    // A phone's address bar sliding away changes the height and nothing else.
+    // Rebuilding for that costs a second and hands back a different field, so
+    // only a real change of screen counts.
+    var w = window.innerWidth, h = window.innerHeight;
+    if (w === lastW && Math.abs(h - lastH) / Math.max(1, lastH) < 0.2) return;
+    lastW = w; lastH = h;
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(function () {
       warmup = 3; frameEma = 1 / 60;      // a new screen deserves a fresh look
@@ -313,6 +345,6 @@
   });
 
   build();
-  syncFull();
+  lastW = window.innerWidth; lastH = window.innerHeight;
   if (reduce) frame(0); else requestAnimationFrame(frame);
 })();

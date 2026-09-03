@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
+<!-- Added to a phone's home screen this runs without the browser's own bars,
+     which is as close to full screen as an iPhone gets: Safari there has no
+     Fullscreen API to ask. -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>{{ .Title }}</title>
 <link rel="icon" href="{{ "favicon.svg" | relURL }}" type="image/svg+xml">
 <link rel="stylesheet" href="{{ "fonts/fonts.css" | relURL }}">
@@ -18,7 +24,7 @@
     --sans: Archivo, "Helvetica Neue", Arial, sans-serif;
   }
   * { margin: 0; box-sizing: border-box; }
-  html, body { height: 100%; overflow: hidden; background: var(--paper); }
+  html, body { height: 100dvh; overflow: hidden; background: var(--paper); }
   body { font-family: var(--sans); color: var(--ink); }
   canvas { position: fixed; inset: 0; width: 100%; height: 100%; }
   #live { z-index: 0; }
@@ -97,9 +103,9 @@
     text-align: center; text-wrap: balance;
   }
 
-  /* Controls. They are chrome, so they sit quietly at the bottom and go away
-     entirely in full screen — a mouse move brings them back for a moment, so
-     an announcement can be typed without dropping out of it. */
+  /* Controls. They are chrome, so they sit quietly at the bottom and are gone
+     while presenting — not faded, gone, since a phone has no Fullscreen API
+     to hide them for us and a half-transparent bar is still a bar. */
   #bar {
     position: fixed; z-index: 4; left: 0; right: 0; bottom: 0;
     display: flex; gap: 0.8rem; align-items: center; justify-content: center;
@@ -108,8 +114,18 @@
     border-top: 1px solid rgba(239, 233, 218, 0.14);
     transition: opacity 0.25s ease, transform 0.25s ease;
   }
-  body.full #bar { opacity: 0; transform: translateY(100%); pointer-events: none; }
-  body.full.peek #bar { opacity: 1; transform: none; pointer-events: auto; }
+  body.present #bar { display: none; }
+  body.present { cursor: none; -webkit-user-select: none; user-select: none; }
+
+  /* How to get out, said once and then left alone. A tap anywhere works, so
+     nobody can be stuck behind a hidden cursor. */
+  #exit-hint {
+    position: fixed; z-index: 5; left: 0; right: 0; bottom: 3.4vh;
+    text-align: center; color: var(--muted);
+    font-size: 0.86rem; letter-spacing: 0.14em; text-transform: uppercase;
+    opacity: 0; transition: opacity 0.7s ease; pointer-events: none;
+  }
+  body.present.hint-on #exit-hint { opacity: 0.8; }
   #say-input {
     flex: 1 1 34rem; max-width: 44rem;
     padding: 0.6rem 0.8rem;
@@ -131,6 +147,24 @@
   #fs:hover { background: var(--accent); color: var(--ink); }
   .hint { color: var(--muted); font-size: 0.78rem; letter-spacing: 0.04em; }
   @media (max-width: 700px) { .hint { display: none; } }
+
+  /* Held in portrait — a phone, not the room screen. The type is sized off
+     the width, which on a tall frame leaves it far too small to read, so it
+     takes a larger share of it and the footline stacks instead of spanning. */
+  @media (max-aspect-ratio: 1 / 1) {
+    #type { padding: 4vh 6vw; }
+    .kicker { font-size: 3.4vw; }
+    /* Narrow enough to clear the mark in the corner rather than run under it. */
+    h1 { font-size: 6vw; max-width: 72vw; margin-top: 1.2vh; }
+    .rule { max-width: 88vw; margin-top: 2.6vh; }
+    .foot {
+      flex-direction: column; align-items: flex-start;
+      gap: 0.45em; font-size: 2.9vw; margin-top: 1.4vh;
+    }
+    #mark { width: 17vw; height: 8vh; top: 4vh; right: 6vw; }
+    #say-wrap { padding: 0 6vw; }
+    #bar { flex-wrap: wrap; }
+  }
 </style>
 </head>
 <body>
@@ -152,12 +186,13 @@
 <div id="mark" aria-hidden="true"></div>
 
 <div id="say-wrap"><div id="say"></div></div>
+<div id="exit-hint" aria-hidden="true">Tap anywhere, or press Esc, to exit</div>
 
 <div id="bar">
   <input id="say-input" type="text" autocomplete="off" spellcheck="false"
          placeholder="Announcement — e.g. Back at 10:45, Parallel B moved to Redwood">
   <button id="fs" type="button">Full screen</button>
-  <span class="hint">Esc leaves full screen</span>
+  <span class="hint">Tap or press Esc to come back</span>
 </div>
 
 <script src="{{ "js/network.js" | relURL }}"></script>
