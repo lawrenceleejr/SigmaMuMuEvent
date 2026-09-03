@@ -18,9 +18,29 @@ ends in the vacuum. Every line is exactly the weight it says it is.
 | `sigmamumu-instagram-post-2160x2700.jpg` | Instagram portrait master at 2× — use this for viewing and zooming |
 | `sigmamumu-instagram-post-1080x1350.jpg` | Same board at Instagram's exact upload size |
 | `sigmamumu-ad-post-caption.md` | Caption copy — feed and sponsor-facing |
+| `slide-bg-{dark,light}-{1920x1080,3840x2160}.png` | 16:9 slide backgrounds |
 
 The animated cut of the Instagram board is rendered on demand — see
 **Rendering the video** below.
+
+### The slide background
+
+`node render/slide-bg.mjs` puts a vector-boson-fusion diagram in the middle of
+the field — two quarks come in, each radiates a weak boson, the bosons fuse to
+a Higgs, and that Higgs splits into the pair — and grows the rest of the
+picture out of its six external legs, one legal vertex at a time: a fermion
+carries on and radiates a boson or a Higgs, a boson splits or turns into a
+Higgs, a Higgs splits or goes back to bosons. Nothing is placed that would
+cross what is already there, and the generated mesh fills what is left, held
+off the drawn structure by a clearance along every segment. Both graphs are
+audited against the same table as everything else; the render fails on an
+illegal vertex.
+
+    node render/slide-bg.mjs --theme light          # cream instead of near-black
+    node render/slide-bg.mjs --w 3840 --h 2160      # same picture, larger
+    node render/slide-bg.mjs --seed 12              # a different field
+    node render/slide-bg.mjs --veil 0.5             # knocked back, for slides
+                                                    # that carry a lot of type
 
 `out/archive-first-direction/` holds an earlier, unrelated poster direction
 (a p5.js detector-ring sketch, still in `poster/`) kept for reference.
