@@ -69,9 +69,12 @@
     height: max(2px, 0.45vh);
     background: var(--accent);
   }
+  /* Stacked, both on the left edge the kicker, the title and the rule share.
+     Set across from each other the URL had nothing to align to and floated in
+     the middle of the frame. */
   .foot {
-    display: flex; justify-content: space-between; align-items: baseline;
-    gap: 2em; max-width: 78vw; margin-top: 1.9vh;
+    display: flex; flex-direction: column; align-items: flex-start;
+    gap: 0.5vh; max-width: 78vw; margin-top: 1.9vh;
     font-size: 1.5vw; font-weight: 600;
     letter-spacing: 0.09em; text-transform: uppercase;
   }
@@ -149,13 +152,7 @@
     /* Narrow enough to clear the mark in the corner rather than run under it. */
     h1 { font-size: 6vw; max-width: 72vw; margin-top: 1.2vh; }
     .rule { max-width: 100%; margin-top: 2.6vh; }
-    /* Both halves of the footline stack — they will not sit side by side at
-       this width — and both hang off the left, on the same edge as the rule,
-       the kicker and the title. */
-    .foot {
-      flex-direction: column; align-items: flex-start;
-      gap: 0.35em; font-size: 2.9vw; margin-top: 1.4vh; max-width: 100%;
-    }
+    .foot { gap: 0.35em; font-size: 2.9vw; margin-top: 1.4vh; max-width: 100%; }
     #mark { width: 17vw; height: 8vh; top: 4vh; right: 5vw; }
     #say-wrap { padding: 0 5vw; }
     #bar { flex-wrap: wrap; }
