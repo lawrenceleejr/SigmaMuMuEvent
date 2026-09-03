@@ -1,12 +1,17 @@
 /* The presenter screen at /bg.
  *
- * Two canvases. The back one carries the generated mesh and animates: every
- * line draws itself on the same curve the poster uses — 1-(1-t)^5.5, fast out
- * of the vertex then a long decay — holds, fades, and comes back, staggered by
- * its graph distance from the middle so the waves sweep outward. The front one
- * carries the hand-drawn VBF diagram and the legs grown out of it; that is
- * painted once and left, because it is the thing on the screen meant to be
- * read and it should not blink out halfway through a coffee break.
+ * Two canvases. The back one carries the generated mesh and animates on the
+ * website's rules — site/static/js/field.js — because giving every line its
+ * own looping clock, which is what this page did first, bunches them up and
+ * the whole field re-emerges at once. Instead one or two walkers flood the
+ * mesh from a single vertex each, a direction-biased Dijkstra so the front
+ * travels rather than spreading as a disc, and a line only starts drawing
+ * when the flood reaches it — out of the vertex it arrived at, on the
+ * poster's growth curve. Behind the head the field holds, and the tail fades
+ * it out again. The front one carries the hand-drawn VBF diagram and the legs
+ * grown out of it; that is painted once and left, because it is the thing on
+ * the screen meant to be read and it should not blink out halfway through a
+ * coffee break.
  *
  * Painting is batched the way site/static/js/field.js batches it: same-tone,
  * same-type lines go into one Path2D and are stroked together, marks once per
@@ -22,13 +27,19 @@
   var INK = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim();
   var ACCENT = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
   var PIXEL_BUDGET = 3.5e6;      // past this the fill rate costs more than the sharpness
-  var CYCLE = 34;                // seconds for one pass of the field
-  var GROW_END = 0.2, FADE_AT = 0.78, SPREAD = 0.55;
+  var WALKERS = 2;               // out of phase, so the field is never empty
+  var TRAVERSE = 30;             // seconds for a walker to cross its whole flood
+  var TAIL = 0.85;               // tail as a fraction of the flood. The website
+                                 // takes this from the scroll; there is nothing
+                                 // to scroll here, so it is held generous: a
+                                 // wide lit region with a front and a wake.
+  var FADE = 0.34;               // fraction of the tail spent fading out
   var BUCKETS = 12;
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   var W = 0, H = 0, DPR = 1, U = 0, MESH_S = 1;
-  var drawn = null, mesh = null, phase = null, baseTone = null;
+  var drawn = null, mesh = null, baseTone = null, walkers = null;
+  var eGrow = null, eTone = null, eRev = null, vIsX = null;
 
   function sizeOf() {
     W = Math.max(320, window.innerWidth);
@@ -103,20 +114,28 @@
       higgsPure: 7, higgsQuartics: 2,
     });
 
-    var maxT = 0;
-    mesh.edges.forEach(function (e) { if (e.t0 > maxT) maxT = e.t0; });
-    phase = new Float32Array(mesh.edges.length);
+    mesh.inc = mesh.verts.map(function () { return []; });
+    mesh.edges.forEach(function (e, i) { mesh.inc[e.a].push(i); mesh.inc[e.b].push(i); });
+
     baseTone = new Float32Array(mesh.edges.length);
     mesh.edges.forEach(function (e, i) {
-      phase[i] = maxT ? e.t0 / maxT : 0;
       var p = mesh.verts[e.a], q = mesh.verts[e.b];
       var d = Math.hypot(((p[0] + q[0]) / 2 - CX) / (W / 2),
                          ((p[1] + q[1]) / 2 - CY) / (H / 2));
       baseTone[i] = 0.5 * (1 - 0.4 * Math.min(1, d));   // the vignette
-      e.__p2d = null;
+      e.__p2d = null; e.__pts = null; e.__ptsR = null;
     });
+    eGrow = new Float32Array(mesh.edges.length);
+    eTone = new Float32Array(mesh.edges.length);
+    eRev = new Uint8Array(mesh.edges.length);
     vTone = new Float32Array(mesh.verts.length);
     vIsX = new Uint8Array(mesh.verts.length);
+    mesh.edges.forEach(function (e) { if (e.xa) vIsX[e.a] = 1; if (e.xb) vIsX[e.b] = 1; });
+
+    // The first walker starts at the diagram, so the page opens by growing out
+    // of it; the ones that follow start wherever, and wander.
+    walkers = [];
+    for (var k = 0; k < WALKERS; k++) walkers.push(seedWalker(k / WALKERS, k === 0));
     paintStill();
   }
 
@@ -137,6 +156,107 @@
     }
   }
 
+  /* ---- the flood -------------------------------------------------------- */
+  /* Straight from the website. A plain Dijkstra from a vertex spreads as a
+     disc; multiplying each edge's cost by how far it points from a slowly
+     drifting heading makes the front travel instead — cheap along the
+     heading, expensive across it. Each edge records the distance at which the
+     flood reached it and which of its two ends it arrived at, which is the
+     end the line then grows out of. */
+  function flood(startVertex) {
+    var n = mesh.edges.length;
+    var arrive = new Float64Array(n), rev = new Uint8Array(n);
+    for (var i = 0; i < n; i++) arrive[i] = Infinity;
+    var seen = new Float64Array(mesh.verts.length);
+    for (var v = 0; v < seen.length; v++) seen[v] = Infinity;
+
+    var th0 = Math.random() * Math.PI * 2;
+    var l1 = 900 + Math.random() * 1400, l2 = 320 + Math.random() * 500;
+    var p1 = Math.random() * 6.28, p2 = Math.random() * 6.28;
+    var heading = function (d) {
+      return th0 + 1.15 * Math.sin(d / l1 + p1) + 0.5 * Math.sin(d / l2 + p2);
+    };
+
+    var heap = [[0, startVertex]];
+    seen[startVertex] = 0;
+    var far = 0;
+    while (heap.length) {
+      var top = heap[0], last = heap.pop();
+      if (heap.length) { heap[0] = last; sift(heap, 0); }
+      var d = top[0], u = top[1];
+      if (d > seen[u] + 1e-9) continue;
+      if (d > far) far = d;
+      var list = mesh.inc[u];
+      for (var j = 0; j < list.length; j++) {
+        var ei = list[j], e = mesh.edges[ei];
+        var o = e.a === u ? e.b : e.a;
+        var phi = Math.atan2(mesh.verts[o][1] - mesh.verts[u][1],
+                             mesh.verts[o][0] - mesh.verts[u][0]);
+        var nd = d + e.len * (1 + 2.6 * (1 - Math.cos(phi - heading(d))));
+        if (nd < arrive[ei]) { arrive[ei] = nd; rev[ei] = e.b === u ? 1 : 0; }
+        if (nd < seen[o] - 1e-9) { seen[o] = nd; heap.push([nd, o]); up(heap, heap.length - 1); }
+      }
+    }
+    return { arrive: arrive, rev: rev, far: far || 1 };
+  }
+  function up(h, i) {
+    while (i > 0) {
+      var pi = (i - 1) >> 1;
+      if (h[pi][0] <= h[i][0]) break;
+      var t = h[pi]; h[pi] = h[i]; h[i] = t; i = pi;
+    }
+  }
+  function sift(h, i) {
+    for (;;) {
+      var l = i * 2 + 1, r = l + 1, m = i;
+      if (l < h.length && h[l][0] < h[m][0]) m = l;
+      if (r < h.length && h[r][0] < h[m][0]) m = r;
+      if (m === i) break;
+      var t = h[m]; h[m] = h[i]; h[i] = t; i = m;
+    }
+  }
+
+  function seedWalker(phase, atDiagram) {
+    var start = 0;
+    if (atDiagram) {
+      var best = Infinity;
+      for (var v = 0; v < mesh.verts.length; v++) {
+        if (!mesh.inc[v].length) continue;
+        var d = Math.hypot(mesh.verts[v][0] - CX, mesh.verts[v][1] - CY);
+        if (d < best) { best = d; start = v; }
+      }
+    } else {
+      var live = [];
+      mesh.edges.forEach(function (e) { live.push(e.a); });
+      start = live.length ? live[(Math.random() * live.length) | 0] : 0;
+    }
+    var f = flood(start);
+    return { arrive: f.arrive, rev: f.rev, far: f.far, head: phase * f.far };
+  }
+
+  // Each edge keeps the strongest state across the walkers: how far it has
+  // grown, how lit it is, and which end it is growing out of.
+  function gather(frac) {
+    eGrow.fill(0); eTone.fill(0);
+    var edges = mesh.edges;
+    for (var k = 0; k < walkers.length; k++) {
+      var w = walkers[k], tail = w.far * frac, lo = w.head - tail;
+      for (var i = 0; i < edges.length; i++) {
+        var a = w.arrive[i];
+        if (!isFinite(a) || a > w.head || a < lo) continue;
+        // The head end draws part-grown on the poster's curve: a quintic
+        // ease-out, so each line leaps out of its vertex and then creeps.
+        var lin = Math.min(1, (w.head - a) / (edges[i].len * 2.2));
+        var grow = Math.max(0.02, 1 - Math.pow(1 - lin, 5.5));
+        var age = (w.head - a) / tail;                 // 0 at the head, 1 at the tail
+        var tone = age > 1 - FADE ? Math.max(0, (1 - age) / FADE) : 1;
+        if (tone <= 0.01) continue;
+        if (grow > eGrow[i]) { eGrow[i] = grow; eRev[i] = w.rev[i]; }
+        if (tone > eTone[i]) eTone[i] = tone;
+      }
+    }
+  }
+
   function p2d(e) {
     if (e.__p2d) return e.__p2d;
     var pts = window.SMMNet.pathPoints(mesh, e);
@@ -147,26 +267,7 @@
     return path;
   }
 
-  // A line still growing is stroked as a prefix of its own path, so it can go
-  // into the same bucket as the finished ones instead of costing a draw call
-  // of its own — a fifth of the field is mid-growth at any moment, which is
-  // enough per-call state changes to cost more than the pixels do.
-  function prefix(e, frac) {
-    var pts = window.SMMNet.pathPoints(mesh, e);
-    var total = pts.length - 1;
-    var reach = total * Math.max(0.015, Math.min(1, frac));
-    var whole = Math.floor(reach);
-    var path = new Path2D();
-    path.moveTo(pts[0][0], pts[0][1]);
-    for (var i = 1; i <= Math.min(whole, total); i++) path.lineTo(pts[i][0], pts[i][1]);
-    if (whole < total) {
-      var u = reach - whole, p = pts[whole], q = pts[whole + 1];
-      path.lineTo(p[0] + (q[0] - p[0]) * u, p[1] + (q[1] - p[1]) * u);
-    }
-    return path;
-  }
-
-  var lines, dots, crosses, vTone, vIsX;
+  var lines, dots, crosses, vTone;
   function allocate() {
     lines = { f: [], b: [], h: [] };
     ['f', 'b', 'h'].forEach(function (t) {
@@ -174,62 +275,55 @@
     });
     dots = []; crosses = [];
     for (var i = 0; i < BUCKETS; i++) { dots.push(new Path2D()); crosses.push(new Path2D()); }
-    vTone.fill(0); vIsX.fill(0);
+    vTone.fill(0);
   }
   var bucketOf = function (t) { return Math.max(0, Math.min(BUCKETS - 1, (t * BUCKETS) | 0)); };
   var toneOf = function (b) { return b === BUCKETS - 1 ? 1 : (b + 0.5) / BUCKETS; };
 
-  var lastFrame = 0;
-  function frame(now) {
-    var t = now / 1000;
-    if (!reduce) {
-      adapt(lastFrame ? Math.min(0.05, t - lastFrame) : 1 / 60);
-      lastFrame = t;
-    }
+  function paint() {
+    var N = window.SMMNet, edges = mesh.edges;
+    var lwf = 0.8 + 0.3 * MESH_S;
     lx.clearRect(0, 0, W, H);
     allocate();
 
-    for (var i = 0; i < mesh.edges.length; i++) {
-      var e = mesh.edges[i];
-      var u = reduce ? 1 : ((t / CYCLE - phase[i] * SPREAD) % 1 + 1) % 1;
-      var frac = 1, alpha = 1;
-      if (!reduce) {
-        if (u < GROW_END) {
-          var g = u / GROW_END;
-          frac = 1 - Math.pow(1 - g, 5.5);              // the poster's growth curve
-          alpha = Math.min(1, g * 12);
-        } else if (u > FADE_AT) {
-          alpha = (1 - u) / (1 - FADE_AT);
-        }
-      }
-      var tone = baseTone[i] * alpha;
+    var partial = [];
+    for (var i = 0; i < edges.length; i++) {
+      var g = eGrow[i];
+      if (g <= 0) continue;
+      var tone = eTone[i] * baseTone[i];          // the fade, under the vignette
       if (tone < 0.02) continue;
-      var b = bucketOf(tone);
-      var done = frac >= 0.999;
-      lines[e.type][b].addPath(done ? p2d(e) : prefix(e, frac));
-      // build() orients every edge so `a` is the end the growth reached first,
-      // so that vertex is already there; the far one appears on arrival.
-      if (tone > vTone[e.a]) { vTone[e.a] = tone; vIsX[e.a] = e.xa ? 1 : 0; }
-      if (done && tone > vTone[e.b]) { vTone[e.b] = tone; vIsX[e.b] = e.xb ? 1 : 0; }
+      if (g < 1) { partial.push(i); continue; }
+      var e = edges[i], b = bucketOf(tone);
+      lines[e.type][b].addPath(p2d(e));
+      if (tone > vTone[e.a]) vTone[e.a] = tone;
+      if (tone > vTone[e.b]) vTone[e.b] = tone;
     }
 
-    var lwf = 0.8 + 0.3 * MESH_S;
     lx.lineCap = 'round';
     lx.lineJoin = 'round';
     for (var b2 = 0; b2 < BUCKETS; b2++) {
       var tn = toneOf(b2);
       lx.setLineDash([]);
-      lx.strokeStyle = window.SMMNet.rgba(INK, 0.88 * tn);
+      lx.strokeStyle = N.rgba(INK, 0.88 * tn);
       lx.lineWidth = 1.35 * lwf; lx.stroke(lines.f[b2]);
-      lx.strokeStyle = window.SMMNet.rgba(INK, 0.72 * tn);
+      lx.strokeStyle = N.rgba(INK, 0.72 * tn);
       lx.lineWidth = 1.15 * lwf; lx.stroke(lines.b[b2]);
       lx.setLineDash([6.5 * MESH_S, 6.5 * MESH_S]);
-      lx.strokeStyle = window.SMMNet.rgba(ACCENT, 0.85 * tn);
+      lx.strokeStyle = N.rgba(ACCENT, 0.85 * tn);
       lx.lineWidth = 1.35 * lwf; lx.stroke(lines.h[b2]);
     }
     lx.setLineDash([]);
 
-    // marks, once per vertex rather than once per line that touches it
+    // A growing line keeps its own path, its direction and its origin mark, so
+    // it goes through drawEdge rather than into a bucket. Only the thin band at
+    // the head is ever in this state.
+    for (var k = 0; k < partial.length; k++) {
+      var j = partial[k];
+      N.drawEdge(lx, mesh, edges[j], eGrow[j],
+        { accent: ACCENT, ink: INK, tone: eTone[j] * baseTone[j], rev: !!eRev[j] });
+    }
+
+    // one mark per vertex, at the strongest tone of any line touching it
     var rr = 1.8 * (0.72 + 0.5 * MESH_S), q = 3.4 * (0.72 + 0.5 * MESH_S);
     for (var v = 0; v < vTone.length; v++) {
       if (vTone[v] < 0.02) continue;
@@ -242,16 +336,30 @@
         dots[bk].arc(P[0], P[1], rr, 0, Math.PI * 2);
       }
     }
+    lx.lineWidth = 1.3 * lwf;
     for (var b3 = 0; b3 < BUCKETS; b3++) {
       var tn3 = toneOf(b3);
-      lx.fillStyle = window.SMMNet.rgba(INK, 0.92 * tn3);
+      lx.fillStyle = N.rgba(INK, 0.92 * tn3);
       lx.fill(dots[b3]);
-      lx.strokeStyle = window.SMMNet.rgba(INK, 0.88 * tn3);
-      lx.lineWidth = 1.3 * lwf;
+      lx.strokeStyle = N.rgba(INK, 0.88 * tn3);
       lx.stroke(crosses[b3]);
     }
+  }
 
-    if (!reduce) requestAnimationFrame(frame);
+  var lastFrame = 0;
+  function frame(now) {
+    var t = now / 1000;
+    var dt = lastFrame ? Math.min(0.05, t - lastFrame) : 1 / 60;
+    lastFrame = t;
+    adapt(dt);
+    for (var k = 0; k < walkers.length; k++) {
+      var w = walkers[k];
+      w.head += (w.far / TRAVERSE) * dt;
+      if (w.head - w.far * TAIL > w.far) walkers[k] = seedWalker(0, false);   // spent
+    }
+    gather(TAIL);
+    paint();
+    requestAnimationFrame(frame);
   }
 
   /* ---- the announcement ------------------------------------------------- */
@@ -354,5 +462,14 @@
 
   build();
   lastW = window.innerWidth; lastH = window.innerHeight;
-  if (reduce) frame(0); else requestAnimationFrame(frame);
+  if (reduce) {
+    // Asked for less motion: hand back the finished field and hold it. The
+    // head is put well past the far end and the tail made longer still, so
+    // every line is fully grown and none of them is inside the fade.
+    walkers.forEach(function (w) { w.head = w.far * 3; });
+    gather(10);
+    paint();
+  } else {
+    requestAnimationFrame(frame);
+  }
 })();

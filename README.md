@@ -43,9 +43,13 @@ for on top of that where it exists. Added to a phone's home screen the page
 runs without the browser's bars, which is as close as an iPhone gets.
 
 The diagram and its grown legs are painted once onto their own canvas and left
-alone; only the generated mesh animates, each line drawing itself on the
-poster's growth curve, staggered by its distance from the middle so the waves
-travel outward. Lines are batched by tone and type into one path each, and if
+alone; only the generated mesh animates, and it animates on the website's
+rules — one or two walkers flooding it from a single vertex each, a
+direction-biased Dijkstra so the front travels rather than spreading as a
+disc, and a line starting to draw only when the flood reaches it, out of the
+vertex it arrived at. Giving every line its own looping clock instead, which
+this page did first, bunches them up: the whole field re-emerges at once.
+Lines are batched by tone and type into one path each, and if
 the frames still come back slow — a 4K panel driven without acceleration is
 the case that bites — the canvas steps its resolution down rather than
 stutter. The field is reseeded on every load, so it is never quite the same
