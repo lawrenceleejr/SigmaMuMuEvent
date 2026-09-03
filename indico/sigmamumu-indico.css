@@ -73,11 +73,15 @@ input, select, textarea, button, .i-button {
   html { background-attachment: scroll, scroll; background-size: cover, 200vw auto; }
 }
 
-/* The field draws itself: field-live.svg carries its own CSS animation, and an
-   SVG used as a background-image runs those (it is loaded without scripts, but
-   not frozen). Anyone who has asked for less motion gets the finished field as
-   a flat image instead — the SVG also stops itself internally, so this is
-   belt and braces. */
+/* The field draws itself: field-live.svg carries its own SMIL animation, and
+   an SVG used as a background-image runs that (it is loaded without scripts,
+   but not frozen). It used to carry CSS keyframes instead, which Chrome and
+   iOS ran and Safari on the desktop did not — it rendered the first frame and
+   stopped — so the whole file is SMIL now, which every current engine runs in
+   an image.
+   Anyone who has asked for less motion gets the finished field as a flat
+   image instead. That swap has to happen here rather than inside the SVG:
+   nothing within an SVG can switch its own SMIL off. */
 @media (prefers-reduced-motion: reduce) {
   html {
     background-image:

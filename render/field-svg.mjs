@@ -8,11 +8,24 @@
  * Why an SVG: Indico only lets you upload a stylesheet, so the canvas that
  * animates the website cannot run there. An SVG referenced from CSS as a
  * background-image is loaded in "secure animated mode" — no scripts, but its
- * own CSS animations do play. So the motion is declared inside the file.
+ * own declarative animation does play. So the motion is declared inside the
+ * file.
+ *
+ * Why SMIL rather than CSS keyframes: Safari does not run CSS animations
+ * inside an SVG that is used as an image. It renders the first frame and
+ * stops, which is why this field was alive in Chrome and on iOS and dead on a
+ * Mac desktop. SMIL is the one declarative animation every current engine runs
+ * in an image context, so that is what this emits.
  *
  * Each line carries the growth order build() already computes, turned into a
- * negative animation-delay. Because the delays are spread across one loop the
- * field is always mid-life somewhere rather than restarting in unison.
+ * negative begin time. Because those are spread across one loop the field is
+ * always mid-life somewhere rather than restarting in unison.
+ *
+ * The animation is declared once per timing group rather than once per line:
+ * stroke-dashoffset is an inherited property, so a <g> carrying the animation
+ * drives every line inside it, and group opacity multiplies through for the
+ * fade. 614 lines become a few dozen groups, which is what keeps the file from
+ * doubling in size when the keyframes stop being shared through a stylesheet.
  *
  * Solid lines and boson waves draw themselves with stroke-dashoffset. Scalars
  * are dashed, and their dasharray is already spoken for, so they fade instead.
@@ -121,18 +134,39 @@ for (let i = 0; i <= 2000; i++) {
   const lerp = curve(a) + (curve(b) - curve(a)) * ((u - a) / (b - a));
   worst = Math.max(worst, Math.abs(lerp - curve(u)));
 }
-// One sorted list, so the generated file reads in the order it plays: the
-// growth stops, the opacity fade-in that overlaps them, then hold and fade.
-const frames = us.map((u, i) => ({
-  pct: +(u * GROW_END).toFixed(3),
-  decls: `stroke-dashoffset: ${+curve(u).toFixed(4)};`
-       + (i === 0 ? ' opacity: 0;' : i === us.length - 1 ? ' opacity: 1;' : ''),
-}));
-frames.push({ pct: 3, decls: 'opacity: 1;' });
-frames.push({ pct: 82, decls: 'stroke-dashoffset: 0; opacity: 1;' });
-frames.push({ pct: 100, decls: 'stroke-dashoffset: 0; opacity: 0;' });
-frames.sort((a, b) => a.pct - b.pct);
-const growStops = frames.map(f => `    ${f.pct}% { ${f.decls} }`).join('\n');
+/* The same stops, as the two parallel lists SMIL wants: keyTimes are
+   fractions of the loop and must run 0 to 1, values are what the property
+   takes at each. The growth occupies the first GROW_END% and then the line
+   holds at 0 until the fade at the end. */
+const growTimes = us.map(u => +(u * GROW_END / 100).toFixed(5));
+const growValues = us.map(u => +curve(u).toFixed(4));
+growTimes.push(1);              // holds at zero for the rest of the loop
+growValues.push(0);
+const DASH_TIMES = growTimes.join(';');
+const DASH_VALUES = growValues.join(';');
+
+// Opacity is its own animation: up over the first 3% so a line does not blink
+// into existence at full strength, held, then out at the end. On a group this
+// multiplies through to every line inside it.
+const FADE_TIMES = '0;0.03;0.82;1';
+const FADE_VALUES = '0;1;1;0';
+// The scalars and the vertex marks only fade -- their dasharray is spoken for.
+const GLOW_TIMES = '0;0.04;0.82;1';
+const GLOW_VALUES = '0;1;1;0';
+
+/* One animation per timing group instead of one per line. The delays build()
+   produces are continuous, so they are quantised into BUCKETS steps across the
+   loop: at 26 seconds and 64 buckets that is 0.4s of granularity, which is
+   finer than an eye tracking 600 lines can resolve, and it turns 945
+   animation declarations into 128. */
+/* 40 measured out as the balance: cost falls off with fewer groups (64
+   buckets ran at 31 fps in a software rasteriser, 24 at 41), while a coarser
+   stagger starts to clump -- at 24 buckets some twenty-five lines begin
+   drawing in the same instant. 40 is 0.7s of granularity and about fifteen
+   lines to a group. */
+const BUCKETS = num('buckets', 40);
+const bucketOf = t0 => Math.min(BUCKETS - 1, Math.floor((t0 / maxT) * BUCKETS));
+const beginOf = b => -r2(((b + 0.5) / BUCKETS) * SECONDS);
 
 // The node dots and the x marks that end a line in the vacuum. Each takes the
 // timing of the earliest line that touches it, minus a lead, so the vertex is
@@ -149,26 +183,28 @@ for (const e of net.edges) {
   }
 }
 
-let body = '';
+/* Three sets of shapes, bucketed by when they come to life: the lines that
+   draw themselves, and the scalars and vertex marks that only fade. */
+const drawGroups = Array.from({ length: BUCKETS }, () => '');
+const glowGroups = Array.from({ length: BUCKETS }, () => '');
 let drawn = 0, faded = 0;
 for (const e of net.edges) {
   const d = 'M' + e.pts.map(p => r2(p[0]) + ' ' + r2(p[1])).join('L');
-  const L = Math.ceil(len(e.pts));
   const lwf = 0.8 + 0.3 * e.s;
-  const delay = -(e.t0 / maxT) * SECONDS;
+  const b = bucketOf(e.t0 || 0);
   if (e.type === 'h') {
     const dash = r2(6.5 * e.s);
-    body += `<path class="s" d="${d}" stroke-width="${r2(1.35 * lwf)}"`
-          + ` stroke-dasharray="${dash} ${dash}" style="animation-delay:${r2(delay)}s"/>`;
+    glowGroups[b] += `<path class="s" d="${d}" stroke-width="${r2(1.35 * lwf)}"`
+                   + ` stroke-dasharray="${dash} ${dash}"/>`;
     faded++;
   } else {
     const cls = e.type === 'b' ? 'b' : 'f';
-    // pathLength normalises every line to 1 unit, so the dash pattern and the
-    // growth keyframes are the same numbers for a 20px edge and a 200px one.
-    // Without it each path needs its own length in a custom property and the
-    // keyframes have to be written as calc() against it.
-    body += `<path class="${cls}" d="${d}" stroke-width="${r2((e.type === 'b' ? 1.15 : 1.35) * lwf)}"`
-          + ` pathLength="1" stroke-dasharray="1" style="animation-delay:${r2(delay)}s"/>`;
+    // pathLength normalises every line to 1 unit, so one set of dashoffset
+    // values serves a 20px edge and a 200px one, which is what lets the
+    // animation live on the group instead of on each path.
+    drawGroups[b] += `<path class="${cls}" d="${d}"`
+                   + ` stroke-width="${r2((e.type === 'b' ? 1.15 : 1.35) * lwf)}"`
+                   + ` pathLength="1" stroke-dasharray="1"/>`;
     drawn++;
   }
 }
@@ -176,15 +212,46 @@ const LEAD = SECONDS * 0.012;   // the vertex lands a beat before its lines
 for (const m of marks.values()) {
   const rr = r2(1.8 * (0.72 + 0.5 * m.s)), q = r2(3.4 * (0.72 + 0.5 * m.s));
   const x = r2(m.x), y = r2(m.y);
-  const delay = r2(-(m.t0 / maxT) * SECONDS - LEAD);
-  const st = ` style="animation-delay:${delay}s"`;
-  body += m.isX
-    ? `<path class="x" d="M${r2(x - q)} ${r2(y - q)}L${r2(x + q)} ${r2(y + q)}M${r2(x + q)} ${r2(y - q)}L${r2(x - q)} ${r2(y + q)}" stroke-width="${r2(1.3 * (0.8 + 0.3 * m.s))}"${st}/>`
-    : `<circle class="n" cx="${x}" cy="${y}" r="${rr}"${st}/>`;
+  // a beat early, which is one bucket back
+  const b = Math.max(0, bucketOf(m.t0 || 0) - Math.round((LEAD / SECONDS) * BUCKETS));
+  glowGroups[b] += m.isX
+    ? `<path class="x" d="M${r2(x - q)} ${r2(y - q)}L${r2(x + q)} ${r2(y + q)}M${r2(x + q)} ${r2(y - q)}L${r2(x - q)} ${r2(y + q)}" stroke-width="${r2(1.3 * (0.8 + 0.3 * m.s))}"/>`
+    : `<circle class="n" cx="${x}" cy="${y}" r="${rr}"/>`;
+}
+
+// stroke-dashoffset inherits, and group opacity multiplies through, so one
+// pair of <animate> elements on the group drives everything inside it.
+const anim = (attr, times, values, begin) =>
+  `<animate attributeName="${attr}" dur="${SECONDS}s" repeatCount="indefinite"`
+  + ` calcMode="linear" keyTimes="${times}" values="${values}" begin="${begin}s"/>`;
+
+let body = '', groups = 0;
+for (let b = 0; b < BUCKETS; b++) {
+  const begin = beginOf(b);
+  if (drawGroups[b]) {
+    body += `<g>${anim('stroke-dashoffset', DASH_TIMES, DASH_VALUES, begin)}`
+          + `${anim('opacity', FADE_TIMES, FADE_VALUES, begin)}`
+          + `${drawGroups[b]}</g>\n`;
+    groups++;
+  }
+  if (glowGroups[b]) {
+    body += `<g>${anim('opacity', GLOW_TIMES, GLOW_VALUES, begin)}`
+          + `${glowGroups[b]}</g>\n`;
+    groups++;
+  }
 }
 
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">
 <style>
+  /* Palette only. The motion is in the SMIL animate elements, because Safari
+     does not run CSS animation inside an image, and a CSS rule here would in
+     any case take precedence over SMIL and mask it. Reduced motion is handled
+     by the consumer -- indico/sigmamumu-indico.css swaps this file for the
+     flat field-still.png under a prefers-reduced-motion query -- since nothing
+     inside an SVG can switch SMIL off.
+     No angle brackets in here, either: this is character data in an XML
+     document, so a bare less-than is a parse error and takes the whole file
+     down. It did, once. */
   .bg { fill: ${PAPER}; }
   path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
   .f { stroke: ${INK}; stroke-opacity: .88; }
@@ -192,21 +259,6 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" wid
   .s { stroke: ${ACCENT}; stroke-opacity: .85; }
   .n { fill: ${INK}; fill-opacity: .92; }
   .x { stroke: ${INK}; stroke-opacity: .88; fill: none; }
-  .f, .b { animation: draw ${SECONDS}s linear infinite; }
-  .s { animation: glow ${SECONDS}s linear infinite; }
-  .n, .x { animation: glow ${SECONDS}s linear infinite; }
-  @keyframes draw {
-${growStops}
-  }
-  @keyframes glow {
-    0%       { opacity: 0; }
-    4%, 82%  { opacity: 1; }
-    100%     { opacity: 0; }
-  }
-  /* Someone who asked for less motion gets the finished field, held still. */
-  @media (prefers-reduced-motion: reduce) {
-    .f, .b, .s, .n, .x { animation: none; stroke-dashoffset: 0; opacity: 1; }
-  }
 </style>
 <rect class="bg" width="${W}" height="${H}"/>
 ${body}
@@ -217,7 +269,9 @@ console.log(`wrote ${OUT}`);
 console.log(`  ${W}x${H} ${THEME}, ${net.edges.length} edges (${drawn} drawn, ${faded} faded), `
   + `${marks.size} vertex marks, ${(svg.length / 1024).toFixed(0)} KB, ${SECONDS}s loop`);
 console.log(`  growth 1-(1-t)^${GROW_EXP} over ${GROW_END}% of the loop, traced by ${us.length} `
-  + `keyframes, worst deviation ${(worst * 100).toFixed(2)}% of a line`);
+  + `SMIL values, worst deviation ${(worst * 100).toFixed(2)}% of a line`);
+console.log(`  ${groups} timing groups over ${BUCKETS} buckets `
+  + `(${r2(SECONDS / BUCKETS)}s of stagger granularity)`);
 if (worst > TOL * 1.5) {
   console.error('  CURVE FAULT: keyframes do not follow the growth curve');
   process.exitCode = 1;
