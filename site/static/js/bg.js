@@ -85,8 +85,10 @@
     sizeOf();
     // The diagram is ten and a half units across, so on a tall screen the
     // width is what limits it, not the height. Taking the smaller of the two
-    // keeps it inside the frame instead of running off both edges.
-    U = Math.min(H / 17, W / 13);
+    // keeps it inside the frame instead of running off both edges — and it is
+    // a feature in a field rather than the whole screen, so it sits well
+    // inside both.
+    U = Math.min(H / 21, W / 16);
     // And the line scale follows that unit rather than the screen width. Tied
     // to width, a phone got a scale of 0.2 while the geometry stayed sized off
     // height: eleven wave cycles along an edge the desktop draws with three.
@@ -392,6 +394,58 @@
   }
   input.addEventListener('input', fitSoon);
 
+  /* ---- music ------------------------------------------------------------ */
+  /* Apple Music, and only if this page has been given a developer token and a
+     playlist. The plain embed.music.apple.com iframe cannot do what was asked:
+     it has no shuffle, and being cross-origin it cannot be told to start from
+     out here — the listener has to press play inside it. MusicKit can do both,
+     at the cost of a token.
+
+     Full-length playback needs whoever is at the machine to be signed in to an
+     Apple Music subscription; without one Apple serves previews or refuses.
+     Everything below fails quietly: the screen is the point, and a room should
+     not be looking at a stack trace because the wifi ate a token. */
+  var music = (function () {
+    var cfg = window.SMM_MUSIC;
+    if (!cfg || !cfg.token || !cfg.playlist) return null;
+    var kit = null, on = true;
+
+    document.addEventListener('musickitloaded', function () {
+      try {
+        MusicKit.configure({
+          developerToken: cfg.token,
+          app: { name: cfg.name || 'sigma mu mu', build: '1' },
+        }).then(function (m) { kit = m; }, function () {});
+      } catch (e) {}
+    });
+
+    // authorize() opens Apple's sign-in window, so it has to be the first
+    // thing a click does — after an await the browser no longer counts the
+    // gesture and the window is blocked.
+    function begin() {
+      if (!kit) return Promise.reject();
+      return kit.isAuthorized ? Promise.resolve() : kit.authorize();
+    }
+    return {
+      enabled: function () { return on; },
+      toggle: function () {
+        on = !on;
+        if (!on) { this.stop(); } else { begin().catch(function () {}); }
+        return on;
+      },
+      start: function () {
+        if (!on || !kit) return;
+        begin()
+          .then(function () { return kit.setQueue({ playlist: cfg.playlist, startPlaying: false }); })
+          .then(function () { kit.shuffleMode = 1; return kit.play(); })
+          .catch(function () {});
+      },
+      stop: function () {
+        try { if (kit && kit.isPlaying) kit.pause(); } catch (e) {}
+      },
+    };
+  })();
+
   /* ---- presenting ------------------------------------------------------- */
   /* iPhone Safari has no Fullscreen API — not on the document element, not
      prefixed — so a presenting mode that waits for requestFullscreen simply
@@ -413,6 +467,7 @@
     var el = document.documentElement;
     var req = el.requestFullscreen || el.webkitRequestFullscreen;
     if (req) { try { req.call(el); } catch (e) { /* denied is fine — the chrome is gone anyway */ } }
+    if (music) music.start();          // before any await, so the gesture counts
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
     // On a later tick, or the click that started this would end it.
     setTimeout(function () { document.addEventListener('click', leaveOnTap, true); }, 0);
@@ -420,6 +475,7 @@
 
   function leave() {
     presenting = false;
+    if (music) music.stop();
     body.classList.remove('present');
     document.removeEventListener('click', leaveOnTap, true);
     if (isFull()) {
@@ -436,6 +492,15 @@
   }
 
   btn.addEventListener('click', function () { if (presenting) leave(); else enter(); });
+
+  var mbtn = document.getElementById('music');
+  if (mbtn && music) {
+    mbtn.hidden = false;
+    // Pressing it before the room fills gets Apple's sign-in out of the way.
+    mbtn.addEventListener('click', function () {
+      mbtn.textContent = music.toggle() ? 'Music: on' : 'Music: off';
+    });
+  }
   document.addEventListener('keydown', function (e) {
     if (presenting && (e.key === 'Escape' || e.key === 'Esc')) leave();
   });

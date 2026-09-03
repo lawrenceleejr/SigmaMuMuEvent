@@ -35,6 +35,35 @@ on the screen, sized to fit the band it is given, so **Back at 10:45** fills it
 and a whole sentence steps down until it fits. A button presents: the bar goes,
 and a tap, a click or Esc brings it back.
 
+#### Music
+
+The same press that goes full screen can start an Apple Music playlist,
+shuffled. Both parameters in `site/content/bg.md` are blank, and while they
+are blank nothing is loaded, no button appears and the page is exactly what it
+was:
+
+    params:
+      music_token: ""      # a MusicKit developer token
+      music_playlist: ""   # pl.xxxxxxxx, out of the playlist's share link
+
+The plain `embed.music.apple.com` iframe cannot do this — it has no shuffle,
+and being cross-origin it cannot be told to start from outside, somebody has
+to press play inside it. MusicKit can do both and wants a developer token in
+exchange: a JWT signed with a MusicKit private key from an Apple Developer
+account, good for up to six months. It is not a secret the way a password is
+— it ships in the page, which is how MusicKit works — but it is tied to that
+account, so give it the shortest life you can live with.
+
+Two things to know before leaning on it in a room. Full-length playback needs
+whoever is at the machine to be signed in to an Apple Music subscription;
+MusicKit asks on the first press, and without a subscription Apple serves
+previews or refuses. And you can get that sign-in out of the way before the
+room fills by pressing **Music** in the bar once — it authorizes without
+starting anything.
+
+Everything fails quietly: a bad token, a refused sign-in, or Apple's CDN being
+unreachable all leave the screen exactly as it was.
+
 Presenting is the page's own state, not the Fullscreen API's. iPhone Safari has
 no Fullscreen API — not on the document element, not prefixed — so a mode that
 waits for `requestFullscreen` never starts there and the controls stay on

@@ -128,14 +128,15 @@
   }
   #say-input::placeholder { color: var(--muted); }
   #say-input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
-  #fs {
+  #fs, #music {
     padding: 0.65em 1.4em;
     background: var(--ink); color: var(--paper);
     border: 0; border-radius: 0; cursor: pointer;
     font-family: var(--sans); font-size: 0.82rem; font-weight: 700;
     letter-spacing: 0.14em; text-transform: uppercase;
   }
-  #fs:hover { background: var(--accent); color: var(--ink); }
+  #fs:hover, #music:hover { background: var(--accent); color: var(--ink); }
+  #music { background: none; color: var(--ink); border: 1px solid rgba(239, 233, 218, 0.24); }
   .hint { color: var(--muted); font-size: 0.78rem; letter-spacing: 0.04em; }
   @media (max-width: 700px) { .hint { display: none; } }
 
@@ -185,9 +186,25 @@
   <input id="say-input" type="text" autocomplete="off" spellcheck="false"
          placeholder="Announcement — e.g. Back at 10:45, Parallel B moved to Redwood">
   <button id="fs" type="button">Full screen</button>
+  <button id="music" type="button" hidden>Music: on</button>
   <span class="hint">Tap or press Esc to come back</span>
 </div>
 
+{{ with .Params.music_playlist }}
+{{ if $.Params.music_token }}
+<!-- Apple Music. Only loaded when this page has been given a developer token
+     and a playlist; blank either and nothing here is emitted at all. -->
+<!-- No jsonify: Go's templates already escape a string into a JS string
+     literal inside a script block, and jsonifying first quotes it twice, so
+     the token would reach Apple with quote marks inside it. -->
+<script>window.SMM_MUSIC = {
+  token: {{ $.Params.music_token }},
+  playlist: {{ . }},
+  name: {{ site.Title }}
+};</script>
+<script src="https://js-cdn.music.apple.com/musickit/v3/musickit.js" async></script>
+{{ end }}
+{{ end }}
 <script src="{{ "js/network.js" | relURL }}"></script>
 <script src="{{ "js/vbf.js" | relURL }}"></script>
 <script src="{{ "js/bg.js" | relURL }}" defer></script>
