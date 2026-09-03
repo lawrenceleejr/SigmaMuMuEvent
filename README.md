@@ -23,6 +23,28 @@ ends in the vacuum. Every line is exactly the weight it says it is.
 The animated cut of the Instagram board is rendered on demand — see
 **Rendering the video** below.
 
+### The presenter screen
+
+`/bg` is a page to put up on the room screen during a break: the same field,
+animated, with the VBF diagram held still in the middle and the banner's
+information over it. Nothing on the site links to it and it stays out of the
+sitemap — it is a screen, not a page.
+
+Two controls sit in a bar along the bottom. A text field puts an announcement
+on the screen, sized to fit the band it is given, so **Back at 10:45** fills it
+and a whole sentence steps down until it fits. A button goes full screen and
+takes the bar with it; Esc leaves, and a mouse move brings the bar back for a
+few seconds so an announcement can be typed without dropping out.
+
+The diagram and its grown legs are painted once onto their own canvas and left
+alone; only the generated mesh animates, each line drawing itself on the
+poster's growth curve, staggered by its distance from the middle so the waves
+travel outward. Lines are batched by tone and type into one path each, and if
+the frames still come back slow — a 4K panel driven without acceleration is
+the case that bites — the canvas steps its resolution down rather than
+stutter. The field is reseeded on every load, so it is never quite the same
+screen twice.
+
 ### The slide background
 
 `node render/slide-bg.mjs` puts a vector-boson-fusion diagram in the middle of

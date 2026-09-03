@@ -46,8 +46,10 @@ jobs:
           node render/verify_network.mjs
           node render/audit_vertices.mjs
 
-      - name: Confirm the site ships the same generator as the poster
-        run: diff -q design/network.js site/static/js/network.js
+      - name: Confirm the site ships the same generators as the poster
+        run: |
+          diff -q design/network.js site/static/js/network.js
+          diff -q design/vbf.js site/static/js/vbf.js
 
       - name: Build
         working-directory: site
