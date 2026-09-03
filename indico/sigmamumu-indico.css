@@ -36,6 +36,10 @@
   --smm-glass: rgba(245, 240, 225, 0.62);
   --smm-glass-solid: rgba(245, 240, 225, 0.95);
   --smm-accent-wash: rgba(236, 48, 19, 0.12);
+  /* Indico paints disabled fields with a diagonal stripe in two greys. */
+  --smm-stripe: repeating-linear-gradient(-40deg,
+      rgba(32, 30, 29, 0.1), rgba(32, 30, 29, 0.1) 10px,
+      rgba(32, 30, 29, 0.04) 10px, rgba(32, 30, 29, 0.04) 20px);
   --smm-sans: Archivo, "Helvetica Neue", Arial, sans-serif;
   --smm-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset,
                 0 18px 50px -30px rgba(32, 30, 29, 0.45);
@@ -715,17 +719,36 @@ body > .header,
 }
 
 /* Semantic UI checkbox: a plain white box drawn with :before/:after, not an
-   <input> Indico's usual "form input" rule reaches. */
-.ui.checkbox label:before {
+   <input> Indico's usual "form input" rule reaches. Toggles and sliders are
+   excluded — their :before is the coloured track, and painting it over
+   would leave on and off looking identical. */
+.ui.checkbox:not(.toggle):not(.slider) label:before {
   background: var(--smm-paper) !important;
   border: 1px solid var(--smm-rule) !important;
 }
-.ui.checkbox input:checked ~ label:before {
+.ui.checkbox:not(.toggle):not(.slider) input:checked ~ label:before {
   background: var(--smm-paper) !important;
   border-color: var(--smm-accent) !important;
 }
-.ui.checkbox input:checked ~ label:after {
+.ui.checkbox:not(.toggle):not(.slider) input:checked ~ label:after {
   color: var(--smm-accent) !important;
+}
+/* The label beside it carries its own near-black, which the "form label"
+   rule above never reaches: it is not inside a .ui.form. Toggles included —
+   only their track is left alone, not their text. */
+.ui.checkbox label,
+.ui.checkbox + label,
+.ui.toggle.checkbox label { color: var(--smm-ink) !important; }
+/* Semantic marks the switched-on label !important at a longer selector, so
+   that one has to be answered at the same length. The track comes into the
+   palette while it is here: off was a 5%-black wash, invisible on a dark
+   panel, and on was Semantic's blue. */
+.ui.toggle.checkbox input:checked ~ label,
+.ui.toggle.checkbox input:focus:checked ~ label { color: var(--smm-ink) !important; }
+.ui.toggle.checkbox label:before { background-color: var(--smm-hair) !important; }
+.ui.toggle.checkbox input:checked ~ label:before,
+.ui.toggle.checkbox input:focus:checked ~ label:before {
+  background-color: var(--smm-accent) !important;
 }
 
 /* ---- modals (Semantic UI React dialogs) ---------------------------------
@@ -810,6 +833,199 @@ body > .header,
   background: var(--smm-accent-wash) !important;
 }
 
+/* ---- management dialogs (jQuery UI) --------------------------------------
+   Edit contribution, edit page, edit session, submit abstract: all of them
+   open in a jQuery UI dialog appended to <body>, outside .confBodyBox and
+   outside every rule above. Indico paints the dialog white and lets the
+   text inherit, so on the dark skin the labels — which this sheet has
+   already turned bone — arrived white on white. The surface is what has to
+   move; everything inside then reads correctly without naming it.
+   .ui-dialog-titlebar is one of the few rules Indico marks !important, so
+   it is answered in kind. */
+.ui-widget-content,
+div.exclusivePopup {
+  background: var(--smm-paper) !important;
+  color: var(--smm-ink) !important;
+  border-color: var(--smm-rule) !important;
+}
+.ui-dialog {
+  border-radius: 0 !important;
+  box-shadow: var(--smm-shadow) !important;
+}
+.ui-dialog-titlebar {
+  background-color: var(--smm-hair) !important;
+  border-bottom: 1px solid var(--smm-rule) !important;
+  color: var(--smm-ink) !important;
+  font-family: var(--smm-sans) !important;
+}
+.ui-dialog .ui-dialog-buttonpane {
+  background: var(--smm-hair) !important;
+  border-top: 1px solid var(--smm-rule) !important;
+}
+.ui-widget-content a { color: var(--smm-accent) !important; }
+/* The overlay behind a dialog is a flat #aaa tile at half opacity, which
+   washes a dark page out to grey instead of dimming it. One near-black
+   scrim reads correctly on cream and on near-black alike. */
+.ui-widget-overlay {
+  background: rgba(20, 19, 18, 0.6) !important;
+  opacity: 1 !important;
+}
+.ui-widget-content .ui-state-default,
+.ui-widget-content .ui-state-hover,
+.ui-widget-content .ui-state-active,
+.ui-widget-header .ui-state-default {
+  background: transparent !important;
+  color: var(--smm-ink) !important;
+  border-color: var(--smm-rule) !important;
+}
+/* Buttons in a dialog are <a class="i-button"> as often as <button>, and the
+   button rule above only reaches the latter outside .confBodyBox. Disabled
+   ones are held back deliberately: Indico marks their grey !important, so
+   an ink block here would have recoloured the text and left the pale
+   background — a greyed Submit reading as cream-on-grey. They get their own
+   muted panel below instead. */
+.ui-dialog .i-button:not(.disabled):not(:disabled),
+div.exclusivePopup .i-button:not(.disabled):not(:disabled) {
+  background: var(--smm-ink) !important;
+  background-image: none !important;
+  color: var(--smm-paper) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  text-shadow: none !important;
+}
+.ui-dialog .i-button:not(.disabled):not(:disabled):hover,
+div.exclusivePopup .i-button:not(.disabled):not(:disabled):hover {
+  background: var(--smm-accent) !important;
+}
+.ui-dialog .i-button.disabled:not(.borderless),
+.ui-dialog .i-button:disabled:not(.borderless),
+div.exclusivePopup .i-button.disabled:not(.borderless),
+div.exclusivePopup .i-button:disabled:not(.borderless) {
+  background: var(--smm-hair) !important;
+  border: 1px solid var(--smm-rule) !important;
+  color: var(--smm-muted) !important;
+}
+/* Indico's segmented radios — the protection-mode switch, for one — light
+   the chosen segment in its own blue. */
+.i-selection input[type="radio"]:checked + label,
+.i-selection input[type="checkbox"]:checked + label {
+  background: var(--smm-accent) !important;
+  background-image: none !important;
+  border-color: var(--smm-accent) !important;
+  color: var(--smm-paper) !important;
+}
+/* Field help sits in Indico's greys, which lose too much on a dark panel. */
+.i-form .form-group .form-field .static-text .form-field-description,
+.i-form fieldset p.description,
+.form-field-description { color: var(--smm-muted) !important; }
+
+/* ---- the description editor (Indico's own markdown editor) ---------------
+   Three separate white surfaces stacked: the button row, the source box,
+   and the live preview under it. The preview keeps its serif — it is
+   showing what the text will look like once published — but it moves onto
+   the panel with the rest. */
+.wmd-panel,
+.wmd-input,
+.md-preview-wrapper.edit,
+.md-preview-wrapper.display {
+  background-color: var(--smm-paper) !important;
+  color: var(--smm-ink) !important;
+  border-color: var(--smm-rule) !important;
+}
+.md-preview-wrapper.edit.empty,
+.md-preview-wrapper.display.empty {
+  background-color: var(--smm-paper) !important;
+  color: var(--smm-muted) !important;
+}
+.wmd-button-row {
+  background-color: var(--smm-hair) !important;
+  border-bottom: 1px solid var(--smm-rule) !important;
+}
+.wmd-button { color: var(--smm-ink) !important; }
+.wmd-button:hover { color: var(--smm-accent) !important; }
+.wmd-spacer { background-color: var(--smm-rule) !important; }
+.wmd-input.has-length-info { border-bottom-color: var(--smm-paper) !important; }
+.md-preview-wrapper pre,
+.md-preview-wrapper blockquote {
+  background-color: var(--smm-hair) !important;
+  color: var(--smm-muted) !important;
+  border-color: var(--smm-rule) !important;
+}
+.wmd-prompt-dialog {
+  background-color: var(--smm-paper) !important;
+  border-color: var(--smm-rule) !important;
+  color: var(--smm-ink) !important;
+}
+
+/* ---- the page editor (TinyMCE) -------------------------------------------
+   Chrome only. The document itself is inside an iframe with its own
+   stylesheet, which an uploaded event stylesheet cannot reach — and that is
+   the right reading anyway: it shows the page as it will be published. */
+.tox.tox-tinymce {
+  border-color: var(--smm-rule) !important;
+  border-radius: 0 !important;
+}
+.tox:not(.tox-tinymce-inline) .tox-editor-header,
+.tox .tox-menubar,
+.tox .tox-toolbar,
+.tox .tox-toolbar__primary,
+.tox .tox-toolbar__overflow,
+.tox .tox-toolbar-overlord,
+.tox .tox-statusbar,
+.tox .tox-menu {
+  background-color: var(--smm-paper) !important;
+  background-image: none !important;
+}
+.tox .tox-tbtn,
+.tox .tox-tbtn--select,
+.tox .tox-collection__item,
+.tox .tox-statusbar,
+.tox .tox-statusbar a { color: var(--smm-ink) !important; }
+.tox .tox-tbtn:hover,
+.tox .tox-collection__item--active,
+.tox .tox-collection__item--enabled { background-color: var(--smm-accent-wash) !important; }
+.tox .tox-statusbar { border-top-color: var(--smm-rule) !important; }
+
+/* ---- pop-up balloons (qtip) ----------------------------------------------
+   Indico's plain tooltip is already dark and reads on both skins; these are
+   its white-panel variants — the timetable balloon, the bubble menus, the
+   informational pop-ups. */
+.qtip-default.qtip-popup,
+.qtip-default.qbubble,
+.qtip-default.informational,
+.qtip-default.add-field-qtip,
+.material_tip .qtip-content {
+  background-color: var(--smm-paper) !important;
+  color: var(--smm-ink) !important;
+  border-color: var(--smm-rule) !important;
+}
+.qtip-default.qtip-popup a,
+.qtip-default.qbubble a,
+.qtip-default.informational a,
+.qtip-default.add-field-qtip a { color: var(--smm-accent) !important; }
+.qtip-default.qbubble .action-row:hover {
+  background-color: var(--smm-accent-wash) !important;
+  color: var(--smm-ink) !important;
+}
+.balloon-qtip .title-container .title { color: var(--smm-accent) !important; }
+.balloon-qtip .title-container .balloon-subtitle,
+.balloon-qtip .title-container .balloon-code,
+.balloon-qtip .description,
+.balloon-qtip .address { color: var(--smm-muted) !important; }
+.balloon-qtip span.hr { border-bottom-color: var(--smm-rule) !important; }
+
+/* Disabled fields are painted with a diagonal stripe in two light greys.
+   The React one is a CSS module, so match its readable prefix. */
+.i-location-field .wrapper input.i-location-input-field.disabled,
+.i-location-field .wrapper > textarea.disabled,
+.i-color-field .clickable-wrapper .color-preview.no-value,
+[class*="syncedInputs"] input[readonly],
+[class*="syncedInputs"] textarea[readonly],
+[class*="syncedInputs"] div.dropdown.disabled {
+  background: var(--smm-stripe) !important;
+  color: var(--smm-muted) !important;
+}
+
 /* Indico's action boxes — "the call for abstracts is open" and its siblings.
    Four variants (highlight, warning, danger, disabled), each a pale panel with
    a saturated border and saturated text: a light-page idiom that reads as a
@@ -887,9 +1103,13 @@ body > .header,
    only for parity with the rest of the sheet. */
 .contribution-list .contribution-row .description::before,
 .track-review-list .contribution-row .description::before,
-.track-review-list .track-review-row .description::before,
-.balloon-qtip .description::before {
+.track-review-list .track-review-row .description::before {
   background: linear-gradient(transparent 0.4em, var(--smm-glass-solid) 4.2em) !important;
+}
+/* The balloon clips at 10em rather than 5, and sits on the pop-up panel
+   rather than the page, so it fades further down and to that panel's tone. */
+.balloon-qtip .description::before {
+  background: linear-gradient(transparent 0.4em, var(--smm-paper) 8.2em) !important;
 }
 .i-table thead th, .confBodyBox table thead th {
   background: none !important;
@@ -914,6 +1134,33 @@ body > .header,
   border-radius: 0 !important;
   box-shadow: none !important;
 }
+/* The same component turns up inside the management dialogs, which are not
+   in .confBodyBox — the "this object is not publicly accessible" notice on
+   the page editor, for one. Unscoped, so those get it too; the scoped rule
+   above still wins on the page itself. */
+.ui.message,
+.ui.info.message,
+.ui.warning.message,
+.ui.error.message,
+.ui.negative.message,
+.ui.success.message,
+.ui.positive.message {
+  background: rgba(245, 240, 225, 0.55) !important;
+  color: var(--smm-ink) !important;
+  border: 1px solid var(--smm-rule) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+.ui.message { border-left: 3px solid var(--smm-accent) !important; }
+.ui.warning.message { border-left: 3px solid #d9992f !important; }
+.ui.error.message,
+.ui.negative.message { border-left: 3px solid #d94f2f !important; }
+.ui.success.message,
+.ui.positive.message { border-left: 3px solid #3f9142 !important; }
+.ui.message .header,
+.ui.message p,
+.ui.message li { color: var(--smm-ink) !important; }
+
 .confBodyBox .ui.message > .header {
   color: var(--smm-ink) !important;
   font-family: var(--smm-sans) !important;

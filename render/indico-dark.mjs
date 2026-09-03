@@ -41,6 +41,10 @@ swap('--smm-hair: rgba(32, 30, 29, 0.1);', '--smm-hair: rgba(239, 233, 218, 0.14
 swap('--smm-glass: rgba(245, 240, 225, 0.62);', '--smm-glass: rgba(28, 26, 24, 0.62);');
 swap('--smm-glass-solid: rgba(245, 240, 225, 0.95);', '--smm-glass-solid: rgba(28, 26, 24, 0.95);');
 swap('--smm-accent-wash: rgba(236, 48, 19, 0.12);', '--smm-accent-wash: rgba(255, 82, 48, 0.16);');
+swap('      rgba(32, 30, 29, 0.1), rgba(32, 30, 29, 0.1) 10px,\n'
+   + '      rgba(32, 30, 29, 0.04) 10px, rgba(32, 30, 29, 0.04) 20px);',
+     '      rgba(239, 233, 218, 0.1), rgba(239, 233, 218, 0.1) 10px,\n'
+   + '      rgba(239, 233, 218, 0.04) 10px, rgba(239, 233, 218, 0.04) 20px);');
 // A shadow has less to work with on a dark ground — black on near-black
 // barely reads — so the dark skin needs a far heavier stack than the cream
 // one: a tight contact shadow, a mid lift, and a wide ambient pool, over a
