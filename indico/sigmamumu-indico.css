@@ -415,6 +415,37 @@ body > .header,
 .conf_leftMenu .menuConfSelected > a,
 .conf_leftMenu li.selected > a { color: var(--smm-accent) !important; font-weight: 700; }
 
+/* Registration is the reason most people open this page, so it should not read
+   as one more line in a list of six. CSS cannot match on an item's label, and
+   Indico gives custom menu entries no class of their own -- every one of them
+   is li.menuConfTitle -- so this goes by where the link points: the event's
+   registration form. The participant list lives under the same path and is
+   excluded by name.
+
+   Consequence worth knowing: this follows the link, not the wording. Rename
+   the item and it stays styled; point some other item at the registration
+   form and that one gets it too. */
+.conf_leftMenu li a[href*="/registration"]:not([href*="participants"]) {
+  color: var(--smm-accent) !important;
+  padding-top: 0.85rem;
+  padding-bottom: 0.85rem;
+  font-size: 1.32rem;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+}
+.conf_leftMenu li a[href*="/registration"]:not([href*="participants"]):hover {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+/* And on the registration page itself it keeps the size rather than falling
+   back to the selected-item styling, which is set for a one-line item. */
+.conf_leftMenu .menuConfSelected > a[href*="/registration"]:not([href*="participants"]),
+.conf_leftMenu li.selected > a[href*="/registration"]:not([href*="participants"]) {
+  font-size: 1.32rem;
+  font-weight: 800;
+}
+
 /* ---- headings and copy -------------------------------------------------- */
 .confBodyBox h2, .page-content h2, .conferenceDetails h2 {
   margin: 0 0 1.2rem;

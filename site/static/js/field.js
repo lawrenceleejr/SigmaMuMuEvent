@@ -30,16 +30,24 @@
   // budget pixels rather than capping the ratio: a phone (small viewport, dense
   // screen) gets its full device resolution for less fill than a laptop at 2x.
   // Never below 1, which is already native on an ordinary display.
-  var PIXEL_BUDGET = 3.5e6;
-  // If the machine cannot paint that budget smoothly, trade resolution for
-  // motion rather than the other way round: when frames run slow for a while,
-  // step the backing store down and never back up (stepping up again would
-  // oscillate). A phone with a GPU never triggers this; a desktop painting in
-  // software does, and settles where it can hold the frame rate.
+  var PIXEL_BUDGET = 2.2e6;
+  // If the machine cannot paint that budget smoothly, something has to give.
+  // Frame rate goes first and resolution only after: this field drifts, and
+  // nothing in it moves fast enough for 30 frames a second to read as choppy,
+  // whereas resizing the backing store is plainly visible — it reallocates,
+  // which blanks the canvas for a frame, and the linework steps softer. Three
+  // of those in the first ten seconds is what "it glitches after a while"
+  // turned out to be.
+  //
+  // So: hold 60, then cap at 30, then 20, and only a machine that still
+  // cannot keep up at 20 starts giving up resolution. Never back up — a
+  // governor that recovers oscillates, and a background that keeps changing
+  // its mind is worse than one that settled somewhere lower.
   var SLOW_FRAME = 1 / 38;   // seconds: below ~38 fps counts as slow
   var ADAPT_EVERY = 2.0;     // seconds between decisions
   var ADAPT_STEP = 0.8;      // multiply the resolution by this each step
   var DPR_FLOOR = 0.75;      // never softer than this
+  var FPS_CAPS = [0, 1 / 30, 1 / 20];   // the ladder, in seconds per frame
   var WALKERS = 2;
   var TRAVERSE = 34;         // seconds for a walker to cross its whole flood
   var TAIL_TOP = 0.18;       // tail as a fraction of the flood, at the top
@@ -82,7 +90,7 @@
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   }
 
-  var frameEma = 1 / 60, adaptClock = 0, warmup = 3.0;
+  var frameEma = 1 / 60, adaptClock = 0, warmup = 3.0, capStep = 0;
   function adapt(dt) {
     if (window.SMM_FIXED_DPR) return;               // harnesses that compare pixels pin it
     // The first seconds are slow on any machine — fonts, images and the mesh
@@ -93,18 +101,31 @@
     adaptClock += dt;
     if (adaptClock < ADAPT_EVERY) return;
     adaptClock = 0;
-    if (frameEma > SLOW_FRAME && DPR > DPR_FLOOR) {
+    // Judge each rung against its own target, not against 60. Capped at 30,
+    // frames are 33 ms apart because that is what was asked for — read that
+    // as "still too slow" and the governor walks the whole ladder down on a
+    // machine that was keeping up fine.
+    var want = Math.max(SLOW_FRAME, FPS_CAPS[capStep] * 1.25);
+    if (frameEma <= want) return;
+    if (capStep < FPS_CAPS.length - 1) {
+      capStep++;                                      // slow down before softening
+    } else if (DPR > DPR_FLOOR) {
       DPR = Math.max(DPR_FLOOR, DPR * ADAPT_STEP);
       sizeBacking();
-      frameEma = 1 / 60;                              // judge the new size on its own frames
+    } else {
+      return;                                         // nothing left to give
     }
+    frameEma = 1 / 60;                                // judge the new setting on its own frames
   }
 
   function build() {
     var v = viewport();
     W = v.w;
     H = v.h;
-    DPR = dprFor(W, H);
+    // Keep whatever the governor has already learned about this machine. Reset
+    // to the full budget on every rebuild and a window drag walks the whole
+    // ladder down again, resize by visible resize.
+    DPR = Math.min(dprFor(W, H), DPR || Infinity);
     sizeBacking();
 
     net = window.SMMNet.build({
@@ -329,9 +350,14 @@
     }
   }
 
-  var last = 0;
+  var last = 0, painted = 0;
   function frame(ts) {
     raf = requestAnimationFrame(frame);
+    // A background nobody is looking at should cost nothing.
+    if (document.hidden) { last = 0; return; }
+    var cap = FPS_CAPS[capStep];
+    if (cap && painted && (ts - painted) / 1000 < cap - 0.002) return;
+    painted = ts;
     var dt = last ? Math.min(0.05, (ts - last) / 1000) : 0.016;
     last = ts;
 
