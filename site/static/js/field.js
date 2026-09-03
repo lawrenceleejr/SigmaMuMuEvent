@@ -31,6 +31,15 @@
   // screen) gets its full device resolution for less fill than a laptop at 2x.
   // Never below 1, which is already native on an ordinary display.
   var PIXEL_BUDGET = 3.5e6;
+  // If the machine cannot paint that budget smoothly, trade resolution for
+  // motion rather than the other way round: when frames run slow for a while,
+  // step the backing store down and never back up (stepping up again would
+  // oscillate). A phone with a GPU never triggers this; a desktop painting in
+  // software does, and settles where it can hold the frame rate.
+  var SLOW_FRAME = 1 / 38;   // seconds: below ~38 fps counts as slow
+  var ADAPT_EVERY = 2.0;     // seconds between decisions
+  var ADAPT_STEP = 0.8;      // multiply the resolution by this each step
+  var DPR_FLOOR = 0.75;      // never softer than this
   var WALKERS = 2;
   var TRAVERSE = 34;         // seconds for a walker to cross its whole flood
   var TAIL_TOP = 0.18;       // tail as a fraction of the flood, at the top
@@ -46,6 +55,9 @@
     .getPropertyValue('--accent') || '#ec3013').trim();
 
   var W = 0, H = 0, DPR = 1, net = null, walkers = [], maxArrival = 1, raf = null;
+  // Per-frame scratch, one slot per edge and per vertex, sized in build().
+  var eGrow, eTone, eRev, vTone, vIsX;
+  var BUCKETS = 16;          // tone steps the fade is quantised to for batching
   var scrollP = 0;
 
   /* ---- the mesh ---------------------------------------------------------- */
@@ -62,16 +74,38 @@
     return Math.min(device, Math.max(1, Math.sqrt(PIXEL_BUDGET / (w * h))));
   }
 
+  // Only the backing store: the element's own box stays CSS-driven, so
+  // measuring it back still reports the viewport rather than what we set.
+  function sizeBacking() {
+    cv.width = Math.round(W * DPR);
+    cv.height = Math.round(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+
+  var frameEma = 1 / 60, adaptClock = 0, warmup = 3.0;
+  function adapt(dt) {
+    if (window.SMM_FIXED_DPR) return;               // harnesses that compare pixels pin it
+    // The first seconds are slow on any machine — fonts, images and the mesh
+    // are all still arriving — and must not be read as a slow machine.
+    if (warmup > 0) { warmup -= dt; return; }
+    if (document.readyState !== 'complete') return;  // resources still arriving
+    frameEma += (dt - frameEma) * 0.08;
+    adaptClock += dt;
+    if (adaptClock < ADAPT_EVERY) return;
+    adaptClock = 0;
+    if (frameEma > SLOW_FRAME && DPR > DPR_FLOOR) {
+      DPR = Math.max(DPR_FLOOR, DPR * ADAPT_STEP);
+      sizeBacking();
+      frameEma = 1 / 60;                              // judge the new size on its own frames
+    }
+  }
+
   function build() {
     var v = viewport();
     W = v.w;
     H = v.h;
     DPR = dprFor(W, H);
-    // Only the backing store: the element's own box stays CSS-driven, so
-    // measuring it back still reports the viewport rather than what we set.
-    cv.width = Math.round(W * DPR);
-    cv.height = Math.round(H * DPR);
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    sizeBacking();
 
     net = window.SMMNet.build({
       w: W, h: H, zones: [], seed: (Math.random() * 1e9) | 0,
@@ -89,6 +123,13 @@
     // adjacency once; the flood re-walks it on every re-seed
     net.inc = net.verts.map(function () { return []; });
     net.edges.forEach(function (e, i) { net.inc[e.a].push(i); net.inc[e.b].push(i); });
+
+    eGrow = new Float32Array(net.edges.length);
+    eTone = new Float32Array(net.edges.length);
+    eRev = new Uint8Array(net.edges.length);
+    vTone = new Float32Array(net.verts.length);
+    vIsX = new Uint8Array(net.verts.length);   // a vertex that ends a line in the vacuum takes an x
+    net.edges.forEach(function (e) { if (e.xa) vIsX[e.a] = 1; if (e.xb) vIsX[e.b] = 1; });
 
     walkers = [];
     for (var k = 0; k < WALKERS; k++) walkers.push(seedWalker(k / WALKERS));
@@ -169,21 +210,122 @@
   }
 
   /* ---- drawing ----------------------------------------------------------- */
-  function drawWalker(w, tail) {
+  // Every frame used to restroke every lit edge on its own: one path built
+  // point by point in JS, one stroke, two vertex marks, a dash reset — and
+  // twice over wherever the two walkers overlapped. Six hundred to a thousand
+  // draw calls a frame on a laptop, more on a big display, and the cost scales
+  // with the viewport rather than staying put. It read as choppy on desktops
+  // while a phone, with a tenth of the edges, never noticed.
+  //
+  // Now the frame is gathered first and painted once. Each edge's strongest
+  // state across the walkers is kept, fully grown edges are collected into one
+  // Path2D per line type and tone step and stroked in a handful of calls, and
+  // vertex marks are drawn once per vertex rather than once per incident edge.
+  // Only edges still growing are drawn individually, since they need their own
+  // partial path and direction. The geometry of each edge is cached as a Path2D
+  // the first time it is seen.
+
+  function edgePath(e) {
+    if (e.__p2d) return e.__p2d;
+    var pts = window.SMMNet.pathPoints(net, e);
+    var p = new Path2D();
+    p.moveTo(pts[0][0], pts[0][1]);
+    for (var i = 1; i < pts.length; i++) p.lineTo(pts[i][0], pts[i][1]);
+    e.__p2d = p;
+    return p;
+  }
+
+  // Which tone step a value falls in. The top step is exactly 1, so the fully
+  // lit majority paints identically to before; the fade below it is quantised
+  // to sixteenths, which the eye does not pick out.
+  function bucketOf(t) { return t >= 1 ? BUCKETS - 1 : Math.floor(t * BUCKETS); }
+  function toneOf(b) { return b === BUCKETS - 1 ? 1 : (b + 0.5) / BUCKETS; }
+
+  function gather(frac) {
+    eGrow.fill(0);
+    eTone.fill(0);
     var edges = net.edges;
-    var lo = w.head - tail;
+    for (var k = 0; k < walkers.length; k++) {
+      var w = walkers[k], tail = w.far * frac, lo = w.head - tail;
+      for (var i = 0; i < edges.length; i++) {
+        var a = w.arrive[i];
+        if (!isFinite(a) || a > w.head || a < lo) continue;
+        // The head end draws part-grown, on the poster's own growth curve: a
+        // quintic ease-out, so each line leaps out and then creeps to length.
+        var lin = Math.min(1, (w.head - a) / (edges[i].len * 2.2));
+        var grow = Math.max(0.02, 1 - Math.pow(1 - lin, 5.5));
+        var age = (w.head - a) / tail;                 // 0 at the head, 1 at the tail
+        var tone = age > 1 - FADE ? Math.max(0, (1 - age) / FADE) : 1;
+        if (tone <= 0.01) continue;
+        if (grow > eGrow[i]) { eGrow[i] = grow; eRev[i] = w.rev[i]; }
+        if (tone > eTone[i]) eTone[i] = tone;
+      }
+    }
+  }
+
+  function paint() {
+    var N = window.SMMNet, edges = net.edges, verts = net.verts;
+    var s = SCALE, lwf = 0.8 + 0.3 * s;     // scaleAt is uniform here: one weight per type
+    ctx.clearRect(0, 0, W, H);
+
+    var lines = [[], [], []];               // [fermion, boson, scalar][tone step] -> Path2D
+    var dots = [], crosses = [], partial = [];
+    vTone.fill(0);
     for (var i = 0; i < edges.length; i++) {
-      var a = w.arrive[i];
-      if (!isFinite(a) || a > w.head || a < lo) continue;
-      // The head end draws part-grown, on the poster's own growth curve: a
-      // quintic ease-out, so each line leaps out and then creeps to length.
-      var lin = Math.min(1, (w.head - a) / (edges[i].len * 2.2));
-      var grow = Math.max(0.02, 1 - Math.pow(1 - lin, 5.5));
-      var age = (w.head - a) / tail;                 // 0 at the head, 1 at the tail
-      var tone = age > 1 - FADE ? Math.max(0, (1 - age) / FADE) : 1;
-      if (tone <= 0.01) continue;
-      window.SMMNet.drawEdge(ctx, net, edges[i], grow,
-        { accent: accent, tone: tone, rev: !!w.rev[i] });
+      var g = eGrow[i];
+      if (g <= 0) continue;
+      var e = edges[i], t = eTone[i];
+      if (g < 1) { partial.push(i); continue; }
+      var ti = e.type === 'h' ? 2 : (e.type === 'b' ? 1 : 0);
+      var b = bucketOf(t);
+      (lines[ti][b] || (lines[ti][b] = new Path2D())).addPath(edgePath(e));
+      if (t > vTone[e.a]) vTone[e.a] = t;
+      if (t > vTone[e.b]) vTone[e.b] = t;
+    }
+
+    // the same strokes drawEdge would make, a type and a tone step at a time
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    for (var ty = 0; ty < 3; ty++) {
+      var col = ty === 2 ? accent : N.INK;
+      var alpha = ty === 0 ? 0.88 : (ty === 1 ? 0.72 : 0.85);
+      ctx.lineWidth = (ty === 1 ? 1.15 : 1.35) * lwf;
+      ctx.setLineDash(ty === 2 ? [6.5 * s, 6.5 * s] : []);
+      for (var bb = 0; bb < BUCKETS; bb++) {
+        var P = lines[ty][bb];
+        if (!P) continue;
+        ctx.strokeStyle = N.rgba(col, alpha * toneOf(bb));
+        ctx.stroke(P);
+      }
+    }
+    ctx.setLineDash([]);
+
+    // growing lines keep their own path, direction and origin mark
+    for (var k = 0; k < partial.length; k++) {
+      var j = partial[k];
+      N.drawEdge(ctx, net, edges[j], eGrow[j], { accent: accent, tone: eTone[j], rev: !!eRev[j] });
+    }
+
+    // one mark per vertex, at the strongest tone of any line touching it
+    var rr = 1.8 * (0.72 + 0.5 * s), q = 3.4 * (0.72 + 0.5 * s);
+    for (var v = 0; v < verts.length; v++) {
+      var tv = vTone[v];
+      if (tv <= 0) continue;
+      var vb = bucketOf(tv), x = verts[v][0], y = verts[v][1];
+      if (vIsX[v]) {
+        var C = crosses[vb] || (crosses[vb] = new Path2D());
+        C.moveTo(x - q, y - q); C.lineTo(x + q, y + q);
+        C.moveTo(x + q, y - q); C.lineTo(x - q, y + q);
+      } else {
+        var D = dots[vb] || (dots[vb] = new Path2D());
+        D.moveTo(x + rr, y); D.arc(x, y, rr, 0, Math.PI * 2);
+      }
+    }
+    ctx.lineWidth = 1.3 * lwf;
+    for (var mb = 0; mb < BUCKETS; mb++) {
+      var tm = toneOf(mb);
+      if (dots[mb]) { ctx.fillStyle = N.rgba(N.INK, 0.92 * tm); ctx.fill(dots[mb]); }
+      if (crosses[mb]) { ctx.strokeStyle = N.rgba(N.INK, 0.88 * tm); ctx.stroke(crosses[mb]); }
     }
   }
 
@@ -196,19 +338,19 @@
     // Tail and speed both scale with the walker's own flood, so the animation
     // behaves the same however dense the mesh is.
     var frac = TAIL_TOP + (TAIL_BOTTOM - TAIL_TOP) * Math.pow(scrollP, 1.25);
-    ctx.clearRect(0, 0, W, H);
+    adapt(dt);
     for (var k = 0; k < walkers.length; k++) {
       var w = walkers[k];
       if (!reduced) w.head += (w.far / TRAVERSE) * dt;
       if (w.head - w.far * frac > w.far) walkers[k] = seedWalker(0);  // spent: begin again
-      drawWalker(walkers[k], walkers[k].far * frac);
     }
+    gather(frac);
+    paint();
   }
 
   function onScroll() {
     var max = document.documentElement.scrollHeight - H;
     scrollP = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
-    document.documentElement.style.setProperty('--scroll', scrollP.toFixed(4));
   }
 
   var rt = null;
@@ -229,8 +371,8 @@
     if (reduced) {
       // settle to a full field and hold it
       walkers.forEach(function (w) { w.head = w.far; });
-      ctx.clearRect(0, 0, W, H);
-      walkers.forEach(function (w) { drawWalker(w, w.far * 2); });
+      gather(2);
+      paint();
       return;
     }
     raf = requestAnimationFrame(frame);

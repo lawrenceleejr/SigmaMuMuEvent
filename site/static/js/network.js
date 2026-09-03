@@ -801,5 +801,5 @@
     if (frac >= 1) mark(rev ? e.a : e.b, rev ? e.xa : e.xb);
   }
 
-  window.SMMNet = { INK: INK, rgba: rgba, rng: rng, build: build, drawEdge: drawEdge };
+  window.SMMNet = { INK: INK, rgba: rgba, rng: rng, build: build, drawEdge: drawEdge, pathPoints: pathPoints };
 })();

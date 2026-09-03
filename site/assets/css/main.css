@@ -18,7 +18,6 @@
   --mono: "Source Code Pro", ui-monospace, "Courier New", monospace;
   --math: "Libertinus Math", Cambria, Georgia, serif;
   --measure: 34rem;
-  --scroll: 0;
 }
 
 * { box-sizing: border-box; }
@@ -57,9 +56,13 @@ body {
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  mix-blend-mode: multiply;
-  opacity: 0.55;
-  background: url("../img/paper-grain.png") center / cover no-repeat;
+  /* Not a multiply blend. Multiplying by a grey g is the same as laying black
+     over it at alpha 1 - g/255, so that alpha is baked into the texture and the
+     result is pixel-identical — but as plain source-over compositing, not a
+     full-viewport blend pass every frame the canvas repaints. That pass cost
+     33 ms a frame on a 2560px display without a GPU. The old 0.55 layer
+     opacity is folded into the alpha too. */
+  background: url("../img/paper-grain-alpha.png") center / cover no-repeat;
 }
 
 /* ---- panes -------------------------------------------------------------- */
