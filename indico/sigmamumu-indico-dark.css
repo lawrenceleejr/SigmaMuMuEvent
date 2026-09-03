@@ -39,6 +39,7 @@
   --smm-hair: rgba(239, 233, 218, 0.14);
   --smm-glass: rgba(28, 26, 24, 0.62);
   --smm-glass-solid: rgba(28, 26, 24, 0.95);
+  --smm-accent-wash: rgba(255, 82, 48, 0.16);
   --smm-sans: Archivo, "Helvetica Neue", Arial, sans-serif;
   --smm-shadow: 0 1px 0 rgba(239, 233, 218, 0.07) inset,
                 0 2px 6px rgba(0, 0, 0, 0.55),
@@ -690,11 +691,130 @@ body > .header,
 }
 .confBodyBox ind-select ul li:hover,
 .confBodyBox ind-select ul li[aria-selected="true"] {
-  background: rgba(236, 48, 19, 0.12) !important;
+  background: var(--smm-accent-wash) !important;
   color: var(--smm-ink) !important;
 }
 .confBodyBox [class*="FormErrorList"] {
   border: 1px solid var(--smm-accent) !important;
+}
+
+/* Classic Semantic UI dropdown (the Type/Session/Track pickers on edit forms
+   — a different, older component than ind-select above, but the same white-
+   on-white problem). Global, not confined to .confBodyBox: the modals below
+   render outside it, and a plain .ui.dropdown carries no other hook. */
+.ui.selection.dropdown,
+.ui.dropdown .menu {
+  background: var(--smm-paper) !important;
+  color: var(--smm-ink) !important;
+  border: 1px solid var(--smm-rule) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+.ui.dropdown .menu > .item {
+  color: var(--smm-ink) !important;
+  border-top-color: var(--smm-rule) !important;
+}
+.ui.dropdown .menu > .item:hover,
+.ui.dropdown .menu .selected.item,
+.ui.dropdown .menu .active.item {
+  background: var(--smm-accent-wash) !important;
+  color: var(--smm-ink) !important;
+}
+
+/* Semantic UI checkbox: a plain white box drawn with :before/:after, not an
+   <input> Indico's usual "form input" rule reaches. */
+.ui.checkbox label:before {
+  background: var(--smm-paper) !important;
+  border: 1px solid var(--smm-rule) !important;
+}
+.ui.checkbox input:checked ~ label:before {
+  background: var(--smm-paper) !important;
+  border-color: var(--smm-accent) !important;
+}
+.ui.checkbox input:checked ~ label:after {
+  color: var(--smm-accent) !important;
+}
+
+/* ---- modals (Semantic UI React dialogs) ---------------------------------
+   Edit contribution, edit session, edit page, submit-abstract and every
+   other management dialog mount through React, portalled onto <body> rather
+   than into .confBodyBox — nothing above this reaches them, so they surface
+   in Indico's stock white-on-Muli look, a foreign object dropped onto this
+   skin. .ui.modal is Semantic UI's own class, the only hook there is; it is
+   matched at the specificity Semantic UI itself uses (Indico never marks
+   these !important) so plain source order — this file loads last — decides
+   it without needing to out-specify anything. The dimmer behind it is left
+   alone: dark and semi-opaque already, it reads the same in both themes. */
+.ui.modal {
+  background: var(--smm-paper) !important;
+  color: var(--smm-ink) !important;
+  border-radius: 0 !important;
+  box-shadow: var(--smm-shadow) !important;
+}
+.ui.modal > .header {
+  background: var(--smm-paper) !important;
+  color: var(--smm-ink) !important;
+  border-bottom: 1px solid var(--smm-rule) !important;
+  box-shadow: none !important;
+  font-family: var(--smm-sans) !important;
+}
+.ui.modal > .content,
+.ui.modal > .content > .description {
+  background: var(--smm-paper) !important;
+  color: var(--smm-ink) !important;
+}
+.ui.modal > .actions {
+  background: var(--smm-hair) !important;
+  border-top: 1px solid var(--smm-rule) !important;
+}
+.ui.modal .field label,
+.ui.modal label {
+  color: var(--smm-ink) !important;
+}
+
+/* ---- the description editor (react-markdown-editor-lite) -----------------
+   Its own classes carry hard-coded whites at higher specificity than the
+   ".ui.form textarea" rule above reaches, and it is not even inside a
+   .ui.form to begin with, so the toolbar and the two panes need naming
+   directly. This is the field that opens on "edit contribution", "edit
+   page" and "submit abstract" alike — one fix covers all three. */
+.rc-md-editor {
+  background: var(--smm-paper) !important;
+  border: 1px solid var(--smm-rule) !important;
+}
+.rc-md-editor .rc-md-navigation {
+  background: var(--smm-hair) !important;
+  border-bottom: 1px solid var(--smm-rule) !important;
+}
+.rc-md-editor .rc-md-navigation .navigation-nav,
+.rc-md-editor .rc-md-navigation .button-wrap .button {
+  color: var(--smm-ink) !important;
+}
+.rc-md-editor .rc-md-navigation .button-wrap .button:hover {
+  color: var(--smm-accent) !important;
+}
+.rc-md-editor .rc-md-navigation .button-wrap .button.disabled {
+  color: var(--smm-muted) !important;
+}
+.rc-md-editor .rc-md-divider {
+  background-color: var(--smm-rule) !important;
+}
+.rc-md-editor .editor-container > .section {
+  border-right-color: var(--smm-rule) !important;
+}
+.rc-md-editor .editor-container .sec-md .input,
+.rc-md-editor .editor-container .sec-html .html-wrap {
+  background: var(--smm-paper) !important;
+  color: var(--smm-ink) !important;
+}
+.rc-md-editor .drop-wrap {
+  background-color: var(--smm-paper) !important;
+  border-color: var(--smm-rule) !important;
+  color: var(--smm-ink) !important;
+}
+.rc-md-editor .tab-map-list .list-item:hover,
+.rc-md-editor .header-list .list-item:hover {
+  background: var(--smm-accent-wash) !important;
 }
 
 /* Indico's action boxes — "the call for abstracts is open" and its siblings.
@@ -735,10 +855,48 @@ body > .header,
 .confBodyBox .action-box button,
 .confBodyBox .action-box button * { color: var(--smm-paper) !important; }
 
+/* Indico's other pale-panel-with-saturated-border idiom, one rung older than
+   the action boxes above and used in a few more places (attachment notices,
+   plugin content) — same fix, same reasoning: keep the left-edge colour as
+   the only signal, take the panel itself into the palette. */
+.info-message-box, .message-message-box, .highlight-message-box,
+.success-message-box, .warning-message-box, .error-message-box,
+.danger-message-box {
+  background: rgba(34, 31, 29, 0.6) !important;
+  color: var(--smm-ink) !important;
+  border: 1px solid var(--smm-rule) !important;
+  border-radius: 0 !important;
+}
+.highlight-message-box { border-left: 3px solid var(--smm-accent) !important; }
+.success-message-box   { border-left: 3px solid #3f9142 !important; }
+.warning-message-box   { border-left: 3px solid #d9992f !important; }
+.error-message-box,
+.danger-message-box    { border-left: 3px solid #d94f2f !important; }
+.info-message-box .message-box-footer, .message-message-box .message-box-footer,
+.highlight-message-box .message-box-footer, .success-message-box .message-box-footer,
+.warning-message-box .message-box-footer, .error-message-box .message-box-footer,
+.danger-message-box .message-box-footer {
+  background: var(--smm-hair) !important;
+}
+
 /* ---- tables, timetable, lists ------------------------------------------- */
 .i-table, table.infoTable, .timetable-item, .contribution-list .list-item {
   background: none !important;
   border-color: var(--smm-rule) !important;
+}
+/* The contribution list, track review list and the timetable's hover
+   balloon clip a long description behind a gradient fading to a literal
+   white — correct on a light page, a bright rectangle on this one. Fades
+   toward the same near-solid tone already used behind the dropdown and its
+   error list: it need not be perfectly opaque to read as "the text ends
+   here". Same specificity as Indico's own rule (no !important there), so
+   this file loading last would be enough on its own; !important is kept
+   only for parity with the rest of the sheet. */
+.contribution-list .contribution-row .description::before,
+.track-review-list .contribution-row .description::before,
+.track-review-list .track-review-row .description::before,
+.balloon-qtip .description::before {
+  background: linear-gradient(transparent 0.4em, var(--smm-glass-solid) 4.2em) !important;
 }
 .i-table thead th, .confBodyBox table thead th {
   background: none !important;
