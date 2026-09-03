@@ -1,9 +1,17 @@
 #!/usr/bin/env node
-/* Render the USMCC meeting banner that sits above the Indico event title.
+/* Render a banner to sit above an Indico event title.
  *
- *   node render/banner.mjs                    # dark, 2400x1000
+ *   node render/banner.mjs                    # USMCC meeting, dark, 2400x1000
  *   node render/banner.mjs --theme light
+ *   node render/banner.mjs --event smm        # the sigma-mu-mu reunion
+ *   node render/banner.mjs --event smm --theme dark
  *   node render/banner.mjs --w 2400 --h 1000 --out out/banner.png
+ *
+ * Two events, one layout: a kicker, a title, the official mark on the far
+ * side, a rule and a footline, over the field. The sigma-mu-mu banner leads
+ * with the poster's lockup instead of a text title, which is the one thing
+ * that differs -- the sigma set large in Libertinus Math with the mu mu at
+ * half its size, exactly the proportion site/assets/css/main.css uses.
  *
  * Sized 2.4:1 to drop into the slot the current cream banner occupies, and
  * drawn at twice the width it is displayed at so it stays crisp on a phone.
@@ -24,8 +32,35 @@ const str = (k, d) => { const i = a.indexOf('--' + k); return i < 0 ? d : a[i + 
 
 const THEME = str('theme', 'dark');
 const DARK = THEME === 'dark';
+const EVENT = str('event', 'usmcc');
 const W = num('w', 2400), H = num('h', 1000);
-const OUT = resolve(ROOT, str('out', `out/usmcc-2026-banner-${THEME}.png`));
+
+// Strings live here rather than being read from the Hugo front matter: a
+// banner is a flat image checked by eye once and then uploaded, and reaching
+// into the site's content for it would tie a render to a content edit.
+const EVENTS = {
+  usmcc: {
+    slug: 'usmcc-2026-banner',
+    seed: 66,
+    kicker: '3rd Annual',
+    title: 'US Muon Collider<br>Collaboration Meeting',
+    where: 'Stanford, Dec. 13&ndash;16, 2026',
+    url: 'indico.muoncollider.us/e/usmcc2026',
+  },
+  smm: {
+    slug: 'sigmamumu-banner',
+    seed: 2026,
+    kicker: 'USMCC Annual Meeting &middot; Stanford',
+    lockup: true,
+    title: 'A Particle Physics<br>Alumni Reunion',
+    tagline: 'Cocktail hour &times; Research fair',
+    where: 'Sunday 13 December 2026 &middot; 4:30&ndash;6:30 p.m.',
+    url: 'hepalumni.muoncollider.us',
+  },
+};
+const E = EVENTS[EVENT];
+if (!E) { console.error(`unknown --event ${EVENT}; try ${Object.keys(EVENTS).join(' or ')}`); process.exit(1); }
+const OUT = resolve(ROOT, str('out', `out/${E.slug}-${THEME}.png`));
 
 const PAPER = DARK ? '#141312' : '#f5f0e1';
 const INK = DARK ? '#efe9da' : '#201e1d';
@@ -99,7 +134,7 @@ const html = `<!doctype html><html><head><meta charset="utf-8">
   }
   .kicker {
     color: ${ACCENT};
-    font-size: ${Math.round(H * 0.062)}px;
+    font-size: ${Math.round(H * (E.lockup ? 0.045 : 0.062))}px;
     font-weight: 700;
     letter-spacing: .22em;
     text-transform: uppercase;
@@ -112,6 +147,45 @@ const html = `<!doctype html><html><head><meta charset="utf-8">
     line-height: 1.02;
     letter-spacing: -.022em;
     max-width: ${Math.round(W * 0.6)}px;
+  }
+  /* The reunion banner leads with the poster's lockup, so the title sits
+     beside it rather than carrying the frame on its own: the sigma is the
+     thing to recognise from across a room. Proportions are the site's --
+     Libertinus Math, the mu mu just under half the sigma, nudged up and
+     right so it tucks under the sigma's shoulder. */
+  /* Shrink-wrapped, not full width: a block row would reach under the mark
+     and there would be no way to tell a real collision from a wide box. */
+  #row { display: flex; align-self: flex-start; align-items: center;
+         gap: ${Math.round(W * 0.022)}px; margin-top: ${Math.round(H * 0.012)}px;
+         flex: 1 1 auto; }
+  .lockup {
+    flex: none;
+    color: ${INK};
+    font-family: "Libertinus Math", Cambria, Georgia, serif;
+    font-weight: 400;
+    line-height: .8;
+    white-space: nowrap;
+  }
+  /* Big. On the poster the sigma carries the whole sheet, and a banner that
+     sets it at the same rank as the title throws away the one mark somebody
+     recognises from across a room. */
+  .lockup .sig { font-size: ${Math.round(H * 0.56)}px; }
+  .lockup .mumu {
+    font-size: ${Math.round(H * 0.27)}px;
+    position: relative;
+    top: ${-Math.round(H * 0.034)}px;
+    left: ${Math.round(H * 0.008)}px;
+  }
+  #row h1 { margin-top: 0; font-size: ${Math.round(H * 0.1)}px;
+            text-transform: uppercase; letter-spacing: -.015em;
+            max-width: ${Math.round(W * 0.5)}px; }
+  .tagline {
+    margin-top: ${Math.round(H * 0.026)}px;
+    color: ${ACCENT};
+    font-size: ${Math.round(H * 0.042)}px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
   }
   .rule {
     margin-top: auto;
@@ -144,12 +218,20 @@ const html = `<!doctype html><html><head><meta charset="utf-8">
   <div id="veil2"></div>
   <img id="mark" src="http://127.0.0.1:${port}${MARK}" alt="">
   <div id="type">
-    <div class="kicker">3rd Annual</div>
-    <h1>US Muon Collider<br>Collaboration Meeting</h1>
+    <div class="kicker">${E.kicker}</div>
+    ${E.lockup
+      ? `<div id="row">
+           <div class="lockup" aria-label="sigma mu mu"><span class="sig">&sigma;</span><span class="mumu">&mu;&mu;</span></div>
+           <div>
+             <h1>${E.title}</h1>
+             <div class="tagline">${E.tagline}</div>
+           </div>
+         </div>`
+      : `<h1>${E.title}</h1>`}
     <div class="rule"></div>
     <div class="foot">
-      <span class="where">Stanford, Dec. 13&ndash;16, 2026</span>
-      <span class="url">indico.muoncollider.us/e/usmcc2026</span>
+      <span class="where">${E.where}</span>
+      <span class="url">${E.url}</span>
     </div>
   </div>
 </div></body></html>`;
@@ -161,11 +243,11 @@ page.on('pageerror', e => { console.error('page error:', e.message); process.exi
 await page.setContent(html, { waitUntil: 'load' });
 await page.addScriptTag({ content: await readFile(resolve(ROOT, 'design/network.js'), 'utf8') });
 
-const edges = await page.evaluate(({ W, H, INK, ACCENT, DARK }) => {
+const edges = await page.evaluate(({ W, H, INK, ACCENT, DARK, SEED }) => {
   const c = document.getElementById('c');
   const ctx = c.getContext('2d');
   const net = window.SMMNet.build({
-    w: W, h: H, zones: [], seed: 66, seeds: [{ x: W * 0.78, y: H * 0.5 }],
+    w: W, h: H, zones: [], seed: SEED, seeds: [{ x: W * 0.78, y: H * 0.5 }],
     spacing: 34, keep: 0.72, speed: 120, darts: 90000,
     pad: -80, clearance: 0, clearanceAt: () => 0, scaleAt: () => 2.9,
     cornerR: 0, maxLegs: 4, minSep: 0.42, minSepHard: 0.25, minComponent: 4,
@@ -176,7 +258,7 @@ const edges = await page.evaluate(({ W, H, INK, ACCENT, DARK }) => {
     window.SMMNet.drawEdge(ctx, net, e, 1, { accent: ACCENT, ink: INK, tone: 0.95 });
   }
   return net.edges.length;
-}, { W, H, INK, ACCENT, DARK });
+}, { W, H, INK, ACCENT, DARK, SEED: E.seed });
 
 await page.evaluate(() => document.fonts.ready);
 await page.waitForFunction(() => {
@@ -190,11 +272,14 @@ const layout = await page.evaluate(() => {
   const r = el => el.getBoundingClientRect();
   const mark = r(document.getElementById('mark'));
   const foot = [...document.querySelectorAll('.foot > span')].map(s => r(s));
-  const h1 = r(document.querySelector('h1'));
+  const h1 = r(document.getElementById('row') || document.querySelector('h1'));
   return {
     markInside: mark.right <= innerWidth + 0.5 && mark.top >= -0.5 && mark.bottom <= innerHeight + 0.5,
     footLines: foot.map(f => Math.round(f.height)),
-    footClearsMark: foot.every(f => f.right <= mark.left + 0.5 || f.bottom <= mark.top + 0.5),
+    // Clear means clear: left of the mark, above it, or below it. The
+    // footline is below it, which the first two tests alone call a collision.
+    footClearsMark: foot.every(f => f.right <= mark.left + 0.5
+      || f.bottom <= mark.top + 0.5 || f.top >= mark.bottom - 0.5),
     titleClearsMark: h1.right <= mark.left + 0.5,
     lineHeight: Math.round(parseFloat(getComputedStyle(document.querySelector('.foot')).fontSize) * 1.4),
   };
@@ -202,6 +287,15 @@ const layout = await page.evaluate(() => {
 const oneLine = layout.footLines.every(h => h <= layout.lineHeight);
 if (!layout.markInside || !oneLine || !layout.footClearsMark || !layout.titleClearsMark) {
   console.error('  LAYOUT FAULT', JSON.stringify(layout));
+  console.error('  rects', JSON.stringify(await page.evaluate(() => {
+    const r = el => { const b = el.getBoundingClientRect();
+      return { x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width), h: Math.round(b.height) }; };
+    const out = { mark: r(document.getElementById('mark')) };
+    const row = document.getElementById('row');
+    if (row) { out.row = r(row); out.lockup = r(row.querySelector('.lockup')); out.h1 = r(row.querySelector('h1')); }
+    document.querySelectorAll('.foot > span').forEach((s, i) => out['foot' + i] = r(s));
+    return out;
+  })));
   process.exitCode = 1;
 } else {
   console.log(`  layout ok: mark inside, footline on one line, nothing overlapping the mark`);
