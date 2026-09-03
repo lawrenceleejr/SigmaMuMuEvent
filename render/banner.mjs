@@ -201,6 +201,14 @@ const html = `<!doctype html><html><head><meta charset="utf-8">
   #row h1 { margin-top: 0; font-size: ${Math.round(H * 0.1)}px;
             text-transform: uppercase; letter-spacing: -.015em;
             max-width: ${Math.round(W * 0.5)}px; }
+  /* A zero-sized inline-block sits on the baseline of its line, so its top
+     edge is that baseline and can be measured. Two of them -- one after the
+     sigma, one at the end of the title's last line -- are what the render
+     lines up. Doing it by measurement rather than by CSS offsets is the only
+     way to be right about it: where a baseline falls inside a line box
+     depends on the font's own ascent, which differs between Libertinus and
+     Archivo. */
+  .bl { display: inline-block; width: 0; height: 0; overflow: hidden; }
   .tagline {
     margin-top: ${Math.round(H * 0.026)}px;
     color: ${ACCENT};
@@ -244,9 +252,9 @@ const html = `<!doctype html><html><head><meta charset="utf-8">
     <div class="kicker">${E.kicker}</div>
     ${E.lockup
       ? `<div id="row">
-           <div class="lockup" aria-label="sigma mu mu"><span class="sig">&sigma;</span><span class="mumu">&mu;&mu;</span></div>
-           <div>
-             <h1>${E.title}</h1>
+           <div class="lockup" aria-label="sigma mu mu"><span class="sig">&sigma;<i class="bl" id="bl-sig"></i></span><span class="mumu">&mu;&mu;</span></div>
+           <div id="col">
+             <h1>${E.title}<i class="bl" id="bl-title"></i></h1>
              <div class="tagline">${E.tagline}</div>
            </div>
          </div>`
@@ -307,6 +315,30 @@ await page.waitForFunction(() => {
   return m && m.complete && m.naturalWidth > 0;
 });
 await page.waitForTimeout(400);
+// Sit the title on the sigma's own baseline. The flex row centres boxes, which
+// left the type floating at no particular height against a glyph three times
+// its size; on the same baseline the two read as one line of a lockup rather
+// than as two things that happen to be side by side. The title's last line is
+// the one that matches, since that is the line the eye pairs with the sigma.
+if (E.lockup) {
+  const shift = await page.evaluate(() => {
+    const base = el => el.getBoundingClientRect().top;
+    const d = base(document.getElementById('bl-sig')) - base(document.getElementById('bl-title'));
+    document.getElementById('col').style.transform = `translateY(${d}px)`;
+    return d;
+  });
+  const left = await page.evaluate(() => {
+    const base = el => el.getBoundingClientRect().top;
+    return base(document.getElementById('bl-sig')) - base(document.getElementById('bl-title'));
+  });
+  if (Math.abs(left) > 1) {
+    console.error(`  BASELINE FAULT: ${left.toFixed(1)}px apart after the shift`);
+    process.exitCode = 1;
+  } else {
+    console.log(`  title dropped ${shift.toFixed(0)}px onto the sigma's baseline`);
+  }
+}
+
 // Nothing may wrap, overflow, or collide with the mark. A banner is a single
 // flat image — a layout fault here is invisible until it is on the page.
 const layout = await page.evaluate(() => {
