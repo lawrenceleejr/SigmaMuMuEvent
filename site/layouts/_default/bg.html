@@ -13,15 +13,23 @@
 <title>{{ .Title }}</title>
 <link rel="icon" href="{{ "favicon.svg" | relURL }}" type="image/svg+xml">
 <link rel="stylesheet" href="{{ "fonts/fonts.css" | relURL }}">
+{{/* Two screens, one layout. `theme: light` in the front matter gives the
+     reunion's cream stock; the default is the meeting's dark room. Every
+     tinted surface below is built from these two triples rather than written
+     out twice, so a palette cannot half-change. */}}
+{{ $light := eq .Params.theme "light" }}
+{{ $paper := cond $light "245, 240, 225" "20, 19, 18" }}
+{{ $ink := cond $light "32, 30, 29" "239, 233, 218" }}
 <style>
-  /* The banner's palette, read as a negative — this is a room with the lights
-     down and a projector on. */
+  /* The banner's palette. Dark reads it as a negative -- a room with the
+     lights down and a projector on; light is the poster's own cream stock. */
   :root {
-    --paper: #141312;
-    --ink: #efe9da;
-    --accent: #ff5230;
-    --muted: #9b948a;
+    --paper: {{ cond $light "#f5f0e1" "#141312" }};
+    --ink: {{ cond $light "#201e1d" "#efe9da" }};
+    --accent: {{ cond $light "#ec3013" "#ff5230" }};
+    --muted: {{ cond $light "#605d5d" "#9b948a" }};
     --sans: Archivo, "Helvetica Neue", Arial, sans-serif;
+    --math: "Libertinus Math", "KaTeX Math", Cambria, Georgia, serif;
   }
   * { margin: 0; box-sizing: border-box; }
   html, body { height: 100dvh; overflow: hidden; background: var(--paper); }
@@ -35,13 +43,13 @@
   #veil, #veil2 { position: fixed; inset: 0; z-index: 2; pointer-events: none; }
   #veil {
     background: linear-gradient(170deg,
-      rgba(20, 19, 18, 0.94) 0%, rgba(20, 19, 18, 0.82) 24%,
-      rgba(20, 19, 18, 0.1) 44%, rgba(20, 19, 18, 0.1) 74%,
-      rgba(20, 19, 18, 0.26) 100%);
+      rgba({{ $paper }}, 0.94) 0%, rgba({{ $paper }}, 0.82) 24%,
+      rgba({{ $paper }}, 0.1) 44%, rgba({{ $paper }}, 0.1) 74%,
+      rgba({{ $paper }}, 0.26) 100%);
   }
   #veil2 {
     background: linear-gradient(0deg,
-      rgba(20, 19, 18, 0.82) 0%, rgba(20, 19, 18, 0) 30%);
+      rgba({{ $paper }}, 0.82) 0%, rgba({{ $paper }}, 0) 30%);
   }
 
   #type {
@@ -60,6 +68,35 @@
     font-size: 4.4vw; font-weight: 800;
     line-height: 1.02; letter-spacing: -0.022em;
     max-width: 62vw;
+  }
+  /* With the lockup above it the title is a second voice, not the first, and
+     it is set in caps to sit with the kicker and the tagline around it. */
+  body.has-lockup h1 {
+    margin-top: 0;
+    font-size: 3.5vw; text-transform: uppercase; letter-spacing: -0.015em;
+  }
+  /* The reunion's mark, at the poster's own proportions: the mu mu is .482 of
+     the sigma, dropped .118 of it and nudged .011 across. Sized off the
+     height, because that is what a room screen runs out of first. */
+  .lockup {
+    margin-top: 1.2vh;
+    /* The mu mu is dropped below the sigma's baseline and has descenders of
+       its own, and a 0.8 line height reserves room for neither, so the space
+       under the mark is asked for here rather than left to the line box. */
+    margin-bottom: 4.6vh;
+    font-family: var(--math); font-weight: 400;
+    line-height: 0.8; letter-spacing: 0; white-space: nowrap;
+  }
+  .lockup .sig { font-size: 15.5vh; }
+  .lockup .mumu {
+    font-size: 7.47vh;
+    position: relative; top: 1.83vh; left: 0.17vh;
+  }
+  .tagline {
+    margin-top: 1.4vh;
+    color: var(--accent);
+    font-size: 1.5vw; font-weight: 700;
+    letter-spacing: 0.14em; text-transform: uppercase;
   }
   .rule {
     margin-top: 3.4vh;
@@ -111,8 +148,8 @@
     position: fixed; z-index: 4; left: 0; right: 0; bottom: 0;
     display: flex; gap: 0.8rem; align-items: center; justify-content: center;
     padding: 1rem 1.2rem;
-    background: rgba(12, 11, 11, 0.86);
-    border-top: 1px solid rgba(239, 233, 218, 0.14);
+    background: rgba({{ $paper }}, 0.9);
+    border-top: 1px solid rgba({{ $ink }}, 0.14);
     transition: opacity 0.25s ease, transform 0.25s ease;
   }
   body.present #bar { display: none; }
@@ -121,9 +158,9 @@
   #say-input {
     flex: 1 1 34rem; max-width: 44rem;
     padding: 0.6rem 0.8rem;
-    background: rgba(239, 233, 218, 0.06);
+    background: rgba({{ $ink }}, 0.06);
     color: var(--ink);
-    border: 1px solid rgba(239, 233, 218, 0.24);
+    border: 1px solid rgba({{ $ink }}, 0.24);
     border-radius: 0;
     font-family: var(--sans); font-size: 1rem;
   }
@@ -137,7 +174,7 @@
     letter-spacing: 0.14em; text-transform: uppercase;
   }
   #fs:hover, #music:hover { background: var(--accent); color: var(--ink); }
-  #music { background: none; color: var(--ink); border: 1px solid rgba(239, 233, 218, 0.24); }
+  #music { background: none; color: var(--ink); border: 1px solid rgba({{ $ink }}, 0.24); }
   .hint { color: var(--muted); font-size: 0.78rem; letter-spacing: 0.04em; }
   @media (max-width: 700px) { .hint { display: none; } }
 
@@ -146,18 +183,26 @@
      takes a larger share of it and the footline stacks instead of spanning. */
   @media (max-aspect-ratio: 1 / 1) {
     #type { padding: 4vh 5vw; }
-    .kicker { font-size: 3.4vw; }
+    /* Held narrow enough to wrap rather than run under the mark in the
+       corner. The meeting's kicker is two words and never reached it; the
+       reunion's is six. */
+    .kicker { font-size: 3.4vw; max-width: 68vw; }
     /* Narrow enough to clear the mark in the corner rather than run under it. */
     h1 { font-size: 6vw; max-width: 72vw; margin-top: 1.2vh; }
     .rule { max-width: 100%; margin-top: 2.6vh; }
     .foot { gap: 0.35em; font-size: 2.9vw; margin-top: 1.4vh; max-width: 100%; }
+    body.has-lockup h1 { font-size: 5vw; }
+    .lockup { margin-bottom: 3.6vh; }
+    .lockup .sig { font-size: 12vh; }
+    .lockup .mumu { font-size: 5.78vh; top: 1.42vh; left: 0.13vh; }
+    .tagline { font-size: 2.6vw; }
     #mark { width: 17vw; height: 8vh; top: 4vh; right: 5vw; }
     #say-wrap { padding: 0 5vw; }
     #bar { flex-wrap: wrap; }
   }
 </style>
 </head>
-<body>
+<body{{ if .Params.lockup }} class="has-lockup"{{ end }}>
 
 <canvas id="live" aria-hidden="true"></canvas>
 <div id="veil" aria-hidden="true"></div>
@@ -165,7 +210,11 @@
 
 <div id="type">
   <div class="kicker">{{ .Params.kicker }}</div>
+  {{ if .Params.lockup }}
+  <div class="lockup" aria-label="sigma mu mu"><span class="sig">&sigma;</span><span class="mumu">&mu;&mu;</span></div>
+  {{ end }}
   <h1>{{ .Params.heading | safeHTML }}</h1>
+  {{ with .Params.tagline }}<div class="tagline">{{ . }}</div>{{ end }}
   <div class="rule"></div>
   <div class="foot">
     <span class="where">{{ .Params.where }}</span>

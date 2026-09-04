@@ -1,6 +1,9 @@
 ---
-title: "Presenter background"
+title: "Presenter background — USMCC meeting"
 layout: bg
+# This screen was /bg before there were two of them; the old address still
+# lands here rather than 404ing on anybody who wrote it down.
+aliases: ["/bg/"]
 # Nested under params deliberately: `url` at the top level is one of Hugo's
 # own front matter keys and would move the page to that address.
 params:
@@ -15,6 +18,8 @@ params:
   # The playlist is its catalogue id, the pl.xxxxxxxx in its share link.
   music_token: ""
   music_playlist: ""
+  # The room this is for: lights down, projector on.
+  theme: dark
   # The nine hand-drawn lines of the VBF diagram, held still in the middle.
   # false leaves the page as the website's field and nothing else.
   diagram: true
