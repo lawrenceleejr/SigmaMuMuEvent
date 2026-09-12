@@ -35,12 +35,24 @@ const swap = (from, to, opts = {}) => {
 swap('--smm-paper: #f5f0e1;', '--smm-paper: #141312;');
 swap('--smm-ink: #201e1d;', '--smm-ink: #efe9da;');
 swap('--smm-accent: #ec3013;', '--smm-accent: #ff5230;');   // hotter, to carry on black
-swap('--smm-muted: #605d5d;', '--smm-muted: #9b948a;');
+swap('--smm-muted: #605d5d;', '--smm-muted: #b2aa9e;');
 swap('--smm-rule: rgba(32, 30, 29, 0.18);', '--smm-rule: rgba(239, 233, 218, 0.22);');
 swap('--smm-hair: rgba(32, 30, 29, 0.1);', '--smm-hair: rgba(239, 233, 218, 0.14);');
-swap('--smm-glass: rgba(245, 240, 225, 0.62);', '--smm-glass: rgba(28, 26, 24, 0.62);');
-swap('--smm-glass-solid: rgba(245, 240, 225, 0.95);', '--smm-glass-solid: rgba(28, 26, 24, 0.95);');
+// The panes were a tone of the ground, which left them barely separable from
+// the field behind. Warm them up and let them sit above it instead.
+swap('--smm-glass: rgba(245, 240, 225, 0.62);', '--smm-glass: rgba(38, 35, 32, 0.72);');
+swap('--smm-glass-solid: rgba(245, 240, 225, 0.95);', '--smm-glass-solid: rgba(40, 37, 33, 0.97);');
 swap('--smm-accent-wash: rgba(236, 48, 19, 0.12);', '--smm-accent-wash: rgba(255, 82, 48, 0.16);');
+// Anything that floats above the page has to be lighter than the ground, not
+// darker: on cream a pop-up can be a shade off the paper and still read as a
+// card, but on the negative a panel tinted toward the ground reads as a hole.
+// So the pop-up surface and the menu glass are lifted well clear of #141312
+// rather than swapped to a tone of it.
+swap('--smm-pop: #fbf7ec;', '--smm-pop: #2b2825;');
+swap('--smm-pop-border: rgba(32, 30, 29, 0.2);', '--smm-pop-border: rgba(239, 233, 218, 0.3);');
+swap('--smm-menu-glass: rgba(245, 240, 225, 0.66);', '--smm-menu-glass: rgba(56, 51, 46, 0.82);');
+// Second-rank type: a grey that reads as quiet on cream goes to mud on black.
+swap('--smm-muted-strong: #45423f;', '--smm-muted-strong: #cfc7b8;');
 swap('      rgba(32, 30, 29, 0.1), rgba(32, 30, 29, 0.1) 10px,\n'
    + '      rgba(32, 30, 29, 0.04) 10px, rgba(32, 30, 29, 0.04) 20px);',
      '      rgba(239, 233, 218, 0.1), rgba(239, 233, 218, 0.1) 10px,\n'
@@ -62,9 +74,10 @@ swap('rgba(245, 240, 225, var(--smm-veil))', 'rgba(20, 19, 18, var(--smm-veil))'
 swap('rgba(245, 240, 225, 0.25)', 'rgba(239, 233, 218, 0.22)');
 swap('rgba(245, 240, 225, 0.75)', 'rgba(239, 233, 218, 0.7)');
 swap('rgba(245, 240, 225, 0.9) !important', 'rgba(34, 31, 29, 0.9) !important');
-swap('rgba(245, 240, 225, 0.55) !important', 'rgba(34, 31, 29, 0.6) !important');
+swap('rgba(245, 240, 225, 0.55) !important', 'rgba(255, 255, 255, 0.055) !important');
+// Field wells: 6% white over a near-black pane is a well you cannot find.
 swap('background: rgba(255, 255, 255, 0.55) !important',
-     'background: rgba(255, 255, 255, 0.06) !important');
+     'background: rgba(255, 255, 255, 0.1) !important');
 swap('border: 1px solid rgba(32, 30, 29, 0.35) !important',
      'border: 1px solid rgba(239, 233, 218, 0.4) !important');
 
@@ -128,7 +141,7 @@ swap(`   It dresses Indico in the identity used by the poster and by
 await writeFile(OUT, css);
 console.log(`wrote ${OUT}`);
 console.log(`  ${before} -> ${css.length} bytes, ${css.split('{').length - 1} rule blocks`);
-if (/#f5f0e1|#201e1d|#ec3013/.test(css)) {
+if (/#f5f0e1|#201e1d|#ec3013|#fbf7ec|#45423f/.test(css)) {
   console.error('  WARNING: a light-palette hex survived the swap');
   process.exitCode = 1;
 }
