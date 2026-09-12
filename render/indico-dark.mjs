@@ -91,6 +91,18 @@ swap('background: rgba(255, 255, 255, 0.55) !important',
 swap('border: 1px solid rgba(32, 30, 29, 0.35) !important',
      'border: 1px solid rgba(239, 233, 218, 0.4) !important');
 
+// ---- the frost ----------------------------------------------------------
+// The panes on this skin are near-opaque already (0.72, and 0.96 on the
+// menu), so a 15px blur behind them changes almost nothing you can see —
+// while a backdrop-filter over an animating field is re-run every tick, at
+// device resolution, for every pane. Measured at 1680x1050 on a 2x display:
+// 20 fps with blur(15px) saturate(1.25), 26 fps with none, and the gap is
+// wider on WebKit. A short blur keeps the edge of the glass without the bill.
+swap('  -webkit-backdrop-filter: blur(15px) saturate(1.25);\n'
+   + '  backdrop-filter: blur(15px) saturate(1.25);',
+     '  -webkit-backdrop-filter: blur(4px);\n'
+   + '  backdrop-filter: blur(4px);');
+
 // ---- assets -------------------------------------------------------------
 swap('img/field-live.svg', 'img/field-live-dark.svg');
 swap('img/field-still.png', 'img/field-still-dark.png');
