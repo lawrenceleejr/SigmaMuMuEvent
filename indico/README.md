@@ -122,3 +122,27 @@ already near-black:
 - `--smm-muted-strong` is for type a reader is actually meant to read —
   decks, subtitles, field help. `--smm-muted` stays the quietest the page
   goes: table headers, timezone labels, disabled text.
+
+## If the field still stutters
+
+The field is an animated SVG — 600 paths that re-rasterise on every tick —
+and it is drawn by the browser, not by this stylesheet, so what the sheet can
+do is make each tick cheaper. Two things it already does: the field sits on
+its own composited layer (`body::before`, fixed) instead of being part of the
+page's own paint, and the dark skin's frost drops to a 4px blur, because a
+backdrop-filter re-runs over an animating backdrop on every tick.
+
+If a machine still cannot keep up, in order of how much they cost the look:
+
+1. **Thin the field.** `node render/field-svg.mjs --theme dark --churn 0.35
+   --buckets 24` leaves more of the mesh standing and staggers what moves in
+   fewer groups: 229 of 595 lines animate instead of 327, and it measured
+   about 15% faster with the frost off. Re-upload the SVG to the event site
+   and bump the `?v=` in the stylesheet.
+2. **Drop the frost entirely** — delete the two `backdrop-filter` lines from
+   `.confheader::before, .confBodyBox::before, .conf_leftMenu::before`. The
+   panes are near-opaque on the dark skin; almost nothing is lost.
+3. **Use the still field.** Point the `body::before` background at
+   `field-still-dark.png` instead of `field-live-dark.svg`. This is what
+   anyone who has asked for reduced motion already sees, and the page keeps
+   its texture — it just stops moving.
