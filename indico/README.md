@@ -108,3 +108,17 @@ overflowing elements.
 `--smm-veil` at the top of the file controls how much cream sits over the
 background field. Raise it toward `1` for a quieter page, lower it for more
 texture.
+
+Two more tokens carry the weight on the dark skin, where the page ground is
+already near-black:
+
+- `--smm-pop` is the surface of anything that floats above the page — the
+  select lists on the registration form, dialogs, tooltips, the markdown
+  editor. It is *lighter* than the ground on the dark skin, not a tone of it:
+  a pop-up tinted toward the ground reads as a hole cut in the page rather
+  than a card laid on it. `--smm-menu-glass` does the same for the event menu,
+  which is a narrow column of short lines and needs a little more surface
+  under it than the body pane to hold together.
+- `--smm-muted-strong` is for type a reader is actually meant to read —
+  decks, subtitles, field help. `--smm-muted` stays the quietest the page
+  goes: table headers, timezone labels, disabled text.
