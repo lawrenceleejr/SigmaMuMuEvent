@@ -48,7 +48,7 @@
      one skin without bleaching the other. */
   --smm-pop: #2b2825;
   --smm-pop-border: rgba(239, 233, 218, 0.3);
-  --smm-menu-glass: rgba(50, 45, 41, 0.8);
+  --smm-menu-glass: rgba(46, 42, 38, 0.96);
   /* Second-rank type: decks, subtitles, field help. --smm-muted is the
      quietest the page goes (table headers, timezones); anything a reader is
      actually meant to read takes --smm-muted-strong, which holds its
@@ -65,6 +65,16 @@
                 0 44px 90px -24px rgba(0, 0, 0, 0.95);
   /* How much cream sits over the field. Raise toward 1 for a quieter page. */
   --smm-veil: 0.45;
+  /* Everything the browser draws itself rather than from this file — a native
+     <select>'s pop-up, scrollbars, date and colour pickers, the caret, the
+     spin buttons — takes its palette from color-scheme and from nothing else.
+     Unset, the engine assumes a light page and renders a light-mode menu over
+     a dark one: on macOS that is the translucent system menu, which is how
+     the registration form's Position list came out as grey text floating over
+     the form behind it. No amount of styling the page reaches those; the one
+     word does. */
+  color-scheme: dark;
+  accent-color: var(--smm-accent);
 }
 
 /* ---- the page ----------------------------------------------------------- */
@@ -701,9 +711,14 @@ body > .header,
   font-family: var(--smm-sans);
   font-weight: 700;
 }
+/* input:not([type]) is not pedantry: the filter box inside <ind-select> and
+   a few of Indico's own search fields ship without the attribute, and
+   [type="text"] does not match an input that never declared one. */
 .i-form input[type="text"], .i-form input[type="email"], .i-form input[type="number"],
+.i-form input:not([type]),
 .i-form textarea, .i-form select,
-.ui.form input, .ui.form textarea, .ui.form select, .ui.input > input {
+.ui.form input, .ui.form input:not([type]),
+.ui.form textarea, .ui.form select, .ui.input > input {
   background: rgba(255, 255, 255, 0.1) !important;
   color: var(--smm-ink) !important;
   border: 1px solid var(--smm-rule) !important;
@@ -759,31 +774,68 @@ select optgroup {
    pop-up list, and the error summary. The error list is a CSS module, so its
    class is a readable prefix plus a build hash — match the prefix, or an
    Indico upgrade silently drops the rule. */
-.confBodyBox ind-select .caption,
-.confBodyBox ind-select ul,
 .confBodyBox [class*="FormErrorList"] {
   background: var(--smm-pop) !important;
   color: var(--smm-ink) !important;
+  border: 1px solid var(--smm-accent) !important;
   border-radius: 0 !important;
 }
-/* The open list is drawn over the form it belongs to, so it needs an edge
-   and a shadow of its own — without them the options float in the dark with
-   nothing to say where the list starts and the page resumes. */
-.confBodyBox ind-select ul {
+
+/* <ind-select> — the picker Indico 3.3 uses for a single-choice field, the
+   Position question on the registration form among them. It is a custom
+   element built out of a .caption trigger, a <dialog> that opens against it,
+   a filter <input> and a [role=listbox] of [role=option]s: no <ul>, no
+   .menu, none of the hooks a rule written for Semantic's dropdown would
+   reach, which is why the list came up in Indico's own white (and the filter
+   input with it) however hard that rule tried.
+
+   Deliberately not scoped to .confBodyBox. The listbox is positioned against
+   the viewport by the component's own positioning code, and the same element
+   is used on management forms that never render inside the body box. */
+ind-select .caption,
+ind-select dialog,
+ind-select [role="listbox"],
+ind-select .option-filter input,
+ind-combo-box [role="listbox"],
+ind-menu [role="menu"],
+ind-menu dialog {
+  background: var(--smm-pop) !important;
+  color: var(--smm-ink) !important;
+  border-color: var(--smm-pop-border) !important;
+  border-radius: 0 !important;
+}
+/* The list is drawn over the form it belongs to, so it needs an edge and a
+   shadow of its own — without them the options float with nothing to say
+   where the list starts and the page resumes. */
+ind-select [role="listbox"],
+ind-combo-box [role="listbox"],
+ind-menu [role="menu"] {
   border: 1px solid var(--smm-pop-border) !important;
   box-shadow: var(--smm-shadow) !important;
 }
-.confBodyBox ind-select .caption {
-  border: 1px solid var(--smm-rule) !important;
-}
-.confBodyBox ind-select ul li { color: var(--smm-ink) !important; }
-.confBodyBox ind-select ul li:hover,
-.confBodyBox ind-select ul li[aria-selected="true"] {
+ind-select [role="option"],
+ind-select .no-option,
+ind-combo-box [role="option"],
+ind-menu [role="menuitem"] { color: var(--smm-ink) !important; }
+ind-select [role="option"]:hover,
+ind-select [role="option"][aria-selected],
+ind-combo-box [role="option"]:hover,
+ind-menu [role="menuitem"]:hover {
   background: var(--smm-accent-wash) !important;
   color: var(--smm-ink) !important;
 }
-.confBodyBox [class*="FormErrorList"] {
-  border: 1px solid var(--smm-accent) !important;
+ind-select [role="option"][aria-disabled],
+ind-select .no-option { color: var(--smm-muted) !important; }
+/* Semantic marks an errored field's input in its own pale red, which is the
+   one surface in the form that stays light. Keep the signal, drop the white:
+   the accent border and the accent text say it on either skin. */
+.ui.form .field.error ind-select .caption,
+.ui.form .field.error ind-select .option-filter input,
+.ui.form .field.error input,
+.ui.form .field.error textarea {
+  background: var(--smm-pop) !important;
+  border-color: var(--smm-accent) !important;
+  color: var(--smm-ink) !important;
 }
 
 /* Classic Semantic UI dropdown (the Type/Session/Track pickers on edit forms

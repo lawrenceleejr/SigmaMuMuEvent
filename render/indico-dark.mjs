@@ -52,7 +52,11 @@ swap('--smm-pop: #fbf7ec;', '--smm-pop: #2b2825;');
 swap('--smm-pop-border: rgba(32, 30, 29, 0.2);', '--smm-pop-border: rgba(239, 233, 218, 0.3);');
 // Held just shy of the pop-up surface: any lighter and the vermillion on the
 // menu's hover and its registration item falls under 4.5:1 against it.
-swap('--smm-menu-glass: rgba(245, 240, 225, 0.66);', '--smm-menu-glass: rgba(50, 45, 41, 0.8);');
+// Near-opaque on this skin. At 0.8 the field went on drawing itself through
+// the menu, and a moving line under six short labels costs more legibility
+// than the tint gains. Held just under the pop-up surface so the vermillion
+// on the hover state and the registration item keeps 4.5:1 against it.
+swap('--smm-menu-glass: rgba(245, 240, 225, 0.66);', '--smm-menu-glass: rgba(46, 42, 38, 0.96);');
 // Second-rank type: a grey that reads as quiet on cream goes to mud on black.
 swap('--smm-muted-strong: #45423f;', '--smm-muted-strong: #cfc7b8;');
 swap('      rgba(32, 30, 29, 0.1), rgba(32, 30, 29, 0.1) 10px,\n'
@@ -70,6 +74,10 @@ swap('--smm-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset,\n'
    + '                0 14px 30px -6px rgba(0, 0, 0, 0.7),\n'
    + '                0 44px 90px -24px rgba(0, 0, 0, 0.95);');
 swap('--smm-veil: 0.38;', '--smm-veil: 0.45;');
+// The one declaration that reaches what the browser draws for itself: the
+// native <select> pop-up, scrollbars, pickers, the caret. Without it the
+// engine renders light-mode controls over a dark page.
+swap('  color-scheme: light;', '  color-scheme: dark;');
 
 // ---- literals that mean "the page ground" -------------------------------
 swap('rgba(245, 240, 225, var(--smm-veil))', 'rgba(20, 19, 18, var(--smm-veil))');
