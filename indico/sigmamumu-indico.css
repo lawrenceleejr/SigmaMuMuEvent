@@ -514,6 +514,23 @@ body > .header,
   font-weight: 700;
   letter-spacing: -0.005em;
 }
+/* The page header of every Indico page is an <h2> title with an <h3> deck
+   under it — "Registration", then the form's own name. Indico colours both
+   #333 at `.conference-page header h3`, one class and two elements, which
+   outweighs the element rules above: the title wins here only because it is
+   marked !important, and the deck, which is not, stayed a dark grey that
+   the negative skin turned almost to nothing. Named at the same length and
+   given the second rank, which is what a deck is. */
+.conference-page header h3,
+.conference-page header .subtitle-container h3 {
+  color: var(--smm-muted-strong) !important;
+  font-family: var(--smm-sans) !important;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+.conference-page header h2 { color: var(--smm-accent) !important; }
+.conference-page header .page-description,
+.conference-page header .page-info { color: var(--smm-muted-strong) !important; }
 .description, .editor-output, .confBodyBox p {
   color: var(--smm-ink);
   font-size: 1rem;
