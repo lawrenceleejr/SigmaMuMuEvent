@@ -100,6 +100,10 @@ body::before {
   inset: 0;
   z-index: -2;
   pointer-events: none;
+  /* Say out loud that this layer is its own texture. A fixed element is
+     usually promoted anyway, but WebKit is the engine that was dropping
+     frames here and this is the declaration it reads. */
+  will-change: transform;
   background-color: var(--smm-paper);
   background-image:
     linear-gradient(rgba(20, 19, 18, var(--smm-veil)),
