@@ -73,8 +73,27 @@
 
 /* ---- the page ----------------------------------------------------------- */
 /* The field is fixed behind everything, knocked back under a cream veil so it
-   reads as texture rather than as content. The panels frost what they pass. */
-html {
+   reads as texture rather than as content. The panels frost what they pass.
+
+   It lives on a fixed pseudo-element rather than on `html` with
+   background-attachment: fixed, and that is a performance decision, not a
+   stylistic one. A background-attachment: fixed image is not a layer of its
+   own: it belongs to the page's own paint, so every animation tick of the
+   field repaints the document, and every scroll repaints the field. The
+   field is an animated SVG — 600 paths that re-rasterise on each tick — so
+   that bill is paid several times a second, and on WebKit it collapsed to a
+   frame every few seconds. A fixed element is composited: the browser
+   rasterises it into a texture of its own, the page scrolls over it without
+   touching it, and the animation redraws that one texture instead of the
+   page. Same picture, same position, a fraction of the work. */
+html { background-color: var(--smm-paper); }
+body { background: transparent; color: var(--smm-ink); }
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
   background-color: var(--smm-paper);
   background-image:
     linear-gradient(rgba(245, 240, 225, var(--smm-veil)),
@@ -83,18 +102,18 @@ html {
   background-repeat: no-repeat, no-repeat;
   background-position: center center, center center;
   background-size: cover, cover;
-  background-attachment: fixed, fixed;
 }
-body { background: transparent; color: var(--smm-ink); }
 body,
 .conference-page, .conferenceDetails, .i-box, .ui.form,
 input, select, textarea, button, .i-button {
   font-family: var(--smm-sans);
 }
-/* iOS ignores background-attachment: fixed and stretches a cover image over
-   the whole scroll height instead. Let it scroll at a sane size there. */
-@supports (-webkit-touch-callout: none) {
-  html { background-attachment: scroll, scroll; background-size: cover, 200vw auto; }
+/* iOS mishandled background-attachment: fixed — it stretched the cover image
+   over the whole scroll height — which a fixed element does not, so the old
+   override is gone. What is left for a phone is the size: a field scaled to
+   cover a tall narrow viewport is mostly empty middle. */
+@media (max-width: 700px) {
+  body::before { background-size: cover, 160vw auto; }
 }
 
 /* The ?v= on the field is a cache-buster, and it earns its keep: the file's
@@ -112,7 +131,7 @@ input, select, textarea, button, .i-button {
    image instead. That swap has to happen here rather than inside the SVG:
    nothing within an SVG can switch its own SMIL off. */
 @media (prefers-reduced-motion: reduce) {
-  html {
+  body::before {
     background-image:
       linear-gradient(rgba(245, 240, 225, var(--smm-veil)),
                       rgba(245, 240, 225, var(--smm-veil))),
@@ -839,6 +858,19 @@ select optgroup {
 .confBodyBox [class*="regform-module__description___"] li::marker { color: var(--smm-muted) !important; }
 .confBodyBox [class*="regform-module__description___"] p { margin: 0 0 0.45em !important; }
 .confBodyBox [class*="regform-module__description___"] > :last-child { margin-bottom: 0 !important; }
+
+/* Multiple-choice options are a table, and Indico gives each row 15px of
+   padding above and below plus a hairline between: room for a row that may
+   also carry a price and a places-left count. A plain list of choices does
+   not need a third of an inch between ticks, and the questions already carry
+   the rules, so the options sit close and unruled under theirs. */
+.confBodyBox [class*="table-module__choice-table___"] tr td:first-child {
+  padding-top: 0.22rem !important;
+  padding-bottom: 0.22rem !important;
+}
+.confBodyBox [class*="table-module__choice-table___"] [class*="table-module__row___"]:not(:last-child) {
+  border-bottom: 0 !important;
+}
 
 /* One question per ruled row. Indico separates its form items by 10px of
    air and nothing else, which works where every field is a white box on a
@@ -1568,6 +1600,7 @@ div.exclusivePopup .i-button:disabled:not(.borderless) {
 /* ---- print -------------------------------------------------------------- */
 @media print {
   html { background: #fff !important; }
+  body::before { display: none !important; }
   .confheader, .confBodyBox, .conf_leftMenu {
     background: #fff !important;
     backdrop-filter: none;
