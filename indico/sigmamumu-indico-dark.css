@@ -1191,6 +1191,10 @@ div.exclusivePopup .i-button:disabled:not(.borderless) {
 .confBodyBox .info-message-box .message-text,
 .confBodyBox small {
   color: var(--smm-muted-strong) !important;
+  /* Indico leaves several of these on the browser's default serif — the
+     section description under a title is one — while the rest of the page
+     is in the skin's grotesque. */
+  font-family: var(--smm-sans) !important;
 }
 /* except where the deck is the accent's job already */
 .confBodyBox .subtitle a,
