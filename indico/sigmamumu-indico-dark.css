@@ -48,7 +48,7 @@
      one skin without bleaching the other. */
   --smm-pop: #2b2825;
   --smm-pop-border: rgba(239, 233, 218, 0.3);
-  --smm-menu-glass: rgba(56, 51, 46, 0.82);
+  --smm-menu-glass: rgba(50, 45, 41, 0.8);
   /* Second-rank type: decks, subtitles, field help. --smm-muted is the
      quietest the page goes (table headers, timezones); anything a reader is
      actually meant to read takes --smm-muted-strong, which holds its

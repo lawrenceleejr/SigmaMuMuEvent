@@ -50,7 +50,9 @@ swap('--smm-accent-wash: rgba(236, 48, 19, 0.12);', '--smm-accent-wash: rgba(255
 // rather than swapped to a tone of it.
 swap('--smm-pop: #fbf7ec;', '--smm-pop: #2b2825;');
 swap('--smm-pop-border: rgba(32, 30, 29, 0.2);', '--smm-pop-border: rgba(239, 233, 218, 0.3);');
-swap('--smm-menu-glass: rgba(245, 240, 225, 0.66);', '--smm-menu-glass: rgba(56, 51, 46, 0.82);');
+// Held just shy of the pop-up surface: any lighter and the vermillion on the
+// menu's hover and its registration item falls under 4.5:1 against it.
+swap('--smm-menu-glass: rgba(245, 240, 225, 0.66);', '--smm-menu-glass: rgba(50, 45, 41, 0.8);');
 // Second-rank type: a grey that reads as quiet on cream goes to mud on black.
 swap('--smm-muted-strong: #45423f;', '--smm-muted-strong: #cfc7b8;');
 swap('      rgba(32, 30, 29, 0.1), rgba(32, 30, 29, 0.1) 10px,\n'
