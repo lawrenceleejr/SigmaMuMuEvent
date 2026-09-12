@@ -776,6 +776,64 @@ select optgroup {
   font-family: var(--smm-sans);
 }
 
+/* ---- the registration form's own React components -----------------------
+   The form is React, and its styles are CSS modules: every class is a
+   readable name plus a build hash (regform-module__form-item___AlbiE), so
+   the hash is matched around, not typed in — an Indico upgrade rebuilds it.
+
+   Three things Indico hard-codes there, each written for a white page:
+
+   · a multiple-choice field is a <fieldset> whose <legend> carries the
+     question, coloured rgba(0, 0, 0, .87) — "Research areas" and "Dietary
+     Restrictions" came out black on black.
+   · a label-type field, which authors use as a sub-heading inside a
+     section ("Fee Payment"), renders as a plain div at #555.
+   · a field's description is set justified, italic, at #999: justified at a
+     36em measure it opens rivers, and any markdown list in it loses its
+     indent, so the bullets sit out in the margin. */
+.confBodyBox [class*="regform-module__form-item___"] legend {
+  color: var(--smm-ink) !important;
+  font-family: var(--smm-sans) !important;
+  font-weight: 700 !important;
+}
+.confBodyBox [class*="regform-module__form-item___"] .required > fieldset > legend::after {
+  color: var(--smm-accent) !important;
+}
+.confBodyBox [class*="regform-module__label___"] {
+  color: var(--smm-ink) !important;
+  font-family: var(--smm-sans) !important;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+}
+.confBodyBox [class*="regform-module__description___"] {
+  color: var(--smm-muted-strong) !important;
+  text-align: left !important;
+  text-wrap: pretty;
+}
+/* Give a list in a description the indent the markdown implies, and let the
+   markers sit inside the measure rather than out in the margin. */
+.confBodyBox [class*="regform-module__description___"] ul,
+.confBodyBox [class*="regform-module__description___"] ol {
+  margin: 0.45em 0 !important;
+  padding-left: 1.35em !important;
+  list-style-position: outside !important;
+}
+.confBodyBox [class*="regform-module__description___"] li { margin: 0.2em 0 !important; }
+.confBodyBox [class*="regform-module__description___"] li::marker { color: var(--smm-muted) !important; }
+.confBodyBox [class*="regform-module__description___"] p { margin: 0 0 0.45em !important; }
+.confBodyBox [class*="regform-module__description___"] > :last-child { margin-bottom: 0 !important; }
+
+/* One question per ruled row. Indico separates its form items by 10px of
+   air and nothing else, which works where every field is a white box on a
+   white page and stops working here, where the wells are only a shade off
+   the panel. The rule is the same hairline the dateline and the tables use,
+   so the form reads as the rest of the page does. */
+.confBodyBox [class*="regform-module__form-item___"] + [class*="regform-module__form-item___"] {
+  margin-top: 1.1rem !important;
+  padding-top: 1.1rem !important;
+  border-top: 1px solid var(--smm-hair) !important;
+}
+
 /* Indico's own form widgets carry hard-coded white: the select trigger, its
    pop-up list, and the error summary. The error list is a CSS module, so its
    class is a readable prefix plus a build hash — match the prefix, or an
