@@ -398,6 +398,14 @@ body > .header,
 .confBodyBox {
   padding: clamp(1.25rem, 3vw, 2.25rem) !important;
   min-height: 16rem;
+  /* A formatting context of its own. The menu beside it is a float in the
+     page's root context, so without this any clearfix inside the pane —
+     Indico puts one on .infogrid, among others — clears the *menu* and drags
+     whatever carries it down past the bottom of the menu column. That is how
+     an empty .infogrid, a div with no children at all, came to hold 237px of
+     nothing between the page title and the registration notice. Contained
+     here, a float outside the pane cannot reach into it. */
+  display: flow-root;
 }
 .conf_leftMenu { padding: 1rem !important; }
 /* Indico floats a fixed-width column inside the body box; with padding added
@@ -638,6 +646,11 @@ body > .header,
   border: 0;
   background: none;
 }
+/* Indico emits this grid whether or not it has anything to put in it: a
+   registration form with no scheduled dates, no separate fee and no contact
+   address renders <div class="infogrid condensed"></div> and nothing else.
+   An empty box should take no room and no margin. */
+.infogrid:empty { display: none !important; }
 .infoline {
   float: none !important;
   width: auto !important;
