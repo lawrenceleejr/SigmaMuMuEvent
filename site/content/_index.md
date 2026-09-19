@@ -7,7 +7,7 @@ timeline = "4:30 – 6:30 p.m. Stanford University"
 meeting = "USMCC Annual Meeting · Stanford"
 cta = "Contribute to tomorrow's collider, today."
 rsvp_label = "RSVP"
-rsvp_url = "https://indico.muoncollider.us/e/hepalumni"
+rsvp_url = "https://indico.muoncollider.us/event/124/registrations/4/"
 usmcc_url = "https://www.muoncollider.us"
 copyright = "© 2026 US Muon Collider Collaboration. All rights reserved."
 
