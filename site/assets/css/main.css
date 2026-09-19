@@ -253,7 +253,7 @@ h2 {
   letter-spacing: 0.01em;
 }
 .slot { display: flex; flex-direction: column; gap: 0.3rem; }
-.name { font-size: 1.06rem; font-weight: 700; letter-spacing: -0.005em; }
+.name { font-size: 1.06rem; font-weight: 700; letter-spacing: -0.005em; white-space: pre-line; }
 .note { font-size: 0.92rem; color: var(--muted); text-wrap: pretty; }
 
 /* ---- organizers --------------------------------------------------------- */
