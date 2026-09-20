@@ -22,12 +22,16 @@ outside our reach:
   away. `render/mail-web.mjs` fails the build if that block ever names a
   colour the mail does not use elsewhere — a second palette in there is what a
   dark-mode paste would bake in.
-- **Transparent images, deliberately.** The USMCC mark is the published
-  transparent PNG, and that is the whole trick: Gmail inverts a transparent
-  mark along with the type, so it comes out light on a darkened sheet and dark
-  on a light one, with nothing to maintain. An opaque cream tile was tried and
-  reverted — Gmail leaves opaque images alone, so it became a bright box in
-  the corner of a darkened sheet.
+- **A mark with a halo.** Gmail darkens the sheet and leaves image pixels
+  alone — the published black mark goes nearly invisible there, which a
+  zoomed crop of a phone screenshot settled after two wrong guesses. An image
+  cannot answer a client's theme (a media query could; a compose window throws
+  those away), so the mark answers nothing: black strokes with a three-pixel
+  halo of the sheet's own cream around them, built by `render/logos.py`. On
+  the cream sheet the halo *is* the sheet and cannot be seen; on a darkened
+  one it traces the mark in light. Outside the strokes the image stays
+  transparent, so there is no tile — the failure of the opaque version tried
+  before it.
 - **Not a dark skin.** This was tested twice, both ways. A near-black mail and
   a dark brown one were both flipped to a muddy light sheet with brown
   headlines; the cream mail was flipped to brown with bone type and came out

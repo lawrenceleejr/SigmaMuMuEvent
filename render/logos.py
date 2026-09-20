@@ -14,8 +14,10 @@ calculated -- optical balance is not arithmetic. SLAC is a single heavy word
 and comes down; the Tennessee lockup is mostly small type around one orange
 square and comes up.
 """
+import io
+import urllib.request
 from pathlib import Path
-from PIL import Image
+from PIL import Image, ImageFilter
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC, OUT = ROOT / 'site/static/logos/original', ROOT / 'site/static/logos/row'
@@ -59,3 +61,39 @@ for stem in WHITE:
     canvas.save(WOUT / f'{stem}.png', optimize=True)
     print(f'white/{stem:26} {canvas.size[0]}x{canvas.size[1]}  {(WOUT/f"{stem}.png").stat().st_size/1024:.0f} KB')
 
+
+
+# ---- the USMCC mark for the mails ------------------------------------------
+# An image cannot answer a client's dark theme -- a media query could, and a
+# compose window throws those away. Gmail's apps darken the sheet and leave
+# image pixels alone, so the published black mark goes nearly invisible there.
+#
+# The answer is a mark that needs no answer: black strokes with a thin halo of
+# the sheet's own cream around them. On the cream sheet the halo is the sheet
+# and cannot be seen. On a darkened one it traces the mark in light. Outside
+# the strokes the image stays transparent, so there is no tile and no box --
+# the failure of the opaque version tried before this one.
+MAIL_MARK = 'https://www.muoncollider.us/resources/USMCCLogo_black.png'
+MAIL_OUT = ROOT / 'site/static/logos/mail'
+PAPER, SIZE, HALO = (245, 240, 225), 144, 3       # the mails' cream, 2x the 72px slot
+
+MAIL_OUT.mkdir(parents=True, exist_ok=True)
+with urllib.request.urlopen(MAIL_MARK) as r:
+    raw = Image.open(io.BytesIO(r.read())).convert('RGBA')
+mark = raw.crop(raw.getbbox())
+scale = (SIZE - 2 * HALO - 2) / max(mark.width, mark.height)
+mark = mark.resize((max(1, round(mark.width * scale)), max(1, round(mark.height * scale))),
+                   Image.LANCZOS)
+
+canvas = Image.new('RGBA', (SIZE, SIZE), (0, 0, 0, 0))
+at = ((SIZE - mark.width) // 2, (SIZE - mark.height) // 2)
+canvas.paste(mark, at, mark)
+
+# the halo: the mark's own silhouette, spread outwards, in cream, underneath
+spread = canvas.split()[-1].filter(ImageFilter.MaxFilter(2 * HALO + 1))
+halo = Image.new('RGBA', (SIZE, SIZE), PAPER + (0,))
+halo.putalpha(spread)
+out = Image.alpha_composite(halo, canvas)
+out.save(MAIL_OUT / 'usmcc-mark-halo.png', optimize=True)
+print(f'{"usmcc-mark-halo":32} {SIZE}x{SIZE}  '
+      f'{(MAIL_OUT/"usmcc-mark-halo.png").stat().st_size/1024:.0f} KB  (haloed, for the mails)')
