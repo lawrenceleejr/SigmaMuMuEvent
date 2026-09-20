@@ -2,7 +2,7 @@
 
 | file | what it is | subject |
 | --- | --- | --- |
-| `hepalumni-invitation.html` | the reunion invitation, written to be forwarded | Bring five physicists back |
+| `hepalumni-invitation.html` | the reunion invitation | Old friends, new physics |
 | `usmcc2026-registration.html` | registration is open for the annual meeting | USMCC 2026 registration is open |
 
 Each has a `.txt` beside it — set that as the multipart/alternative part.
@@ -20,16 +20,21 @@ as the multipart/alternative part, or paste it if your client asks.
 
 Send it as:
 
-> **Bring five physicists back**
+> **Old friends, new physics**
 
 Two alternatives, if the list has seen the first:
 
-> Who did HEP lose to industry?
-> Five names, one evening, 13 December
+> You're invited: an evening for HEP alumni
+> Save the evening of December 13
 
-The preview line (already in the HTML, hidden) reads *One evening at Stanford,
-and five names from your address book.* Most clients show it after the
-subject; it is deliberately not a repeat of the subject.
+The preview line (already in the HTML, hidden) reads *An evening at Stanford
+on December 13, 2026, with remarks from Michael Peskin.* Most clients show it
+after the subject, so it carries the date and the name rather than repeating
+the subject.
+
+The mail is an invitation first. Michael Peskin's remarks are the draw, and
+the request to pass it on to five HEP alumni friends waits until the closing
+three actions, after the reader has been invited and given the details.
 
 ### How it is built
 
