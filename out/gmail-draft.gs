@@ -38,8 +38,8 @@ var HTML_REUNION = `<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="x-apple-disable-message-reformatting">
-<meta name="color-scheme" content="light dark">
-<meta name="supported-color-schemes" content="light dark">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
 <title>Old friends, new physics</title>
 <!--[if mso]>
 <xml><o:OfficeDocumentSettings xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -48,28 +48,14 @@ var HTML_REUNION = `<!doctype html>
 <style>
   a { color: #ec3013; }
 
-  /* A client in dark mode will recolour this mail whether or not it is asked
-     to. Gmail's apps do it by algorithm, per element, which is how a sheet and
-     the surround behind it end up on opposite sides of the flip -- the swap.
-     Two answers, both here: the mail now has one ground rather than two near
-     tones for an algorithm to separate, and where a client honours the query
-     below it gets the skin's own dark palette instead of inventing one. */
-  /* A mark cannot change its own colours, so both are in the mail and the
-     query picks one. The black one is the default, since a client that never
-     runs the query is showing the cream skin. */
-  .img-dark { display: none !important; }
-  @media (prefers-color-scheme: dark) {
-    .img-light { display: none !important; }
-    .img-dark { display: block !important; width: 72px !important; height: 72px !important;
-                max-height: none !important; overflow: visible !important; }
-    body, .ground, .sheet { background-color: #141312 !important; }
-    .ink, .ink * { color: #efe9da !important; }
-    .muted, .muted a { color: #cfc7b8 !important; }
-    .accent, .accent a { color: #ff5230 !important; }
-    .rule { background-color: rgba(239,233,218,0.22) !important; }
-    .btn { background-color: #efe9da !important; }
-    .btn a { color: #141312 !important; }
-  }
+  /* One palette, baked in. These mails are sent by copying the rendered page
+     out of a browser and pasting it into a compose window, and a paste carries
+     whatever the browser resolved -- so a dark-mode rule here would arrive as
+     cream text on whatever ground the compose window kept. There is nothing to
+     resolve now: the cream skin is the mail. Every table and padded cell also
+     carries its ground as a bgcolor attribute, which is what survives a paste
+     when the CSS background does not. */
+
   .sheet { width: 600px; }
   @media only screen and (max-width: 620px) {
     .sheet { width: 100% !important; }
@@ -88,90 +74,87 @@ var HTML_REUNION = `<!doctype html>
   &#8204;&nbsp;&#8204;&nbsp;&#8204;&nbsp;&#8204;&nbsp;&#8204;&nbsp;&#8204;&nbsp;&#8204;&nbsp;&#8204;&nbsp;&#8204;&nbsp;&#8204;&nbsp;&#8204;&nbsp;&#8204;&nbsp;
 </div>
 
-<table class="ground" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f5f0e1;">
-<tr><td class="muted" align="center" style="padding:14px 12px 0 12px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:11px; line-height:1.5; color:#605d5d;">
+<table bgcolor="#f5f0e1" class="ground" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f5f0e1;">
+<tr><td bgcolor="#f5f0e1" class="muted" align="center" style="padding:14px 12px 0 12px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:11px; line-height:1.5; color:#605d5d;">
   Trouble seeing this? <a href="https://hepalumni.muoncollider.us/mail/reunion/" style="color:#605d5d; text-decoration:underline;">Open it in your browser</a>.
 </td></tr>
 </table>
 
-<table class="ground" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f5f0e1;">
+<table bgcolor="#f5f0e1" class="ground" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f5f0e1;">
 <tr><td align="center" style="padding:16px 12px 40px 12px;">
 
-  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" class="sheet" style="width:600px; max-width:600px; background-color:#f5f0e1;">
+  <table bgcolor="#f5f0e1" role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" class="sheet" style="width:600px; max-width:600px; background-color:#f5f0e1;">
 
     <!-- masthead: one label, the mark opposite it, as on the site -->
-    <tr><td class="pad" style="padding:36px 44px 0 44px;">
+    <tr><td bgcolor="#f5f0e1" class="pad" style="padding:36px 44px 0 44px;">
       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
-        <td class="ink" valign="top" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:11px; font-weight:bold; letter-spacing:0.16em; text-transform:uppercase; color:#201e1d; padding-top:6px;">
+        <td bgcolor="#f5f0e1" class="ink" valign="top" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:11px; font-weight:bold; letter-spacing:0.16em; text-transform:uppercase; color:#201e1d; padding-top:6px;">
           USMCC Annual Meeting &middot; Stanford
         </td>
         <td valign="top" align="right" width="72" style="width:72px;">
-          <img class="img-light" src="https://www.muoncollider.us/resources/USMCCLogo_black.png" width="72" height="72" alt="" style="display:block; width:72px; height:72px; border:0; outline:none;">
-          <!--[if !mso]><!-->
-          <img class="img-dark" src="https://www.muoncollider.us/resources/USMCCLogo_white.png" width="72" height="72" alt="" style="display:none; width:0; max-height:0; overflow:hidden; border:0; outline:none; mso-hide:all;">
-          <!--<![endif]-->
+          <img src="https://www.muoncollider.us/resources/USMCCLogo_black.png" width="72" height="72" alt="" style="display:block; width:72px; height:72px; border:0; outline:none;">
         </td>
       </tr></table>
     </td></tr>
 
-    <tr><td class="pad ink" style="padding:18px 44px 0 44px; font-family:Georgia,'Times New Roman',Times,serif; color:#201e1d; line-height:1;">
+    <tr><td bgcolor="#f5f0e1" class="pad ink" style="padding:18px 44px 0 44px; font-family:Georgia,'Times New Roman',Times,serif; color:#201e1d; line-height:1;">
       <span class="sigma" style="font-size:92px; line-height:1;">&#963;</span><span class="mumu" style="font-size:46px; line-height:1;">&#956;&#956;</span>
     </td></tr>
 
-    <tr><td class="pad title ink" style="padding:12px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:30px; line-height:1.08; font-weight:bold; letter-spacing:-0.015em; text-transform:uppercase; color:#201e1d;">
+    <tr><td bgcolor="#f5f0e1" class="pad title ink" style="padding:12px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:30px; line-height:1.08; font-weight:bold; letter-spacing:-0.015em; text-transform:uppercase; color:#201e1d;">
       A Particle Physics Alumni Reunion
     </td></tr>
 
-    <tr><td class="pad accent" style="padding:12px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; font-weight:bold; letter-spacing:0.14em; text-transform:uppercase; color:#ec3013;">
+    <tr><td bgcolor="#f5f0e1" class="pad accent" style="padding:12px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; font-weight:bold; letter-spacing:0.14em; text-transform:uppercase; color:#ec3013;">
       Cocktail hour &times; Research fair
     </td></tr>
 
     <!-- The research fair is half of what the evening is, and it is the half
          a sentence describes worst: two people at a poster, one of them
          explaining. Inset to the text column, above the first line. -->
-    <tr><td class="pad" style="padding:28px 44px 0 44px; font-size:0; line-height:0;">
+    <tr><td bgcolor="#f5f0e1" class="pad" style="padding:28px 44px 0 44px; font-size:0; line-height:0;">
       <a href="https://hepalumni.muoncollider.us" style="display:block;">
         <img src="https://hepalumni.muoncollider.us/photos/mail/usmcc-poster-session-1.jpg"
              width="512" height="341" alt="Two physicists in conversation at a poster session"
              style="display:block; width:100%; max-width:512px; height:auto; border:0; outline:none;">
       </a>
     </td></tr>
-    <tr><td class="pad muted" style="padding:7px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:11px; line-height:1.4; letter-spacing:0.02em; color:#605d5d;">
+    <tr><td bgcolor="#f5f0e1" class="pad muted" style="padding:7px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:11px; line-height:1.4; letter-spacing:0.02em; color:#605d5d;">
       USMCC 2025 &middot; Lawrence Lee
     </td></tr>
 
     <!-- body -->
-    <tr><td class="pad ink" style="padding:26px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:1.6; color:#201e1d;">
+    <tr><td bgcolor="#f5f0e1" class="pad ink" style="padding:26px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:1.6; color:#201e1d;">
       On December 13, 2026, the US Muon Collider Collaboration will host an HEP Alumni Reunion
       event at Stanford University. The event will kick off this year's USMCC annual meeting with
       the colleagues we miss from past lives.
     </td></tr>
 
-    <tr><td class="pad ink" style="padding:16px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:1.6; color:#201e1d;">
+    <tr><td bgcolor="#f5f0e1" class="pad ink" style="padding:16px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:1.6; color:#201e1d;">
       Dust off that particle physics instinct, mix in your new expertise, and enjoy an evening
       with friends and colleagues. At the research fair, our community will lay out what a 10 TeV
       muon collider takes to build and where the interesting problems are.
     </td></tr>
 
-    <tr><td class="pad ink" style="padding:16px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:1.6; color:#201e1d;">
+    <tr><td bgcolor="#f5f0e1" class="pad ink" style="padding:16px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:1.6; color:#201e1d;">
       Prof. Michael Peskin (SLAC) will deliver opening remarks on why reaching the 10 TeV
       interaction scale is a crucial frontier for us to explore.
     </td></tr>
 
     <!-- date, set the way the site sets it -->
-    <tr><td class="pad date ink" style="padding:32px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:32px; line-height:1.05; font-weight:bold; letter-spacing:-0.015em; text-transform:uppercase; color:#201e1d;">
+    <tr><td bgcolor="#f5f0e1" class="pad date ink" style="padding:32px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:32px; line-height:1.05; font-weight:bold; letter-spacing:-0.015em; text-transform:uppercase; color:#201e1d;">
       Sunday, December 13, 2026
     </td></tr>
-    <tr><td class="pad muted" style="padding:10px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; font-weight:bold; letter-spacing:0.12em; text-transform:uppercase; color:#605d5d;">
+    <tr><td bgcolor="#f5f0e1" class="pad muted" style="padding:10px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; font-weight:bold; letter-spacing:0.12em; text-transform:uppercase; color:#605d5d;">
       4:30 &ndash; 6:30 p.m. Stanford University
     </td></tr>
 
-    <tr><td class="pad accent" style="padding:22px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:19px; font-weight:bold; letter-spacing:-0.01em; color:#ec3013;">
+    <tr><td bgcolor="#f5f0e1" class="pad accent" style="padding:22px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:19px; font-weight:bold; letter-spacing:-0.01em; color:#ec3013;">
       Old friends, new physics.
     </td></tr>
 
     <!-- button, in the site's ink -->
-    <tr><td class="pad" style="padding:26px 44px 0 44px;">
+    <tr><td bgcolor="#f5f0e1" class="pad" style="padding:26px 44px 0 44px;">
       <!--[if mso]>
       <v:rect href="https://hepalumni.muoncollider.us" fillcolor="#201e1d" strokecolor="#201e1d"
               style="width:248px; height:47px; v-text-anchor:middle;">
@@ -188,30 +171,30 @@ var HTML_REUNION = `<!doctype html>
       <!--<![endif]-->
     </td></tr>
 
-    <tr><td class="pad muted" style="padding:14px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; line-height:1.6; color:#605d5d;">
+    <tr><td bgcolor="#f5f0e1" class="pad muted" style="padding:14px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; line-height:1.6; color:#605d5d;">
       <a href="https://hepalumni.muoncollider.us" style="color:#ec3013; text-decoration:none; font-weight:bold;">hepalumni.muoncollider.us</a><br>
       Optional contributions at RSVP help pick up the tab for the evening and send students to
       the meeting.
     </td></tr>
 
-    <tr><td class="pad" style="padding:30px 44px 0 44px;">
+    <tr><td bgcolor="#f5f0e1" class="pad" style="padding:30px 44px 0 44px;">
       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
         <td class="rule" height="1" style="height:1px; line-height:1px; font-size:1px; background-color:rgba(32,30,29,0.18);">&nbsp;</td>
       </tr></table>
     </td></tr>
 
-    <tr><td class="pad ink" style="padding:22px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:1.6; color:#201e1d;">
+    <tr><td bgcolor="#f5f0e1" class="pad ink" style="padding:22px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:1.6; color:#201e1d;">
       <strong>RSVP.</strong><br>
       <strong>Pass this along to five HEP alumni friends.</strong><br>
       <strong>Sponsor a round.</strong> Your support helps make the event possible and can help
       bring students to the meeting.
     </td></tr>
 
-    <tr><td class="pad ink" style="padding:20px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:1.6; color:#201e1d;">
+    <tr><td bgcolor="#f5f0e1" class="pad ink" style="padding:20px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:1.6; color:#201e1d;">
       We hope to see you in Palo Alto!
     </td></tr>
 
-    <tr><td class="pad ink" style="padding:20px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:1.6; color:#201e1d;">
+    <tr><td bgcolor="#f5f0e1" class="pad ink" style="padding:20px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:1.6; color:#201e1d;">
       &mdash; Lawrence Lee and Kiley Kennedy<br>
       <span class="muted" style="font-size:13px; color:#605d5d;">for the US Muon Collider Collaboration and the
       &#963;&#956;&#956; organizing committee<br>
@@ -222,14 +205,14 @@ var HTML_REUNION = `<!doctype html>
     <!-- and the other half of the evening, at the foot: the argument that
          carries on at a wall. Nothing is asked after it, so it can simply be
          the last thing the reader looks at. -->
-    <tr><td class="pad" style="padding:30px 44px 0 44px; font-size:0; line-height:0;">
+    <tr><td bgcolor="#f5f0e1" class="pad" style="padding:30px 44px 0 44px; font-size:0; line-height:0;">
       <a href="https://hepalumni.muoncollider.us" style="display:block;">
         <img src="https://hepalumni.muoncollider.us/photos/mail/usmcc-chalkboard.jpg"
              width="512" height="341" alt="A chalkboard wall mid-calculation at the collaboration meeting"
              style="display:block; width:100%; max-width:512px; height:auto; border:0; outline:none;">
       </a>
     </td></tr>
-    <tr><td class="pad muted" style="padding:7px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:11px; line-height:1.4; letter-spacing:0.02em; color:#605d5d;">
+    <tr><td bgcolor="#f5f0e1" class="pad muted" style="padding:7px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:11px; line-height:1.4; letter-spacing:0.02em; color:#605d5d;">
       USMCC 2025 &middot; Lawrence Lee
     </td></tr>
 
@@ -291,7 +274,7 @@ var HTML_REGISTRATION = `<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="x-apple-disable-message-reformatting">
 <meta name="color-scheme" content="dark">
-<meta name="supported-color-schemes" content="dark light">
+<meta name="supported-color-schemes" content="dark">
 <title>USMCC 2026 registration is open</title>
 <!--[if mso]>
 <xml><o:OfficeDocumentSettings xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -300,17 +283,9 @@ var HTML_REGISTRATION = `<!doctype html>
 <style>
   a { color: #ff5230; }
 
-  /* Dark already, and re-asserted for the clients that would otherwise invert
-     a dark mail into a light one. The surround matches the sheet, so there are
-     no two near tones for an algorithm to flip apart. */
-  @media (prefers-color-scheme: dark) {
-    body, .ground, .sheet { background-color: #141312 !important; }
-    .ink, .ink * { color: #efe9da !important; }
-    .muted, .muted a { color: #9b948a !important; }
-    .accent, .accent a { color: #ff5230 !important; }
-    .btn { background-color: #efe9da !important; }
-    .btn a { color: #141312 !important; }
-  }
+  /* One palette, baked in -- see the note in hepalumni-invitation.html. The
+     dark skin is the mail; the grounds are attributes as well as styles. */
+
   .sheet { width: 600px; }
   @media only screen and (max-width: 620px) {
     .sheet { width: 100% !important; }
@@ -327,26 +302,26 @@ var HTML_REGISTRATION = `<!doctype html>
   &#8204;&nbsp;&#8204;&nbsp;&#8204;&nbsp;&#8204;&nbsp;&#8204;&nbsp;&#8204;&nbsp;&#8204;&nbsp;&#8204;&nbsp;&#8204;&nbsp;&#8204;&nbsp;&#8204;&nbsp;&#8204;&nbsp;
 </div>
 
-<table class="ground" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#141312;">
-<tr><td class="muted" align="center" style="padding:14px 12px 0 12px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:11px; line-height:1.5; color:#9b948a;">
+<table bgcolor="#141312" class="ground" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#141312;">
+<tr><td bgcolor="#141312" class="muted" align="center" style="padding:14px 12px 0 12px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:11px; line-height:1.5; color:#9b948a;">
   Trouble seeing this? <a href="https://hepalumni.muoncollider.us/mail/registration/" style="color:#9b948a; text-decoration:underline;">Open it in your browser</a>.
 </td></tr>
 </table>
 
-<table class="ground" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#141312;">
+<table bgcolor="#141312" class="ground" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#141312;">
 <tr><td align="center" style="padding:16px 12px 40px 12px;">
 
-  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" class="sheet" style="width:600px; max-width:600px; background-color:#141312;">
+  <table bgcolor="#141312" role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" class="sheet" style="width:600px; max-width:600px; background-color:#141312;">
 
-    <tr><td class="pad" align="right" style="padding:36px 44px 0 44px;">
+    <tr><td bgcolor="#141312" class="pad" align="right" style="padding:36px 44px 0 44px;">
       <img src="https://www.muoncollider.us/resources/USMCCLogo_white.png" width="72" height="72" alt="" style="display:block; width:72px; height:72px; border:0; outline:none;">
     </td></tr>
 
-    <tr><td class="pad title ink" style="padding:16px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:32px; line-height:1.08; font-weight:bold; letter-spacing:-0.02em; text-transform:uppercase; color:#efe9da;">
+    <tr><td bgcolor="#141312" class="pad title ink" style="padding:16px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:32px; line-height:1.08; font-weight:bold; letter-spacing:-0.02em; text-transform:uppercase; color:#efe9da;">
       US Muon Collider Collaboration Meeting
     </td></tr>
 
-    <tr><td class="pad" style="padding:12px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; font-weight:bold; letter-spacing:0.12em; text-transform:uppercase; color:#cfc7b8;">
+    <tr><td bgcolor="#141312" class="pad" style="padding:12px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; font-weight:bold; letter-spacing:0.12em; text-transform:uppercase; color:#cfc7b8;">
       Stanford &middot; December 13&ndash;16, 2026
     </td></tr>
 
@@ -354,31 +329,31 @@ var HTML_REGISTRATION = `<!doctype html>
          edges line up with the type above and below, and placed against the
          headline: the picture answers "what is this" and the line answers
          "what do I do", and the two are read as one thing. -->
-    <tr><td class="pad" style="padding:30px 44px 0 44px; font-size:0; line-height:0;">
+    <tr><td bgcolor="#141312" class="pad" style="padding:30px 44px 0 44px; font-size:0; line-height:0;">
       <a href="https://indico.muoncollider.us/e/usmcc2026" style="display:block;">
         <img src="https://hepalumni.muoncollider.us/photos/web/usmcc-group-banner.jpg"
              width="512" height="143" alt="The US Muon Collider Collaboration at its last annual meeting"
              style="display:block; width:100%; max-width:512px; height:auto; border:0; outline:none;">
       </a>
     </td></tr>
-    <tr><td class="pad muted" style="padding:7px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:11px; line-height:1.4; letter-spacing:0.02em; color:#9b948a;">
+    <tr><td bgcolor="#141312" class="pad muted" style="padding:7px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:11px; line-height:1.4; letter-spacing:0.02em; color:#9b948a;">
       USMCC 2025 &middot; Mary Heintz
     </td></tr>
 
-    <tr><td class="pad head ink" style="padding:34px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:32px; line-height:1.08; font-weight:bold; letter-spacing:-0.02em; color:#efe9da;">
+    <tr><td bgcolor="#141312" class="pad head ink" style="padding:34px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:32px; line-height:1.08; font-weight:bold; letter-spacing:-0.02em; color:#efe9da;">
       Registration is open.
     </td></tr>
 
-    <tr><td class="pad ink" style="padding:18px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:1.6; color:#efe9da;">
+    <tr><td bgcolor="#141312" class="pad ink" style="padding:18px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:1.6; color:#efe9da;">
       Four days at Stanford on what it takes to build a 10 TeV muon collider, and on what it would
       let us see.
     </td></tr>
 
-    <tr><td class="pad accent" style="padding:18px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:19px; font-weight:bold; letter-spacing:-0.01em; color:#ff5230;">
+    <tr><td bgcolor="#141312" class="pad accent" style="padding:18px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:19px; font-weight:bold; letter-spacing:-0.01em; color:#ff5230;">
       Early bird pricing runs until October 23, 2026.
     </td></tr>
 
-    <tr><td class="pad" style="padding:24px 44px 0 44px;">
+    <tr><td bgcolor="#141312" class="pad" style="padding:24px 44px 0 44px;">
       <!--[if mso]>
       <v:rect href="https://indico.muoncollider.us/e/usmcc2026" fillcolor="#efe9da" strokecolor="#efe9da"
               style="width:180px; height:47px; v-text-anchor:middle;">
@@ -395,15 +370,15 @@ var HTML_REGISTRATION = `<!doctype html>
       <!--<![endif]-->
     </td></tr>
 
-    <tr><td class="pad muted" style="padding:14px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; line-height:1.6; color:#9b948a;">
+    <tr><td bgcolor="#141312" class="pad muted" style="padding:14px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; line-height:1.6; color:#9b948a;">
       <a href="https://indico.muoncollider.us/e/usmcc2026" style="color:#ff5230; text-decoration:none; font-weight:bold;">indico.muoncollider.us/e/usmcc2026</a>
     </td></tr>
 
     <!-- program, in the shape the site gives its program -->
-    <tr><td class="pad accent" style="padding:34px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:11px; font-weight:bold; letter-spacing:0.16em; text-transform:uppercase; color:#ff5230;">
+    <tr><td bgcolor="#141312" class="pad accent" style="padding:34px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:11px; font-weight:bold; letter-spacing:0.16em; text-transform:uppercase; color:#ff5230;">
       Program
     </td></tr>
-    <tr><td class="pad" style="padding:14px 44px 0 44px;">
+    <tr><td bgcolor="#141312" class="pad" style="padding:14px 44px 0 44px;">
       <table class="ink" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:1.5; color:#efe9da;">
         <tr><td style="padding:0 0 12px 0; border-bottom:1px solid rgba(239,233,218,0.14);">Recent advances in muon collider technologies</td></tr>
         <tr><td style="padding:12px 0; border-bottom:1px solid rgba(239,233,218,0.14);">The theory motivation for pushing to higher energies</td></tr>
@@ -413,31 +388,31 @@ var HTML_REGISTRATION = `<!doctype html>
       </table>
     </td></tr>
 
-    <tr><td class="pad ink" style="padding:22px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:1.6; color:#efe9da;">
+    <tr><td bgcolor="#141312" class="pad ink" style="padding:22px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:1.6; color:#efe9da;">
       The meeting runs December 13&ndash;16 at Stanford, followed immediately by the IMCC
       Demonstrator Workshop at SLAC, Dec 16&ndash;18 (details coming soon).
     </td></tr>
 
-    <tr><td class="pad ink" style="padding:28px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:1.6; color:#efe9da;">
+    <tr><td bgcolor="#141312" class="pad ink" style="padding:28px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:1.6; color:#efe9da;">
       The call for poster presentations is open on Indico, for an opportunity to present both at
       the poster session and the special HEP alumni reunion event. If you're interested in a
       parallel presentation, please contact the
       <a href="https://indico.muoncollider.us/e/usmcc2026" style="color:#ff5230; text-decoration:none; font-weight:bold;">program committee</a>.
     </td></tr>
 
-    <tr><td class="pad ink" style="padding:18px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:1.6; color:#efe9da;">
+    <tr><td bgcolor="#141312" class="pad ink" style="padding:18px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:1.6; color:#efe9da;">
       The week opens on the Sunday with <strong>&#963;&#956;&#956;</strong>, an HEP alumni reunion
       and industry mixer, open to all registrants. We would love to see you there:
       <a href="https://hepalumni.muoncollider.us" style="color:#ff5230; text-decoration:none; font-weight:bold;">hepalumni.muoncollider.us</a>
     </td></tr>
 
-    <tr><td class="pad" style="padding:28px 44px 0 44px;">
+    <tr><td bgcolor="#141312" class="pad" style="padding:28px 44px 0 44px;">
       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
         <td class="rule" height="1" style="height:1px; line-height:1px; font-size:1px; background-color:rgba(239,233,218,0.22);">&nbsp;</td>
       </tr></table>
     </td></tr>
 
-    <tr><td class="pad muted" style="padding:20px 44px 40px 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; line-height:1.6; color:#9b948a;">
+    <tr><td bgcolor="#141312" class="pad muted" style="padding:20px 44px 40px 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; line-height:1.6; color:#9b948a;">
       US Muon Collider Collaboration &middot;
       <a href="https://www.muoncollider.us" style="color:#9b948a; text-decoration:underline;">muoncollider.us</a>
     </td></tr>

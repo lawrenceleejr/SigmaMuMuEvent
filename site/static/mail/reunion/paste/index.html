@@ -4,6 +4,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="x-apple-disable-message-reformatting">
 <meta name="robots" content="noindex, nofollow">
 <meta name="color-scheme" content="light">
 <meta name="supported-color-schemes" content="light">
@@ -15,15 +16,14 @@
 <style>
   a { color: #ec3013; }
 
-  /* A client in dark mode will recolour this mail whether or not it is asked
-     to. Gmail's apps do it by algorithm, per element, which is how a sheet and
-     the surround behind it end up on opposite sides of the flip -- the swap.
-     Two answers, both here: the mail now has one ground rather than two near
-     tones for an algorithm to separate, and where a client honours the query
-     below it gets the skin's own dark palette instead of inventing one. */
-  /* A mark cannot change its own colours, so both are in the mail and the
-     query picks one. The black one is the default, since a client that never
-     runs the query is showing the cream skin. */
+  /* One palette, baked in. These mails are sent by copying the rendered page
+     out of a browser and pasting it into a compose window, and a paste carries
+     whatever the browser resolved -- so a dark-mode rule here would arrive as
+     cream text on whatever ground the compose window kept. There is nothing to
+     resolve now: the cream skin is the mail. Every table and padded cell also
+     carries its ground as a bgcolor attribute, which is what survives a paste
+     when the CSS background does not. */
+
   .sheet { width: 600px; }
   @media only screen and (max-width: 620px) {
     .sheet { width: 100% !important; }
@@ -43,6 +43,12 @@
 </div>
 
 <table bgcolor="#f5f0e1" class="ground" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f5f0e1;">
+<tr><td bgcolor="#f5f0e1" class="muted" align="center" style="padding:14px 12px 0 12px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:11px; line-height:1.5; color:#605d5d;">
+  Trouble seeing this? <a href="https://hepalumni.muoncollider.us/mail/reunion/" style="color:#605d5d; text-decoration:underline;">Open it in your browser</a>.
+</td></tr>
+</table>
+
+<table bgcolor="#f5f0e1" class="ground" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f5f0e1;">
 <tr><td align="center" style="padding:16px 12px 40px 12px;">
 
   <table bgcolor="#f5f0e1" role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" class="sheet" style="width:600px; max-width:600px; background-color:#f5f0e1;">
@@ -54,9 +60,7 @@
           USMCC Annual Meeting &middot; Stanford
         </td>
         <td valign="top" align="right" width="72" style="width:72px;">
-          <img class="img-light" src="https://www.muoncollider.us/resources/USMCCLogo_black.png" width="72" height="72" alt="" style="display:block; width:72px; height:72px; border:0; outline:none;">
-          <!--[if !mso]><!-->
-          <!--<![endif]-->
+          <img src="https://www.muoncollider.us/resources/USMCCLogo_black.png" width="72" height="72" alt="" style="display:block; width:72px; height:72px; border:0; outline:none;">
         </td>
       </tr></table>
     </td></tr>
