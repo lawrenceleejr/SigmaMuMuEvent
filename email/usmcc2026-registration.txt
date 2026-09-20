@@ -23,12 +23,13 @@ PROGRAM
 The meeting runs December 13–16 at Stanford, followed immediately by the IMCC
 Demonstrator Workshop at SLAC, Dec 16–18 (details coming soon).
 
-The call for poster presentations is open, for a poster session held jointly
-between the two meetings. Parallel sessions are being assembled now — if you
-have a contribution, contact the program committee member who covers that
-area.
+The call for poster presentations is open on Indico, for an opportunity to
+present both at the poster session and the special HEP alumni reunion event.
+If you're interested in a parallel presentation, please contact the program
+committee: https://indico.muoncollider.us/e/usmcc2026
 
-The week opens on the Sunday with σμμ, an HEP alumni reunion with opening
-remarks from Prof. Michael Peskin: https://hepalumni.muoncollider.us
+The week opens on the Sunday with σμμ, an HEP alumni reunion and industry
+mixer, open to all registrants. We would love to see you there:
+https://hepalumni.muoncollider.us
 
 US Muon Collider Collaboration · muoncollider.us
