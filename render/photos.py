@@ -32,9 +32,10 @@ OUT = ROOT / 'site' / 'static' / 'photos'
 NAMES = ['usmcc-poster-session-1', 'usmcc-poster-session-2', 'usmcc-poster-session-3']
 SIZES = {'web': (1200, 80, '4:2:0'), 'full': (2400, 88, '4:4:4')}
 
-args = [a for a in sys.argv[1:] if not a.startswith('--')] or [str(ROOT / 'photos-src')]
-if '--banner' in sys.argv:
-    args = []
+# The batch is the default; each flag below does one photograph instead.
+MODES = ('--banner', '--one', '--mail')
+args = [] if any(m in sys.argv for m in MODES) else (
+    [a for a in sys.argv[1:] if not a.startswith('--')] or [str(ROOT / 'photos-src')])
 srcs = []
 for a in args:
     p = Path(a)
@@ -85,3 +86,35 @@ def group_banner(src):
 
 if __name__ == '__main__' and '--banner' in sys.argv:
     group_banner(sys.argv[sys.argv.index('--banner') + 1])
+
+
+# ---- one photograph, at the width of a mail's text column -------------------
+# 1024 is two device pixels for every CSS pixel of the 512px column the mails
+# set their pictures in. The web/ files are 1200 and would be scaled down past
+# their 2x, which is both bigger and softer than going back to the original.
+def mail_image(src, name):
+    im = Image.open(src).convert('RGB')
+    im = im.resize((1024, round(1024 * im.height / im.width)), Image.LANCZOS)
+    dest = OUT / 'mail' / f'{name}.jpg'
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    im.save(dest, 'JPEG', quality=82, optimize=True, progressive=True, subsampling='4:2:0')
+    print(f'{dest.relative_to(ROOT)}  {im.size[0]}x{im.size[1]}  {dest.stat().st_size/1024:.0f} KB')
+
+def one(src, name):
+    """A single photograph through the same two sizes as the batch."""
+    im = Image.open(src).convert('RGB')
+    for kind, (edge, q, sub) in SIZES.items():
+        w, h = im.size
+        scale = edge / max(w, h)
+        o = im.resize((round(w*scale), round(h*scale)), Image.LANCZOS) if scale < 1 else im
+        dest = OUT / kind / f'{name}.jpg'
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        o.save(dest, 'JPEG', quality=q, optimize=True, progressive=True, subsampling=sub)
+        print(f'{dest.relative_to(ROOT)}  {o.size[0]}x{o.size[1]}  {dest.stat().st_size/1024:.0f} KB')
+
+if __name__ == '__main__' and '--one' in sys.argv:
+    i = sys.argv.index('--one')
+    one(sys.argv[i+1], sys.argv[i+2]); mail_image(sys.argv[i+1], sys.argv[i+2])
+if __name__ == '__main__' and '--mail' in sys.argv:
+    i = sys.argv.index('--mail')
+    mail_image(sys.argv[i+1], sys.argv[i+2])

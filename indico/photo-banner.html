@@ -1,0 +1,36 @@
+<!-- A row of three photographs, to sit at the top of an Indico page.
+
+     Paste into the description's source view (the <> button in the editor
+     toolbar), above the text that is already there.
+
+     Written in attributes rather than CSS, because Indico's sanitiser keeps
+     width and cellspacing and is not guaranteed to keep a style block. With
+     the sigmamumu skin installed the images are capped at the column width
+     and the three cells stack to full width on a phone; without it they still
+     behave, because width="100%" on an image is as old as the web.
+
+     To make them click-to-enlarge, wrap each <img> in
+     <a href="https://hepalumni.muoncollider.us/photos/full/NAME.jpg"> -- the
+     2400px copies are up beside the small ones. -->
+
+<table width="100%" cellspacing="8" cellpadding="0" border="0">
+<tbody>
+<tr>
+<td width="33%" valign="top">
+<img src="https://hepalumni.muoncollider.us/photos/web/usmcc-poster-session-1.jpg"
+     alt="Two physicists at a poster on high-temperature superconductors"
+     width="100%" style="display:block;width:100%;height:auto">
+</td>
+<td width="33%" valign="top">
+<img src="https://hepalumni.muoncollider.us/photos/web/usmcc-poster-session-2.jpg"
+     alt="A student showing a cooling-channel simulation at a poster"
+     width="100%" style="display:block;width:100%;height:auto">
+</td>
+<td width="33%" valign="top">
+<img src="https://hepalumni.muoncollider.us/photos/web/usmcc-poster-session-3.jpg"
+     alt="A poster session conversation about smart pixel detectors"
+     width="100%" style="display:block;width:100%;height:auto">
+</td>
+</tr>
+</tbody>
+</table>
