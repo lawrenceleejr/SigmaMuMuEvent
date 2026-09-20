@@ -132,7 +132,27 @@ mail *after* that, or the link 404s.
 
 ## Sending them
 
-The best route is to hand the client the **file**, not a rendering of it:
+### From your own Gmail address
+
+Gmail's compose window has no HTML source view, and nothing adds one. Apps
+Script goes in the other door — it hands Gmail the HTML directly, and the
+draft that appears in the account is the mail exactly as written:
+
+    node render/gmail-draft.mjs     # -> out/gmail-draft.gs
+
+Paste that file into a new project at script.google.com, save, and run
+`createReunionDraft()` or `createRegistrationDraft()`. Google asks once for
+permission to manage drafts; it is your own account asking about your own
+script. `TO` at the top of the file is blank, which drafts to yourself — fill
+it in when the draft reads right. The script editor is a plain text box, so
+nothing renders on the way through and nothing is baked in.
+
+It is generated from `email/`, so re-run it after editing either mail. Gmail's
+own sending limits apply, so a list of any size still belongs in a list tool.
+
+### Other routes
+
+The best of them is to hand the client the **file**, not a rendering of it:
 Thunderbird's *Insert → HTML*, Apple Mail with the file dragged in, or any
 list tool (Mailchimp, a listserv's web form, a Python `smtplib` script) that
 takes an HTML source and a `text/plain` alternative. That way every byte here
