@@ -9,6 +9,16 @@ Each has a `.txt` beside it — set that as the multipart/alternative part.
 The reunion mail wears the cream skin, the meeting mail the dark one, so the
 two read as one family rather than as the same message sent twice.
 
+**One palette each, baked in.** Neither mail has a `prefers-color-scheme`
+block any more, and neither swaps an image for dark mode. They are sent by
+copying the rendered page out of a browser, and a paste carries whatever the
+browser resolved — so a dark rule could only ever arrive as cream text on
+whichever ground the compose window kept. Each mail declares the scheme it
+already is, so a client has no reason to invert it, and every table and padded
+cell carries its ground as a `bgcolor` attribute as well as a style, because
+the attribute is what survives a paste. `render/mail-web.mjs` fails the build
+if a dark block reappears.
+
 ## The invitation email
 
 `hepalumni-invitation.html` is the HTML mail to send to the collaboration,
@@ -57,8 +67,9 @@ Email clients are not browsers. This file is written for them:
   `hepalumni.muoncollider.us`; the two organiser addresses are `mailto:`.
 - **11 KB.** Gmail clips a message over about 102 KB, which shows as
   "[Message clipped] View entire message" and would cut the closing actions.
-- **`color-scheme: light`** and an explicit background on every cell, which is
-  as far as one can go to stop a dark-mode client inverting cream to sludge.
+- **`color-scheme: light`**, an explicit background on every cell, and a
+  `bgcolor` attribute beside it — as far as one can go to stop a dark-mode
+  client inverting cream to sludge.
 
 ### What to change before sending
 
@@ -113,16 +124,17 @@ Both mails carry a "Trouble seeing this? Open it in your browser" line, for
 the clients that mangle HTML mail or refuse it. It points at a copy hosted on
 the event site:
 
-| mail | hosted at |
-| --- | --- |
-| reunion | `https://hepalumni.muoncollider.us/mail/reunion/` |
-| registration | `https://hepalumni.muoncollider.us/mail/registration/` |
+| mail | to send from (paste copy) | where the browser line points |
+| --- | --- | --- |
+| reunion | `…/mail/reunion/paste/` | `https://hepalumni.muoncollider.us/mail/reunion/` |
+| registration | `…/mail/registration/paste/` | `https://hepalumni.muoncollider.us/mail/registration/` |
 
     node render/mail-web.mjs        # after editing either mail
 
 The copies are **generated**, not written: edit the mail in `email/`, re-run
-the script, commit both. It strips the browser line (the reader is already in
-a browser) and adds `noindex, nofollow`.
+the script, commit all four. Both get `noindex, nofollow`; only the browser
+copy loses the "Trouble seeing this?" row, since its reader is already in a
+browser.
 
 They live in `site/static/`, so Hugo copies them verbatim and they cannot
 reach the sitemap, and nothing on the site links to them — the mails do, which
@@ -142,11 +154,9 @@ them a link to the paste copy and four lines:
 > In a new Gmail or Outlook message, click into the body and paste (⌘V).
 > Subject: **Old friends, new physics**. Don't edit the body — send as is.
 
-The paste copy is built for exactly this. It carries no dark-mode rules, so a
-machine in dark mode cannot bake a cream-on-black palette into the clipboard,
-and every table and padded cell carries its ground as a `bgcolor` attribute as
-well as a style, because a compose window that drops the CSS background
-usually keeps the attribute.
+The paste copy is the mail entire, browser line included — that line has to
+reach the inbox, being the recipient's way out when a client mangles the
+message. The only copy that drops it is the browser one it points at.
 
 ### The simplest route: the finished message
 
