@@ -25,11 +25,42 @@ import { resolve } from 'node:path';
 
 const ROOT = resolve(new URL('..', import.meta.url).pathname);
 const MAILS = [
-  { src: 'email/hepalumni-invitation.html',   out: 'site/static/mail/reunion/index.html' },
-  { src: 'email/usmcc2026-registration.html', out: 'site/static/mail/registration/index.html' },
+  { src: 'email/hepalumni-invitation.html',   out: 'site/static/mail/reunion/index.html',
+    paste: 'site/static/mail/reunion/paste/index.html' },
+  { src: 'email/usmcc2026-registration.html', out: 'site/static/mail/registration/index.html',
+    paste: 'site/static/mail/registration/paste/index.html' },
 ];
 
-for (const { src, out } of MAILS) {
+/* The paste copy: the same mail with every trace of the dark palette taken
+ * out.
+ *
+ * It exists for one way of sending these -- open the mail in a browser, select
+ * all, paste into a compose window. What the clipboard carries is not the
+ * source but the *rendered* page: the browser resolves the stylesheet, media
+ * queries included, and bakes the result into inline styles. Do that on a
+ * machine whose system theme is dark and the cream-on-black palette comes
+ * along as inline colour, while the backgrounds -- which a compose window
+ * strips -- do not. Cream text, cream ground, an invisible mail.
+ *
+ * With no dark rules to resolve there is nothing to bake in, so this copy
+ * pastes as the cream skin whatever theme the machine is wearing.
+ */
+function pasteCopy(html) {
+  // The dark rules, and the comments that introduce them.
+  const dark = html.match(
+    /(?:  \/\*(?:(?!\*\/)[\s\S])*?\*\/\n)*  @media \(prefers-color-scheme: dark\) \{[\s\S]*?\n  \}\n/);
+  if (!dark) return null;
+  return html
+    .replace(dark[0], '')
+    .replace('  .img-dark { display: none !important; }\n', '')
+    .replace(/\n *<img class="img-dark"[^>]*>/g, '')
+    .replace('<meta name="color-scheme" content="light dark">',
+             '<meta name="color-scheme" content="light">')
+    .replace('<meta name="supported-color-schemes" content="light dark">',
+             '<meta name="supported-color-schemes" content="light">');
+}
+
+for (const { src, out, paste } of MAILS) {
   let html = await readFile(resolve(ROOT, src), 'utf8');
   const before = html.length;
 
@@ -57,4 +88,19 @@ for (const { src, out } of MAILS) {
   await mkdir(resolve(ROOT, out, '..'), { recursive: true });
   await writeFile(resolve(ROOT, out), html);
   console.log(`${src} -> ${out}  (${before} -> ${html.length} bytes)`);
+
+  const light = pasteCopy(html);
+  if (!light) {
+    console.error(`  MISSING: no dark-palette block in ${src}`);
+    process.exitCode = 1;
+    continue;
+  }
+  if (/prefers-color-scheme|img-dark/.test(light)) {
+    console.error(`  LEFTOVER: dark-mode markup survived in the paste copy of ${src}`);
+    process.exitCode = 1;
+    continue;
+  }
+  await mkdir(resolve(ROOT, paste, '..'), { recursive: true });
+  await writeFile(resolve(ROOT, paste), light);
+  console.log(`${src} -> ${paste}  (paste copy, ${light.length} bytes)`);
 }
