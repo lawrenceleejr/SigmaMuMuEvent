@@ -46,13 +46,23 @@ const write = async (path, html) => {
 for (const { src, out, paste } of MAILS) {
   const source = await readFile(resolve(ROOT, src), 'utf8');
 
-  // A dark rule that comes back is the bug this was built to end, so it fails
-  // the build rather than shipping quietly.
-  if (/prefers-color-scheme/.test(source)) {
-    console.error(`  DARK RULES: ${src} has a prefers-color-scheme block again`);
-    process.exitCode = 1;
-    continue;
+  // The mails carry a dark-mode block whose colours are the light ones, to
+  // claim dark support without changing anything (see the note in the mail).
+  // A *second* palette in there is the bug this was built to end -- a paste
+  // made in dark mode would bake it in -- so it fails the build instead of
+  // shipping quietly.
+  const darkBlock = source.match(/@media \(prefers-color-scheme: dark\) \{[\s\S]*?\n  \}/);
+  const palette = new Set((source.match(/<body[^>]*background-color:(#[0-9a-f]{6})/i) || []).slice(1));
+  if (darkBlock) {
+    const strangers = [...new Set(darkBlock[0].match(/#[0-9a-f]{6}/gi) || [])]
+      .filter(c => !source.split(darkBlock[0]).join('').includes(c));
+    if (strangers.length) {
+      console.error(`  DARK RULES: ${src} has colours only its dark block uses: ${strangers.join(', ')}`);
+      process.exitCode = 1;
+      continue;
+    }
   }
+  void palette;
 
   let html = source.replace('<meta name="x-apple-disable-message-reformatting">\n',
     '<meta name="x-apple-disable-message-reformatting">\n<meta name="robots" content="noindex, nofollow">\n');

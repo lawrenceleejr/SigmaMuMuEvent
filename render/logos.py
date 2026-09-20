@@ -14,6 +14,7 @@ calculated -- optical balance is not arithmetic. SLAC is a single heavy word
 and comes down; the Tennessee lockup is mostly small type around one orange
 square and comes up.
 """
+import io
 from pathlib import Path
 from PIL import Image
 
@@ -58,3 +59,27 @@ for stem in WHITE:
     canvas.paste(white, (0, (CANVAS - white.height) // 2), white)
     canvas.save(WOUT / f'{stem}.png', optimize=True)
     print(f'white/{stem:26} {canvas.size[0]}x{canvas.size[1]}  {(WOUT/f"{stem}.png").stat().st_size/1024:.0f} KB')
+
+
+# ---- the USMCC mark for the mails ------------------------------------------
+# A transparent mark is a liability in an inbox: Gmail's apps darken a message
+# when the app is in dark theme, and a black mark on a darkened ground is a
+# blank square. Baking the sheet's own cream behind the mark makes the image
+# opaque, so it reads the same whatever the client does to the page around it.
+MAIL_MARK = 'https://www.muoncollider.us/resources/USMCCLogo_black.png'
+MAIL_OUT = ROOT / 'site/static/logos/mail'
+PAPER, SIZE = (245, 240, 225), 144      # the mails' cream, at 2x the 72px slot
+
+import urllib.request
+MAIL_OUT.mkdir(parents=True, exist_ok=True)
+with urllib.request.urlopen(MAIL_MARK) as r:
+    raw = Image.open(io.BytesIO(r.read())).convert('RGBA')
+mark = raw.crop(raw.getbbox())
+scale = (SIZE * 0.86) / max(mark.width, mark.height)     # a little air around it
+mark = mark.resize((max(1, round(mark.width * scale)), max(1, round(mark.height * scale))),
+                   Image.LANCZOS)
+sheet = Image.new('RGB', (SIZE, SIZE), PAPER)
+sheet.paste(mark, ((SIZE - mark.width) // 2, (SIZE - mark.height) // 2), mark)
+sheet.save(MAIL_OUT / 'usmcc-mark-cream.png', optimize=True)
+print(f'{"usmcc-mark-cream":32} {SIZE}x{SIZE}  '
+      f'{(MAIL_OUT/"usmcc-mark-cream.png").stat().st_size/1024:.0f} KB  (opaque, for the mails)')

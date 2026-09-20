@@ -6,8 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="x-apple-disable-message-reformatting">
 <meta name="robots" content="noindex, nofollow">
-<meta name="color-scheme" content="light">
-<meta name="supported-color-schemes" content="light">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">
 <title>Old friends, new physics</title>
 <!--[if mso]>
 <xml><o:OfficeDocumentSettings xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -23,6 +23,26 @@
      resolve now: the cream skin is the mail. Every table and padded cell also
      carries its ground as a bgcolor attribute, which is what survives a paste
      when the CSS background does not. */
+
+
+  /* A claim of dark-mode support, whose dark mode is the cream skin.
+     Gmail's apps re-colour every message when the app is in dark theme, and
+     they honour no opt-out -- but the WebView underneath skips its own
+     darkening for content that says it handles dark mode itself. So the mail
+     says so, and then asks for exactly the colours it already has. Two
+     properties of this that matter: a client that ignores the claim is no
+     worse off, and a paste made in dark mode bakes in these values, which are
+     the cream ones. Nothing here may differ from the palette above. */
+  :root { color-scheme: light dark; }
+  @media (prefers-color-scheme: dark) {
+    body, .ground, .sheet { background-color: #f5f0e1 !important; }
+    .ink, .ink * { color: #201e1d !important; }
+    .muted, .muted a { color: #605d5d !important; }
+    .accent, .accent a { color: #ec3013 !important; }
+    .rule { background-color: rgba(32,30,29,0.18) !important; }
+    .btn { background-color: #201e1d !important; }
+    .btn a { color: #f5f0e1 !important; }
+  }
 
   .sheet { width: 600px; }
   @media only screen and (max-width: 620px) {
@@ -60,7 +80,7 @@
           USMCC Annual Meeting &middot; Stanford
         </td>
         <td valign="top" align="right" width="72" style="width:72px;">
-          <img src="https://www.muoncollider.us/resources/USMCCLogo_black.png" width="72" height="72" alt="" style="display:block; width:72px; height:72px; border:0; outline:none;">
+          <img src="https://hepalumni.muoncollider.us/logos/mail/usmcc-mark-cream.png" width="72" height="72" alt="" style="display:block; width:72px; height:72px; border:0; outline:none;">
         </td>
       </tr></table>
     </td></tr>

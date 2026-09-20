@@ -38,8 +38,8 @@ var HTML_REUNION = `<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="x-apple-disable-message-reformatting">
-<meta name="color-scheme" content="light">
-<meta name="supported-color-schemes" content="light">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">
 <title>Old friends, new physics</title>
 <!--[if mso]>
 <xml><o:OfficeDocumentSettings xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -55,6 +55,26 @@ var HTML_REUNION = `<!doctype html>
      resolve now: the cream skin is the mail. Every table and padded cell also
      carries its ground as a bgcolor attribute, which is what survives a paste
      when the CSS background does not. */
+
+
+  /* A claim of dark-mode support, whose dark mode is the cream skin.
+     Gmail's apps re-colour every message when the app is in dark theme, and
+     they honour no opt-out -- but the WebView underneath skips its own
+     darkening for content that says it handles dark mode itself. So the mail
+     says so, and then asks for exactly the colours it already has. Two
+     properties of this that matter: a client that ignores the claim is no
+     worse off, and a paste made in dark mode bakes in these values, which are
+     the cream ones. Nothing here may differ from the palette above. */
+  :root { color-scheme: light dark; }
+  @media (prefers-color-scheme: dark) {
+    body, .ground, .sheet { background-color: #f5f0e1 !important; }
+    .ink, .ink * { color: #201e1d !important; }
+    .muted, .muted a { color: #605d5d !important; }
+    .accent, .accent a { color: #ec3013 !important; }
+    .rule { background-color: rgba(32,30,29,0.18) !important; }
+    .btn { background-color: #201e1d !important; }
+    .btn a { color: #f5f0e1 !important; }
+  }
 
   .sheet { width: 600px; }
   @media only screen and (max-width: 620px) {
@@ -92,7 +112,7 @@ var HTML_REUNION = `<!doctype html>
           USMCC Annual Meeting &middot; Stanford
         </td>
         <td valign="top" align="right" width="72" style="width:72px;">
-          <img src="https://www.muoncollider.us/resources/USMCCLogo_black.png" width="72" height="72" alt="" style="display:block; width:72px; height:72px; border:0; outline:none;">
+          <img src="https://hepalumni.muoncollider.us/logos/mail/usmcc-mark-cream.png" width="72" height="72" alt="" style="display:block; width:72px; height:72px; border:0; outline:none;">
         </td>
       </tr></table>
     </td></tr>
@@ -285,8 +305,8 @@ var HTML_REGISTRATION = `<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="x-apple-disable-message-reformatting">
-<meta name="color-scheme" content="light">
-<meta name="supported-color-schemes" content="light">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">
 <title>USMCC 2026 registration is open</title>
 <!--[if mso]>
 <xml><o:OfficeDocumentSettings xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -295,8 +315,31 @@ var HTML_REGISTRATION = `<!doctype html>
 <style>
   a { color: #ec3013; }
 
-  /* One palette, baked in -- see the note in hepalumni-invitation.html. The
-     dark skin is the mail; the grounds are attributes as well as styles. */
+  /* One palette, baked in -- see the note in hepalumni-invitation.html. This
+     mail wore a dark skin until the Gmail app inverted it element by element
+     on a phone: a muddy sheet, brown headlines, a white mark gone invisible.
+     It is cream like its sibling now, and the grounds are attributes as well
+     as styles. */
+
+
+  /* A claim of dark-mode support, whose dark mode is the cream skin.
+     Gmail's apps re-colour every message when the app is in dark theme, and
+     they honour no opt-out -- but the WebView underneath skips its own
+     darkening for content that says it handles dark mode itself. So the mail
+     says so, and then asks for exactly the colours it already has. Two
+     properties of this that matter: a client that ignores the claim is no
+     worse off, and a paste made in dark mode bakes in these values, which are
+     the cream ones. Nothing here may differ from the palette above. */
+  :root { color-scheme: light dark; }
+  @media (prefers-color-scheme: dark) {
+    body, .ground, .sheet { background-color: #f5f0e1 !important; }
+    .ink, .ink * { color: #201e1d !important; }
+    .muted, .muted a { color: #605d5d !important; }
+    .accent, .accent a { color: #ec3013 !important; }
+    .rule { background-color: rgba(32,30,29,0.18) !important; }
+    .btn { background-color: #201e1d !important; }
+    .btn a { color: #f5f0e1 !important; }
+  }
 
   .sheet { width: 600px; }
   @media only screen and (max-width: 620px) {
@@ -326,7 +369,7 @@ var HTML_REGISTRATION = `<!doctype html>
   <table bgcolor="#f5f0e1" role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" class="sheet" style="width:600px; max-width:600px; background-color:#f5f0e1;">
 
     <tr><td bgcolor="#f5f0e1" class="pad" align="right" style="padding:36px 44px 0 44px;">
-      <img src="https://www.muoncollider.us/resources/USMCCLogo_black.png" width="72" height="72" alt="" style="display:block; width:72px; height:72px; border:0; outline:none;">
+      <img src="https://hepalumni.muoncollider.us/logos/mail/usmcc-mark-cream.png" width="72" height="72" alt="" style="display:block; width:72px; height:72px; border:0; outline:none;">
     </td></tr>
 
     <tr><td bgcolor="#f5f0e1" class="pad title ink" style="padding:16px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:32px; line-height:1.08; font-weight:bold; letter-spacing:-0.02em; text-transform:uppercase; color:#201e1d;">
