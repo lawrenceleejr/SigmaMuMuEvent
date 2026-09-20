@@ -22,16 +22,17 @@ outside our reach:
   away. `render/mail-web.mjs` fails the build if that block ever names a
   colour the mail does not use elsewhere — a second palette in there is what a
   dark-mode paste would bake in.
-- **A mark with a halo.** Gmail darkens the sheet and leaves image pixels
-  alone — the published black mark goes nearly invisible there, which a
-  zoomed crop of a phone screenshot settled after two wrong guesses. An image
-  cannot answer a client's theme (a media query could; a compose window throws
-  those away), so the mark answers nothing: black strokes with a three-pixel
-  halo of the sheet's own cream around them, built by `render/logos.py`. On
-  the cream sheet the halo *is* the sheet and cannot be seen; on a darkened
-  one it traces the mark in light. Outside the strokes the image stays
-  transparent, so there is no tile — the failure of the opaque version tried
-  before it.
+- **A mark on a cream disc.** Gmail darkens the sheet and leaves image pixels
+  alone, so the published black mark goes nearly invisible there — a zoomed
+  crop of a phone screenshot settled that, after two wrong readings of the
+  same thumbnail. An image cannot answer a client's theme (a media query
+  could; a compose window throws those away), so the mark answers nothing: it
+  sits on a disc of the sheet's own cream, built by `render/logos.py`. On the
+  cream sheet the disc *is* the sheet and cannot be seen; on a darkened one it
+  reads as a coin, which is a shape a mark is allowed to have. Two earlier
+  attempts are worth not repeating: a square cream tile, which became a bright
+  box in the corner, and a halo traced around every stroke, which looked like
+  a sticker.
 - **Not a dark skin.** This was tested twice, both ways. A near-black mail and
   a dark brown one were both flipped to a muddy light sheet with brown
   headlines; the cream mail was flipped to brown with bone type and came out

@@ -17,7 +17,7 @@ square and comes up.
 import io
 import urllib.request
 from pathlib import Path
-from PIL import Image, ImageFilter
+from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC, OUT = ROOT / 'site/static/logos/original', ROOT / 'site/static/logos/row'
@@ -68,32 +68,35 @@ for stem in WHITE:
 # compose window throws those away. Gmail's apps darken the sheet and leave
 # image pixels alone, so the published black mark goes nearly invisible there.
 #
-# The answer is a mark that needs no answer: black strokes with a thin halo of
-# the sheet's own cream around them. On the cream sheet the halo is the sheet
-# and cannot be seen. On a darkened one it traces the mark in light. Outside
-# the strokes the image stays transparent, so there is no tile and no box --
-# the failure of the opaque version tried before this one.
+# The answer is a mark that needs no answer: the black mark on a disc of the
+# sheet's own cream. On the cream sheet the disc is the sheet and cannot be
+# seen. On a darkened one it reads as a coin, which is a shape a mark is
+# allowed to have -- unlike the square tile tried before it, or the halo after
+# that, which traced every stroke and looked like a sticker.
 MAIL_MARK = 'https://www.muoncollider.us/resources/USMCCLogo_black.png'
 MAIL_OUT = ROOT / 'site/static/logos/mail'
-PAPER, SIZE, HALO = (245, 240, 225), 144, 3       # the mails' cream, 2x the 72px slot
+PAPER, SIZE, INSET = (245, 240, 225), 288, 0.62   # cream, 4x the 72px slot
 
 MAIL_OUT.mkdir(parents=True, exist_ok=True)
 with urllib.request.urlopen(MAIL_MARK) as r:
     raw = Image.open(io.BytesIO(r.read())).convert('RGBA')
 mark = raw.crop(raw.getbbox())
-scale = (SIZE - 2 * HALO - 2) / max(mark.width, mark.height)
+scale = (SIZE * INSET) / max(mark.width, mark.height)
 mark = mark.resize((max(1, round(mark.width * scale)), max(1, round(mark.height * scale))),
                    Image.LANCZOS)
 
-canvas = Image.new('RGBA', (SIZE, SIZE), (0, 0, 0, 0))
-at = ((SIZE - mark.width) // 2, (SIZE - mark.height) // 2)
-canvas.paste(mark, at, mark)
+# the disc, drawn at 4x and averaged down, so its edge is smooth rather than
+# stepped -- PIL's ellipse does not antialias. Averaged, not resampled: a
+# sharpening filter overshoots at the edge and leaves a ring that is visible
+# against the cream the disc is meant to disappear into.
+SS = 4
+disc = Image.new('L', (SIZE * SS, SIZE * SS), 0)
+ImageDraw.Draw(disc).ellipse((0, 0, SIZE * SS - 1, SIZE * SS - 1), fill=255)
+disc = disc.resize((SIZE, SIZE), Image.BOX)
 
-# the halo: the mark's own silhouette, spread outwards, in cream, underneath
-spread = canvas.split()[-1].filter(ImageFilter.MaxFilter(2 * HALO + 1))
-halo = Image.new('RGBA', (SIZE, SIZE), PAPER + (0,))
-halo.putalpha(spread)
-out = Image.alpha_composite(halo, canvas)
-out.save(MAIL_OUT / 'usmcc-mark-halo.png', optimize=True)
-print(f'{"usmcc-mark-halo":32} {SIZE}x{SIZE}  '
-      f'{(MAIL_OUT/"usmcc-mark-halo.png").stat().st_size/1024:.0f} KB  (haloed, for the mails)')
+out = Image.new('RGBA', (SIZE, SIZE), PAPER + (0,))
+out.putalpha(disc)
+out.paste(mark, ((SIZE - mark.width) // 2, (SIZE - mark.height) // 2), mark)
+out.save(MAIL_OUT / 'usmcc-mark-disc.png', optimize=True)
+print(f'{"usmcc-mark-disc":32} {SIZE}x{SIZE}  '
+      f'{(MAIL_OUT/"usmcc-mark-disc.png").stat().st_size/1024:.0f} KB  (on a cream disc, for the mails)')
