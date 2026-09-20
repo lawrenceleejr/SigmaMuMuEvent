@@ -6,8 +6,10 @@
 | `usmcc2026-registration.html` | registration is open for the annual meeting | USMCC 2026 registration is open |
 
 Each has a `.txt` beside it — set that as the multipart/alternative part.
-The reunion mail wears the cream skin, the meeting mail the dark one, so the
-two read as one family rather than as the same message sent twice.
+Both wear the cream skin. The meeting mail was the dark one until the Gmail
+app inverted it element by element on a phone — a muddy near-white sheet,
+brown headlines, the white mark invisible against it. Nothing in HTML stops
+that; the only mail Gmail leaves as sent is a light one.
 
 **One palette each, baked in.** Neither mail has a `prefers-color-scheme`
 block any more, and neither swaps an image for dark mode. They are sent by
