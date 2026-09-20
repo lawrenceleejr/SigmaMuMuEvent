@@ -75,7 +75,7 @@ for stem in WHITE:
 # that, which traced every stroke and looked like a sticker.
 MAIL_MARK = 'https://www.muoncollider.us/resources/USMCCLogo_black.png'
 MAIL_OUT = ROOT / 'site/static/logos/mail'
-PAPER, SIZE, INSET = (245, 240, 225), 288, 0.62   # cream, 4x the 72px slot
+PAPER, SIZE, INSET = (245, 240, 225), 384, 0.72   # cream, 4x the 96px slot
 
 MAIL_OUT.mkdir(parents=True, exist_ok=True)
 with urllib.request.urlopen(MAIL_MARK) as r:

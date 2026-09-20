@@ -111,8 +111,8 @@ var HTML_REUNION = `<!doctype html>
         <td bgcolor="#f5f0e1" class="ink" valign="top" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:11px; font-weight:bold; letter-spacing:0.16em; text-transform:uppercase; color:#201e1d; padding-top:6px;">
           USMCC Annual Meeting &middot; Stanford
         </td>
-        <td valign="top" align="right" width="72" style="width:72px;">
-          <img src="https://hepalumni.muoncollider.us/logos/mail/usmcc-mark-disc.png" width="72" height="72" alt="" style="display:block; width:72px; height:72px; border:0; outline:none;">
+        <td valign="top" align="right" width="96" style="width:96px;">
+          <img src="https://hepalumni.muoncollider.us/logos/mail/usmcc-mark-disc.png" width="96" height="96" alt="" style="display:block; width:96px; height:96px; border:0; outline:none;">
         </td>
       </tr></table>
     </td></tr>
@@ -369,7 +369,7 @@ var HTML_REGISTRATION = `<!doctype html>
   <table bgcolor="#f5f0e1" role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" class="sheet" style="width:600px; max-width:600px; background-color:#f5f0e1;">
 
     <tr><td bgcolor="#f5f0e1" class="pad" align="right" style="padding:36px 44px 0 44px;">
-      <img src="https://hepalumni.muoncollider.us/logos/mail/usmcc-mark-disc.png" width="72" height="72" alt="" style="display:block; width:72px; height:72px; border:0; outline:none;">
+      <img src="https://hepalumni.muoncollider.us/logos/mail/usmcc-mark-disc.png" width="96" height="96" alt="" style="display:block; width:96px; height:96px; border:0; outline:none;">
     </td></tr>
 
     <tr><td bgcolor="#f5f0e1" class="pad title ink" style="padding:16px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:32px; line-height:1.08; font-weight:bold; letter-spacing:-0.02em; text-transform:uppercase; color:#201e1d;">
