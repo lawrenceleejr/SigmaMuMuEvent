@@ -132,6 +132,24 @@ mail *after* that, or the link 404s.
 
 ## Sending them
 
+### The simplest route: the finished message
+
+    node render/mail-eml.mjs        # -> out/reunion.eml, out/registration.eml
+
+An `.eml` *is* the message — headers, plain-text part, HTML part — so nothing
+has to survive a compose window. Double-click one (or drag it onto the Mail
+icon) and **Apple Mail** opens it as a message; **Message → Redirect**, ⌘⇧E,
+puts the recipients in and sends it on untouched. Redirect, not Forward:
+forwarding runs it back through the editor, which is the thing being avoided.
+
+The `From:` line says Lawrence Lee; redirecting adds your own address as
+`Resent-From`, so change that constant in the script if someone else sends it.
+
+**Outlook, classic on Windows**, has its own door: in a new message, Insert →
+Attach File → the arrow beside Insert → **Insert as Text**, and pick the
+`.html`. New Outlook and outlook.com have no equivalent — use the `.eml` in
+Apple Mail, or Thunderbird's Insert → HTML.
+
 ### From your own Gmail address
 
 Gmail's compose window has no HTML source view, and nothing adds one. Apps
