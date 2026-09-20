@@ -1,4 +1,4 @@
-Trouble seeing this? Open it in your browser: https://hepalumni.muoncollider.us/mail/registration/
+Trouble viewing? Open in browser: https://hepalumni.muoncollider.us/mail/registration/
 
 US MUON COLLIDER COLLABORATION MEETING
 Stanford · December 13–16, 2026
@@ -13,11 +13,11 @@ Early bird pricing runs until October 23, 2026.
 REGISTER NOW → https://indico.muoncollider.us/e/usmcc2026
 
 PROGRAM
-  Recent advances in muon collider technologies
-  The theory motivation for pushing to higher energies
-  The accelerator, experimental, and theoretical challenges ahead
-  Industrial synergies
-  Private foundations and how they fund work like this
+  · Recent advances in muon collider technologies
+  · The theory motivation for pushing to higher energies
+  · The accelerator, experimental, and theoretical challenges ahead
+  · Industrial synergies
+  · Private foundations and how they fund work like this
 
 The meeting runs December 13–16 at Stanford, followed immediately by the IMCC
 Demonstrator Workshop at SLAC, Dec 16–18 (details coming soon).

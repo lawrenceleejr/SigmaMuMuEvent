@@ -7,8 +7,8 @@
  * Indico skin is: two files that say the same thing drift the moment one of
  * them is edited. Edit the mail in email/, re-run this, and the pages follow.
  *
- *   mail/<name>/         the browser copy -- where "Trouble seeing this? Open
- *                        it in your browser" points, so the line itself goes:
+ *   mail/<name>/         the browser copy -- where "Trouble viewing? Open in
+ *                        browser" points, so the line itself goes:
  *                        the reader is already in a browser.
  *
  *   mail/<name>/paste/   the copy to send from. Open it, select all, paste
@@ -62,12 +62,13 @@ for (const { src, out, paste } of MAILS) {
   await write(paste, html);
   console.log(`${src} -> ${paste}  (paste copy, ${html.length} bytes)`);
 
-  // Matched by the sentence rather than the markup, so a reworded line still
+  // Matched by the sentence rather than the markup, so a rewritten row still
   // goes and a missing one is an error -- a browser copy still offering to
-  // open itself is the tell that this script stopped working.
-  const row = html.match(/<table [^>]*role="presentation"[^>]*>\n<tr><td [^>]*>\n  Trouble seeing this\?.*?\n<\/table>\n\n/s);
+  // open itself is the tell that this script stopped working. Reword the line
+  // in the mails and this line has to follow.
+  const row = html.match(/<table [^>]*role="presentation"[^>]*>\n<tr><td [^>]*>\n  Trouble viewing\?.*?\n<\/table>\n\n/s);
   if (!row) {
-    console.error(`  MISSING: no "Trouble seeing this?" row in ${src}`);
+    console.error(`  MISSING: no "Trouble viewing?" row in ${src}`);
     process.exitCode = 1;
     continue;
   }

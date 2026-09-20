@@ -120,7 +120,7 @@ only other route out.
 
 ## The copies on the website
 
-Both mails carry a "Trouble seeing this? Open it in your browser" line, for
+Both mails carry a "Trouble viewing? Open in browser" line, for
 the clients that mangle HTML mail or refuse it. It points at a copy hosted on
 the event site:
 
@@ -133,7 +133,7 @@ the event site:
 
 The copies are **generated**, not written: edit the mail in `email/`, re-run
 the script, commit all four. Both get `noindex, nofollow`; only the browser
-copy loses the "Trouble seeing this?" row, since its reader is already in a
+copy loses the "Trouble viewing?" row, since its reader is already in a
 browser.
 
 They live in `site/static/`, so Hugo copies them verbatim and they cannot

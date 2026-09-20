@@ -76,7 +76,7 @@ var HTML_REUNION = `<!doctype html>
 
 <table bgcolor="#f5f0e1" class="ground" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f5f0e1;">
 <tr><td bgcolor="#f5f0e1" class="muted" align="center" style="padding:14px 12px 0 12px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:11px; line-height:1.5; color:#605d5d;">
-  Trouble seeing this? <a href="https://hepalumni.muoncollider.us/mail/reunion/" style="color:#605d5d; text-decoration:underline;">Open it in your browser</a>.
+  Trouble viewing? <a href="https://hepalumni.muoncollider.us/mail/reunion/" style="color:#605d5d; text-decoration:underline;">Open in browser</a>.
 </td></tr>
 </table>
 
@@ -216,7 +216,17 @@ var HTML_REUNION = `<!doctype html>
       USMCC 2025 &middot; Lawrence Lee
     </td></tr>
 
-    <tr><td style="height:40px; line-height:40px; font-size:0;">&nbsp;</td></tr>
+    <!-- the same footer the registration mail wears, in this mail's palette -->
+    <tr><td bgcolor="#f5f0e1" class="pad" style="padding:28px 44px 0 44px;">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
+        <td class="rule" height="1" style="height:1px; line-height:1px; font-size:1px; background-color:rgba(32,30,29,0.18);">&nbsp;</td>
+      </tr></table>
+    </td></tr>
+
+    <tr><td bgcolor="#f5f0e1" class="pad muted" style="padding:20px 44px 40px 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; line-height:1.6; color:#605d5d;">
+      US Muon Collider Collaboration &middot;
+      <a href="https://www.muoncollider.us" style="color:#605d5d; text-decoration:underline;">muoncollider.us</a>
+    </td></tr>
 
   </table>
 
@@ -226,7 +236,7 @@ var HTML_REUNION = `<!doctype html>
 </html>
 `;
 
-var TEXT_REUNION = `Trouble seeing this? Open it in your browser: https://hepalumni.muoncollider.us/mail/reunion/
+var TEXT_REUNION = `Trouble viewing? Open in browser: https://hepalumni.muoncollider.us/mail/reunion/
 
 USMCC ANNUAL MEETING · STANFORD
 
@@ -265,6 +275,8 @@ We hope to see you in Palo Alto!
 — Lawrence Lee and Kiley Kennedy
 for the US Muon Collider Collaboration and the σμμ organizing committee
 LLee@utk.edu · Kiley.Kennedy@tufts.edu
+
+US Muon Collider Collaboration · muoncollider.us
 `;
 
 var HTML_REGISTRATION = `<!doctype html>
@@ -304,7 +316,7 @@ var HTML_REGISTRATION = `<!doctype html>
 
 <table bgcolor="#141312" class="ground" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#141312;">
 <tr><td bgcolor="#141312" class="muted" align="center" style="padding:14px 12px 0 12px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:11px; line-height:1.5; color:#9b948a;">
-  Trouble seeing this? <a href="https://hepalumni.muoncollider.us/mail/registration/" style="color:#9b948a; text-decoration:underline;">Open it in your browser</a>.
+  Trouble viewing? <a href="https://hepalumni.muoncollider.us/mail/registration/" style="color:#9b948a; text-decoration:underline;">Open in browser</a>.
 </td></tr>
 </table>
 
@@ -380,11 +392,26 @@ var HTML_REGISTRATION = `<!doctype html>
     </td></tr>
     <tr><td bgcolor="#141312" class="pad" style="padding:14px 44px 0 44px;">
       <table class="ink" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:1.5; color:#efe9da;">
-        <tr><td style="padding:0 0 12px 0; border-bottom:1px solid rgba(239,233,218,0.14);">Recent advances in muon collider technologies</td></tr>
-        <tr><td style="padding:12px 0; border-bottom:1px solid rgba(239,233,218,0.14);">The theory motivation for pushing to higher energies</td></tr>
-        <tr><td style="padding:12px 0; border-bottom:1px solid rgba(239,233,218,0.14);">The accelerator, experimental, and theoretical challenges ahead</td></tr>
-        <tr><td style="padding:12px 0; border-bottom:1px solid rgba(239,233,218,0.14);">Industrial synergies</td></tr>
-        <tr><td style="padding:12px 0 0 0;">Private foundations and how they fund work like this</td></tr>
+        <tr>
+          <td valign="top" width="18" style="width:18px; padding:0 0 10px 0; color:#ff5230;">&bull;</td>
+          <td valign="top" style="padding:0 0 10px 0;">Recent advances in muon collider technologies</td>
+        </tr>
+        <tr>
+          <td valign="top" width="18" style="width:18px; padding:10px 0; color:#ff5230;">&bull;</td>
+          <td valign="top" style="padding:10px 0;">The theory motivation for pushing to higher energies</td>
+        </tr>
+        <tr>
+          <td valign="top" width="18" style="width:18px; padding:10px 0; color:#ff5230;">&bull;</td>
+          <td valign="top" style="padding:10px 0;">The accelerator, experimental, and theoretical challenges ahead</td>
+        </tr>
+        <tr>
+          <td valign="top" width="18" style="width:18px; padding:10px 0; color:#ff5230;">&bull;</td>
+          <td valign="top" style="padding:10px 0;">Industrial synergies</td>
+        </tr>
+        <tr>
+          <td valign="top" width="18" style="width:18px; padding:10px 0 0 0; color:#ff5230;">&bull;</td>
+          <td valign="top" style="padding:10px 0 0 0;">Private foundations and how they fund work like this</td>
+        </tr>
       </table>
     </td></tr>
 
@@ -402,8 +429,7 @@ var HTML_REGISTRATION = `<!doctype html>
 
     <tr><td bgcolor="#141312" class="pad ink" style="padding:18px 44px 0 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:1.6; color:#efe9da;">
       The week opens on the Sunday with <strong>&#963;&#956;&#956;</strong>, an HEP alumni reunion
-      and industry mixer, open to all registrants. We would love to see you there:
-      <a href="https://hepalumni.muoncollider.us" style="color:#ff5230; text-decoration:none; font-weight:bold;">hepalumni.muoncollider.us</a>
+      and industry mixer, open to all registrants. We would love to see you there:&#32;<a href="https://hepalumni.muoncollider.us" style="color:#ff5230; text-decoration:none; font-weight:bold;">hepalumni.muoncollider.us</a>
     </td></tr>
 
     <tr><td bgcolor="#141312" class="pad" style="padding:28px 44px 0 44px;">
@@ -425,7 +451,7 @@ var HTML_REGISTRATION = `<!doctype html>
 </html>
 `;
 
-var TEXT_REGISTRATION = `Trouble seeing this? Open it in your browser: https://hepalumni.muoncollider.us/mail/registration/
+var TEXT_REGISTRATION = `Trouble viewing? Open in browser: https://hepalumni.muoncollider.us/mail/registration/
 
 US MUON COLLIDER COLLABORATION MEETING
 Stanford · December 13–16, 2026
@@ -440,11 +466,11 @@ Early bird pricing runs until October 23, 2026.
 REGISTER NOW → https://indico.muoncollider.us/e/usmcc2026
 
 PROGRAM
-  Recent advances in muon collider technologies
-  The theory motivation for pushing to higher energies
-  The accelerator, experimental, and theoretical challenges ahead
-  Industrial synergies
-  Private foundations and how they fund work like this
+  · Recent advances in muon collider technologies
+  · The theory motivation for pushing to higher energies
+  · The accelerator, experimental, and theoretical challenges ahead
+  · Industrial synergies
+  · Private foundations and how they fund work like this
 
 The meeting runs December 13–16 at Stanford, followed immediately by the IMCC
 Demonstrator Workshop at SLAC, Dec 16–18 (details coming soon).
