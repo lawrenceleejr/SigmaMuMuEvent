@@ -37,7 +37,9 @@ for (const { src, out } of MAILS) {
   // sentence still goes, and a missing one is an error rather than a silent
   // pass -- a hosted copy still offering to open itself is the tell that this
   // script stopped working.
-  const row = html.match(/<table role="presentation"[^>]*>\n<tr><td align="center"[^>]*>\n  Trouble seeing this\?.*?\n<\/table>\n\n/s);
+  // Attribute-tolerant: these tags carry classes now (the dark-mode palette
+  // hangs off them), and more may arrive. Key on the sentence, not the markup.
+  const row = html.match(/<table [^>]*role="presentation"[^>]*>\n<tr><td [^>]*>\n  Trouble seeing this\?.*?\n<\/table>\n\n/s);
   if (!row) {
     console.error(`  MISSING: no "Trouble seeing this?" row in ${src}`);
     process.exitCode = 1;
