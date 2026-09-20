@@ -105,3 +105,26 @@ only other route out.
   somewhere else, point the sentence there.
 - **The committee** is not listed in the mail, only pointed at. That keeps the
   mail short and means it cannot go stale when the committee changes.
+
+
+## The copies on the website
+
+Both mails carry a "Trouble seeing this? Open it in your browser" line, for
+the clients that mangle HTML mail or refuse it. It points at a copy hosted on
+the event site:
+
+| mail | hosted at |
+| --- | --- |
+| reunion | `https://hepalumni.muoncollider.us/mail/reunion/` |
+| registration | `https://hepalumni.muoncollider.us/mail/registration/` |
+
+    node render/mail-web.mjs        # after editing either mail
+
+The copies are **generated**, not written: edit the mail in `email/`, re-run
+the script, commit both. It strips the browser line (the reader is already in
+a browser) and adds `noindex, nofollow`.
+
+They live in `site/static/`, so Hugo copies them verbatim and they cannot
+reach the sitemap, and nothing on the site links to them — the mails do, which
+is the whole point. They go live with the next deploy of the site, so send the
+mail *after* that, or the link 404s.
