@@ -40,6 +40,11 @@ closing actions, after the reader has been invited and given the details.
 
 Email clients are not browsers. This file is written for them:
 
+- **The website's own rhythm.** One tracked label per section and no more,
+  the big uppercase title, the date set large with the venue tracked under
+  it, hairline rules rather than tinted panels, and an ink-black button — the
+  same moves the site makes, in the same order. Restraint is the house style;
+  a stack of eyebrows and callout boxes reads as a template.
 - **Tables and inline styles.** The `<style>` block carries only the mobile
   media query and link colour; strip it and nothing essential is lost.
 - **No webfonts.** Archivo would not load in most clients, so the voice is a
@@ -84,8 +89,7 @@ The preview line carries the deadline rather than repeating the subject —
 It is ordered the way the reader decides: the news, the deadline, the button,
 then the reasons (the program), then the two things that need doing early (a
 poster, a parallel contribution), then the shape of the week, then the Sunday
-reunion. The P.S. ties the three deadlines into one action, because the P.S.
-is read when the body is not.
+reunion.
 
 One button, to `indico.muoncollider.us/e/usmcc2026`. The reunion link is the
 only other route out.
