@@ -16,17 +16,24 @@ outside our reach:
 
 - **One palette, declared as both.** Each mail says `color-scheme: light dark`
   and carries a `prefers-color-scheme: dark` block whose colours *are* the
-  cream ones. The WebView under Gmail's Android app skips its own darkening
-  for content that claims to handle dark mode; a client that ignores the claim
-  is no worse off. `render/mail-web.mjs` fails the build if that block ever
-  names a colour the mail does not use elsewhere — a second palette in there
-  is what a dark-mode paste would bake in.
-- **Opaque images.** The USMCC mark is a 144px tile with the sheet's cream
-  behind it (`render/logos.py` builds it), not a transparent PNG. A
-  transparent black mark on a darkened ground is a blank square.
-- **Nothing else.** If Gmail's app darkens the sheet anyway, it darkens it;
-  the reader's own setting wins, as it should. What the three points above buy
-  is that the result stays legible rather than falling apart.
+  cream ones. It costs nothing and helps the hosted copies and the `.eml`,
+  where a `<style>` block survives. It does **not** help the paste route: a
+  compose window keeps inline styles and attributes and throws the `<head>`
+  away. `render/mail-web.mjs` fails the build if that block ever names a
+  colour the mail does not use elsewhere — a second palette in there is what a
+  dark-mode paste would bake in.
+- **Transparent images, deliberately.** The USMCC mark is the published
+  transparent PNG. A cream tile was tried and reverted: a client that darkens
+  the sheet leaves image pixels alone, so the tile became a bright box in the
+  corner, while the transparent mark gets inverted along with the text and
+  reads as a light mark on the dark ground.
+- **Not a dark skin.** The meeting mail was dark once and Gmail's app flipped
+  it to a muddy near-white with brown headlines. The conversion does not ask
+  which way a mail is built; it re-colours toward its own theme regardless. A
+  cream mail flipped is coherent, a dark mail flipped is not.
+- **Nothing else.** If Gmail's app darkens the sheet, it darkens it; the
+  reader's setting wins, as it should. What the points above buy is that the
+  result stays legible rather than falling apart.
 
 **One palette each, baked in.** Neither mail has a `prefers-color-scheme`
 block any more, and neither swaps an image for dark mode. They are sent by
