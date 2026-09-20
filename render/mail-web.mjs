@@ -32,54 +32,19 @@ const ROOT = resolve(new URL('..', import.meta.url).pathname);
 const MAILS = [
   { src: 'email/hepalumni-invitation.html',
     out: 'site/static/mail/reunion/index.html',
-    paste: 'site/static/mail/reunion/paste/index.html',
-    dark: 'site/static/mail/reunion/paste-dark/index.html' },
+    paste: 'site/static/mail/reunion/paste/index.html' },
   { src: 'email/usmcc2026-registration.html',
     out: 'site/static/mail/registration/index.html',
-    paste: 'site/static/mail/registration/paste/index.html',
-    dark: 'site/static/mail/registration/paste-dark/index.html' },
+    paste: 'site/static/mail/registration/paste/index.html' },
 ];
 
-/* The dark variant, generated from the cream one by swapping values -- the
- * same trick the Indico skin uses, and for the same reason: a second file
- * kept by hand drifts from the first.
- *
- * It exists to be tested, not because it is known to be better. The evidence
- * so far is against it: the meeting mail was near-black once and Gmail's app
- * flipped it to a muddy light sheet. But the brown here is the brown Gmail
- * itself produced when it darkened the cream mail, which its heuristics may
- * treat differently from a near-black one. A test send settles it; nothing
- * else will.
- *
- * The grounds are attributes as well as styles, as in the cream mails, so the
- * swap has to reach both.
- */
-const DARK = [
-  ['#f5f0e1', '#2a2520'],   // the sheet: the brown Gmail chose for it
-  ['#201e1d', '#f0ebdd'],   // type, and the button's fill
-  ['#605d5d', '#b3aa9c'],   // fine print, one step brighter than it was dark
-  ['#ec3013', '#ff5230'],   // the accent, opened up for a dark ground
-  ['rgba(32,30,29,0.18)', 'rgba(240,235,221,0.22)'],
-  ['USMCCLogo_black.png', 'USMCCLogo_white.png'],
-  ['content="light dark"', 'content="dark"'],
-  ['color-scheme: light dark', 'color-scheme: dark'],
-];
-
-function darkCopy(html) {
-  // Placeholders first, so a swap cannot consume what an earlier swap wrote:
-  // the ground becomes the brown that the type is about to become.
-  let out = html;
-  DARK.forEach(([from], i) => { out = out.split(from).join(`\u0000${i}\u0000`); });
-  DARK.forEach(([, to], i) => { out = out.split(`\u0000${i}\u0000`).join(to); });
-  return out;
-}
 
 const write = async (path, html) => {
   await mkdir(resolve(ROOT, path, '..'), { recursive: true });
   await writeFile(resolve(ROOT, path), html);
 };
 
-for (const { src, out, paste, dark } of MAILS) {
+for (const { src, out, paste } of MAILS) {
   const source = await readFile(resolve(ROOT, src), 'utf8');
 
   // The mails carry a dark-mode block whose colours are the light ones, to
@@ -121,13 +86,4 @@ for (const { src, out, paste, dark } of MAILS) {
   const browser = html.replace(row[0], '');
   await write(out, browser);
   console.log(`${src} -> ${out}  (browser copy, ${browser.length} bytes)`);
-
-  const inverted = darkCopy(html);
-  if (/#f5f0e1|#201e1d|USMCCLogo_black/.test(inverted)) {
-    console.error(`  HALF-SWAPPED: cream values survive in the dark copy of ${src}`);
-    process.exitCode = 1;
-    continue;
-  }
-  await write(dark, inverted);
-  console.log(`${src} -> ${dark}  (dark variant, ${inverted.length} bytes)`);
 }

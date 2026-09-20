@@ -23,14 +23,20 @@ outside our reach:
   colour the mail does not use elsewhere — a second palette in there is what a
   dark-mode paste would bake in.
 - **Transparent images, deliberately.** The USMCC mark is the published
-  transparent PNG. A cream tile was tried and reverted: a client that darkens
-  the sheet leaves image pixels alone, so the tile became a bright box in the
-  corner, while the transparent mark gets inverted along with the text and
-  reads as a light mark on the dark ground.
-- **Not a dark skin.** The meeting mail was dark once and Gmail's app flipped
-  it to a muddy near-white with brown headlines. The conversion does not ask
-  which way a mail is built; it re-colours toward its own theme regardless. A
-  cream mail flipped is coherent, a dark mail flipped is not.
+  transparent PNG, and that is the whole trick: Gmail inverts a transparent
+  mark along with the type, so it comes out light on a darkened sheet and dark
+  on a light one, with nothing to maintain. An opaque cream tile was tried and
+  reverted — Gmail leaves opaque images alone, so it became a bright box in
+  the corner of a darkened sheet.
+- **Not a dark skin.** This was tested twice, both ways. A near-black mail and
+  a dark brown one were both flipped to a muddy light sheet with brown
+  headlines; the cream mail was flipped to brown with bone type and came out
+  coherent. Gmail's conversion does not ask which way a mail is built, so the
+  choice is not whether it flips but which flipped result you would rather
+  have. Cream wins it. Don't spend another afternoon on this — no
+  `color-scheme`, `bgcolor` or meta tag opts out, and `[data-ogsc]`, the one
+  hook the email world has for forced dark mode, is Outlook.com's, not
+  Gmail's.
 - **Nothing else.** If Gmail's app darkens the sheet, it darkens it; the
   reader's setting wins, as it should. What the points above buy is that the
   result stays legible rather than falling apart.
@@ -149,13 +155,6 @@ only other route out.
 Both mails carry a "Trouble viewing? Open in browser" line, for
 the clients that mangle HTML mail or refuse it. It points at a copy hosted on
 the event site:
-
-A dark variant of each sits at `…/paste-dark/`, generated from the same
-source by swapping values — brown ground, bone type, the white mark. It is
-there to be tested against the cream one in the Gmail app, not because it is
-known to be better: the meeting mail was near-black once and Gmail flipped it
-to a muddy light sheet. If a test send says the brown one survives, make it
-the default; if not, delete the variant from `render/mail-web.mjs`.
 
 | mail | to send from (paste copy) | where the browser line points |
 | --- | --- | --- |
