@@ -69,8 +69,11 @@ def group_banner(src):
     w, h = im.size
     l, t, r, b = GROUP_CROP
     band = im.crop((round(l * w), round(t * h), round(r * w), round(b * h)))
-    # 1200 wide: two device pixels for every CSS pixel of a 600px mail sheet.
-    band = band.resize((1200, round(1200 * band.height / band.width)), Image.LANCZOS)
+    # 1024 wide: two device pixels for every CSS pixel of the mail's text
+    # column, which is 512 -- the 600px sheet less its 44px side padding. The
+    # banner is inset to that column rather than run to the sheet's edge, so
+    # it lines up with the type above and below it.
+    band = band.resize((1024, round(1024 * band.height / band.width)), Image.LANCZOS)
     dest = OUT / 'web' / 'usmcc-group-banner.jpg'
     band.save(dest, 'JPEG', quality=82, optimize=True, progressive=True, subsampling='4:2:0')
     print(f'{dest.relative_to(ROOT)}  {band.size[0]}x{band.size[1]}  {dest.stat().st_size/1024:.0f} KB')
