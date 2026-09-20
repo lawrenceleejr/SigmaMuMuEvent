@@ -32,9 +32,9 @@ on December 13, 2026, with remarks from Michael Peskin.* Most clients show it
 after the subject, so it carries the date and the name rather than repeating
 the subject.
 
-The mail is an invitation first. Michael Peskin's remarks are the draw, and
-the request to pass it on to five HEP alumni friends waits until the closing
-three actions, after the reader has been invited and given the details.
+The mail is an invitation first. Prof. Peskin's opening remarks are the draw,
+and the request to pass it on to five HEP alumni friends waits until the three
+closing actions, after the reader has been invited and given the details.
 
 ### How it is built
 
@@ -51,8 +51,7 @@ Email clients are not browsers. This file is written for them:
 - **One link target.** Every route out of the mail goes to
   `hepalumni.muoncollider.us`; the two organiser addresses are `mailto:`.
 - **11 KB.** Gmail clips a message over about 102 KB, which shows as
-  "[Message clipped] View entire message" and cuts the P.S. — the part after
-  the subject that gets read most.
+  "[Message clipped] View entire message" and would cut the closing actions.
 - **`color-scheme: light`** and an explicit background on every cell, which is
   as far as one can go to stop a dark-mode client inverting cream to sludge.
 
