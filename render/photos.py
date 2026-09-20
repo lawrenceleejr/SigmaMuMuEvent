@@ -32,12 +32,14 @@ OUT = ROOT / 'site' / 'static' / 'photos'
 NAMES = ['usmcc-poster-session-1', 'usmcc-poster-session-2', 'usmcc-poster-session-3']
 SIZES = {'web': (1200, 80, '4:2:0'), 'full': (2400, 88, '4:4:4')}
 
-args = sys.argv[1:] or [str(ROOT / 'photos-src')]
+args = [a for a in sys.argv[1:] if not a.startswith('--')] or [str(ROOT / 'photos-src')]
+if '--banner' in sys.argv:
+    args = []
 srcs = []
 for a in args:
     p = Path(a)
     srcs += sorted(p.glob('*.jpg')) if p.is_dir() else [p]
-if len(srcs) != len(NAMES):
+if args and len(srcs) != len(NAMES):
     sys.exit(f'expected {len(NAMES)} photographs, got {len(srcs)}')
 
 for src, name in zip(srcs, NAMES):
@@ -52,3 +54,31 @@ for src, name in zip(srcs, NAMES):
                     subsampling=subsampling)
         print(f'{dest.relative_to(ROOT)}  {out_im.size[0]}x{out_im.size[1]}  '
               f'{dest.stat().st_size/1024:.0f} KB')
+
+
+# ---- the group photograph, as a banner --------------------------------------
+# The full frame is two thirds building. Cropped to the people it becomes a
+# band about 3.6:1, which is the shape a mail banner wants anyway: wide enough
+# to read as a crowd at 600px, short enough that it does not push the subject
+# line's promise below the fold. The box is in fractions of the frame so it
+# survives a re-scan or a bigger export of the same photograph.
+GROUP_CROP = (0.030, 0.330, 0.925, 0.705)          # left, top, right, bottom
+
+def group_banner(src):
+    im = Image.open(src).convert('RGB')
+    w, h = im.size
+    l, t, r, b = GROUP_CROP
+    band = im.crop((round(l * w), round(t * h), round(r * w), round(b * h)))
+    # 1200 wide: two device pixels for every CSS pixel of a 600px mail sheet.
+    band = band.resize((1200, round(1200 * band.height / band.width)), Image.LANCZOS)
+    dest = OUT / 'web' / 'usmcc-group-banner.jpg'
+    band.save(dest, 'JPEG', quality=82, optimize=True, progressive=True, subsampling='4:2:0')
+    print(f'{dest.relative_to(ROOT)}  {band.size[0]}x{band.size[1]}  {dest.stat().st_size/1024:.0f} KB')
+
+    full = im.resize((2400, round(2400 * h / w)), Image.LANCZOS)
+    dest = OUT / 'full' / 'usmcc-group-photo.jpg'
+    full.save(dest, 'JPEG', quality=88, optimize=True, progressive=True, subsampling='4:4:4')
+    print(f'{dest.relative_to(ROOT)}  {full.size[0]}x{full.size[1]}  {dest.stat().st_size/1024:.0f} KB')
+
+if __name__ == '__main__' and '--banner' in sys.argv:
+    group_banner(sys.argv[sys.argv.index('--banner') + 1])
