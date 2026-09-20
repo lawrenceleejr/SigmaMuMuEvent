@@ -150,6 +150,13 @@ Both mails carry a "Trouble viewing? Open in browser" line, for
 the clients that mangle HTML mail or refuse it. It points at a copy hosted on
 the event site:
 
+A dark variant of each sits at `…/paste-dark/`, generated from the same
+source by swapping values — brown ground, bone type, the white mark. It is
+there to be tested against the cream one in the Gmail app, not because it is
+known to be better: the meeting mail was near-black once and Gmail flipped it
+to a muddy light sheet. If a test send says the brown one survives, make it
+the default; if not, delete the variant from `render/mail-web.mjs`.
+
 | mail | to send from (paste copy) | where the browser line points |
 | --- | --- | --- |
 | reunion | `…/mail/reunion/paste/` | `https://hepalumni.muoncollider.us/mail/reunion/` |
