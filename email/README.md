@@ -137,10 +137,15 @@ mail *after* that, or the link 404s.
     node render/mail-eml.mjs        # -> out/reunion.eml, out/registration.eml
 
 An `.eml` *is* the message — headers, plain-text part, HTML part — so nothing
-has to survive a compose window. Double-click one (or drag it onto the Mail
-icon) and **Apple Mail** opens it as a message; **Message → Redirect**, ⌘⇧E,
-puts the recipients in and sends it on untouched. Redirect, not Forward:
+has to survive a compose window. In **Apple Mail**, **Message → Redirect**,
+⌘⇧E, puts the recipients in and sends it on untouched. Redirect, not Forward:
 forwarding runs it back through the editor, which is the thing being avoided.
+
+Redirect needs the message to be **in a mailbox**. A double-clicked `.eml`
+opens in a window with no account behind it and the whole Message menu is
+greyed out; drag the file onto a mailbox in the sidebar first, then select it
+there. With no local mailbox to drag onto, the `.mbox` written beside the
+messages holds both of them: File → Import Mailboxes → Files in mbox format.
 
 The `From:` line says Lawrence Lee; redirecting adds your own address as
 `Resent-From`, so change that constant in the script if someone else sends it.
