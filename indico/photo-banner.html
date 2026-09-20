@@ -9,11 +9,15 @@
      and the three cells stack to full width on a phone; without it they still
      behave, because width="100%" on an image is as old as the web.
 
+     The caption row spans all three cells, so it stays put when they stack.
+     Its colour is set with opacity rather than a colour value, so it reads as
+     fine print on both the light and the dark skin.
+
      To make them click-to-enlarge, wrap each <img> in
      <a href="https://hepalumni.muoncollider.us/photos/full/NAME.jpg"> -- the
      2400px copies are up beside the small ones. -->
 
-<table width="100%" cellspacing="8" cellpadding="0" border="0">
+<table width="100%" cellspacing="4" cellpadding="0" border="0">
 <tbody>
 <tr>
 <td width="33%" valign="top">
@@ -30,6 +34,12 @@
 <img src="https://hepalumni.muoncollider.us/photos/web/usmcc-poster-session-3.jpg"
      alt="A poster session conversation about smart pixel detectors"
      width="100%" style="display:block;width:100%;height:auto">
+</td>
+</tr>
+<tr>
+<td colspan="3" style="padding-top:5px">
+<span style="font-size:11px;line-height:1.4;letter-spacing:0.02em;opacity:0.65">
+Poster session, USMCC 2025 &middot; Lawrence Lee</span>
 </td>
 </tr>
 </tbody>
