@@ -9,6 +9,10 @@
      and the three cells stack to full width on a phone; without it they still
      behave, because width="100%" on an image is as old as the web.
 
+     The margin-top on each cell is inert in the table layout and only takes
+     effect where the skin stacks the cells on a phone, where it overrides the
+     skin's wider default gap so the pictures stay a tight band there too.
+
      The caption row spans all three cells, so it stays put when they stack.
      Its colour is set with opacity rather than a colour value, so it reads as
      fine print on both the light and the dark skin.
@@ -20,24 +24,24 @@
 <table width="100%" cellspacing="4" cellpadding="0" border="0">
 <tbody>
 <tr>
-<td width="33%" valign="top">
+<td width="33%" valign="top" style="margin-top:5px">
 <img src="https://hepalumni.muoncollider.us/photos/web/usmcc-poster-session-1.jpg"
      alt="Two physicists at a poster on high-temperature superconductors"
      width="100%" style="display:block;width:100%;height:auto">
 </td>
-<td width="33%" valign="top">
+<td width="33%" valign="top" style="margin-top:5px">
 <img src="https://hepalumni.muoncollider.us/photos/web/usmcc-poster-session-2.jpg"
      alt="A student showing a cooling-channel simulation at a poster"
      width="100%" style="display:block;width:100%;height:auto">
 </td>
-<td width="33%" valign="top">
+<td width="33%" valign="top" style="margin-top:5px">
 <img src="https://hepalumni.muoncollider.us/photos/web/usmcc-poster-session-3.jpg"
      alt="A poster session conversation about smart pixel detectors"
      width="100%" style="display:block;width:100%;height:auto">
 </td>
 </tr>
 <tr>
-<td colspan="3" style="padding-top:5px">
+<td colspan="3" style="padding-top:5px;margin-top:5px">
 <span style="font-size:11px;line-height:1.4;letter-spacing:0.02em;opacity:0.65">
 Poster session, USMCC 2025 &middot; Lawrence Lee</span>
 </td>

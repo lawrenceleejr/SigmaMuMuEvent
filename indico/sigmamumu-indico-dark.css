@@ -677,6 +677,36 @@ body > .header,
   .confBodyBox .editor-output td + td { margin-top: 1.75rem; }
 }
 
+/* ---- a band of photographs in a description ----------------------------- */
+/* The table rules above are tuned for layout tables pasted out of a document:
+   a wide gutter, a paragraph of air under every image, and pasted font sizes
+   flattened to the body size. A row of pictures (indico/photo-banner.html)
+   wants the opposite — a hairline gutter, no air, and a caption that is
+   allowed to be small. Keyed on the photograph's URL rather than a class,
+   because Indico's description sanitiser is not guaranteed to keep one. */
+.confBodyBox .editor-output tr:has(img[src*="/photos/web/"]) td,
+.confBodyBox .editor-output tr:has(img[src*="/photos/web/"]) + tr td {
+  padding-right: 4px !important;
+}
+.confBodyBox .editor-output img[src*="/photos/web/"] { margin: 0 !important; }
+.confBodyBox .editor-output tr:has(img[src*="/photos/web/"]) + tr td {
+  padding-top: 5px !important;
+}
+/* the credit line: small, quiet, and at full opacity, since the snippet dims
+   it with opacity for the case where this stylesheet is not installed */
+.confBodyBox .editor-output tr:has(img[src*="/photos/web/"]) + tr td span {
+  font-size: 0.7rem !important;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  color: var(--smm-muted) !important;
+  opacity: 1 !important;
+}
+@media (max-width: 820px) {
+  .confBodyBox .editor-output tr:has(img[src*="/photos/web/"]) td + td {
+    margin-top: 5px !important;
+  }
+}
+
 /* ---- the date / location grid ------------------------------------------- */
 /* Indico lays these out as side-by-side columns; stacking them full width
    turns them into the poster's ruled rows. */
