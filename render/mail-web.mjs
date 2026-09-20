@@ -32,24 +32,32 @@ const MAILS = [
 ];
 
 /* The paste copy: the same mail with every trace of the dark palette taken
- * out.
+ * out, and its grounds nailed down.
  *
- * It exists for one way of sending these -- open the mail in a browser, select
- * all, paste into a compose window. What the clipboard carries is not the
- * source but the *rendered* page: the browser resolves the stylesheet, media
- * queries included, and bakes the result into inline styles. Do that on a
- * machine whose system theme is dark and the cream-on-black palette comes
- * along as inline colour, while the backgrounds -- which a compose window
- * strips -- do not. Cream text, cream ground, an invisible mail.
+ * It exists for the one way of sending these that everybody can do -- open the
+ * mail in a browser, select all, paste into a Gmail or Outlook compose window.
+ * What the clipboard carries is not the source but the *rendered* page: the
+ * browser resolves the stylesheet, media queries included, and bakes the
+ * result into inline styles. Do that on a machine whose system theme is dark
+ * and the cream-on-black palette comes along as inline colour, while the
+ * grounds -- which a compose window is quick to drop -- do not. Cream text,
+ * cream ground, an invisible mail.
  *
- * With no dark rules to resolve there is nothing to bake in, so this copy
- * pastes as the cream skin whatever theme the machine is wearing.
+ * Two answers here. There are no dark rules left to resolve, so nothing of
+ * that palette can be baked in. And every table and every padded cell carries
+ * its ground as a bgcolor attribute as well as a style: a compose window that
+ * drops the CSS background usually keeps the attribute, which is why the
+ * attribute outlived the CSS property in mail to begin with.
  */
 function pasteCopy(html) {
   // The dark rules, and the comments that introduce them.
   const dark = html.match(
     /(?:  \/\*(?:(?!\*\/)[\s\S])*?\*\/\n)*  @media \(prefers-color-scheme: dark\) \{[\s\S]*?\n  \}\n/);
   if (!dark) return null;
+  const ground = html.match(/<body[^>]*background-color:(#[0-9a-f]{6})/i);
+  if (!ground) return null;
+  const paper = ground[1];
+
   return html
     .replace(dark[0], '')
     .replace('  .img-dark { display: none !important; }\n', '')
@@ -57,7 +65,13 @@ function pasteCopy(html) {
     .replace('<meta name="color-scheme" content="light dark">',
              '<meta name="color-scheme" content="light">')
     .replace('<meta name="supported-color-schemes" content="light dark">',
-             '<meta name="supported-color-schemes" content="light">');
+             '<meta name="supported-color-schemes" content="light">')
+    // the ground, as an attribute a compose window will keep
+    .replace(new RegExp(`<table([^>]*background-color:${paper}[^>]*)>`, 'gi'),
+             `<table bgcolor="${paper}"$1>`)
+    // and on each content cell, so the sheet survives even if the tables do not
+    .replace(/<td class="((?:pad|ink|muted|accent|title|date|head)[^"]*)"/g,
+             `<td bgcolor="${paper}" class="$1"`);
 }
 
 for (const { src, out, paste } of MAILS) {

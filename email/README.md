@@ -132,6 +132,22 @@ mail *after* that, or the link 404s.
 
 ## Sending them
 
+### When someone else does the sending
+
+The chairs are on Macs, in Gmail or Outlook, and will not run a script. Send
+them a link to the paste copy and four lines:
+
+> Open <https://hepalumni.muoncollider.us/mail/reunion/paste/> in your browser.
+> Select all (⌘A), copy (⌘C).
+> In a new Gmail or Outlook message, click into the body and paste (⌘V).
+> Subject: **Old friends, new physics**. Don't edit the body — send as is.
+
+The paste copy is built for exactly this. It carries no dark-mode rules, so a
+machine in dark mode cannot bake a cream-on-black palette into the clipboard,
+and every table and padded cell carries its ground as a `bgcolor` attribute as
+well as a style, because a compose window that drops the CSS background
+usually keeps the attribute.
+
 ### The simplest route: the finished message
 
     node render/mail-eml.mjs        # -> out/reunion.eml, out/registration.eml
