@@ -5,8 +5,10 @@
 #     bash check-from-a-mac.sh
 #
 # It answers three questions the browser cannot: who serves the bundles,
-# whether the connection speaks HTTP/2, and whether the body arrives with the
-# encoding its headers claim.
+# whether the connection speaks HTTP/2, and whether anything is compressed.
+#
+# Paste the whole output into the ticket; each section says what its answer
+# means, so nobody has to take the numbers on trust.
 set -u
 HOST="https://indico.muoncollider.us"
 ASSET="$HOST/dist/js/jquery.0838d58a.bundle.js"
@@ -27,11 +29,17 @@ echo "   a browser opens six connections and competes with itself for the"
 echo "   9 MB this page asks for."
 echo
 echo "== 3. is anything compressed ======================================="
-hdrs=$(curl -sI -H 'Accept-Encoding: gzip' "$ASSET")
-enc=$(printf '%s' "$hdrs" | grep -ic '^content-encoding: gzip')
+# A GET with the body thrown away, not a HEAD: mod_deflate does not compress a
+# HEAD response, so asking that way reports "no compression" on a server that
+# compresses perfectly well.
+hdrs=$(curl -s -H 'Accept-Encoding: gzip' -o /dev/null -D - "$ASSET")
+enc=$(printf '%s' "$hdrs" | grep -ic '^content-encoding: *gzip')
 magic=$(curl -s --raw -H 'Accept-Encoding: gzip' "$ASSET" | head -c 2 | od -An -tx1 | tr -d ' ')
+plain=$(curl -s -H 'Accept-Encoding: identity' -o /dev/null -w '%{size_download}' "$ASSET")
+zipped=$(curl -s --raw -H 'Accept-Encoding: gzip' -o /dev/null -w '%{size_download}' "$ASSET")
 echo "   Content-Encoding: gzip header present? $([ "$enc" -gt 0 ] && echo yes || echo NO)"
 echo "   first two bytes of the body: $magic  (1f8b = gzip, anything else = plain)"
+echo "   bytes on the wire: $plain asking for plain, $zipped asking for gzip"
 echo
 if [ "$enc" -eq 0 ] && [ "$magic" = "1f8b" ]; then
   echo "   *** gzipped body with no Content-Encoding header: a strict client"
