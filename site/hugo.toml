@@ -15,7 +15,10 @@ enableRobotsTXT = true
   block = true
 
 [params]
-  description = "An evening for physicists who left the field for industry, and the teams they build with now. Sunday 13 December 2026, Stanford University."
+  # Shown under the link wherever the site is pasted, so it is written to be
+  # read cold: what it is, when, where. The old wording led with people having
+  # left the field, which is not how the invitation talks about them.
+  description = "Old friends, new physics. A cocktail hour and research fair for HEP alumni and the colleagues we miss. Sunday, December 13, 2026, at Stanford University."
 
   # Cloudflare Web Analytics. Cookieless, so no consent banner is needed.
   # The token is a public site identifier, not a secret. Blank it to switch

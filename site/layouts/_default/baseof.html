@@ -3,11 +3,30 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ .Title }} — {{ site.Title }}{{ end }}</title>
-<meta name="description" content="{{ site.Params.description }}">
-<meta property="og:title" content="{{ site.Title }}">
-<meta property="og:description" content="{{ site.Params.description }}">
+<title>{{ cond .IsHome site.Title (printf "%s — %s" .Title site.Title) }}</title>
+{{/* What a paste of the link shows in Slack, iMessage, WhatsApp, Bluesky and
+     the rest. Without an og:image they have nothing to draw and fall back to a
+     bare grey link; the card is built by render/share-card.py from the same
+     artwork as the poster. Absolute URLs throughout -- a scraper is not on
+     this page and cannot resolve a relative one. */}}
+{{ $title := cond .IsHome site.Title (printf "%s — %s" .Title site.Title) }}
+{{ $description := or .Description .Params.description site.Params.description }}
+{{ $card := "img/share-card.jpg" | absURL }}
+<meta name="description" content="{{ $description }}">
+<meta property="og:title" content="{{ $title }}">
+<meta property="og:description" content="{{ $description }}">
 <meta property="og:type" content="website">
+<meta property="og:url" content="{{ .Permalink }}">
+<meta property="og:site_name" content="{{ site.Title }}">
+<meta property="og:image" content="{{ $card }}">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A Particle Physics Alumni Reunion — cocktail hour and research fair, Sunday, December 13, 2026, Stanford University">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ $title }}">
+<meta name="twitter:description" content="{{ $description }}">
+<meta name="twitter:image" content="{{ $card }}">
 <link rel="icon" href="{{ "favicon.svg" | relURL }}" type="image/svg+xml">
 <link rel="stylesheet" href="{{ "fonts/fonts.css" | relURL }}">
 {{ $css := resources.Get "css/main.css" | minify | fingerprint }}
