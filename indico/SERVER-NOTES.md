@@ -80,6 +80,31 @@ XSendFilePath /opt/indico
 Adjust `/opt/indico` if this installation lives elsewhere — `grep -i static
 /opt/indico/etc/indico.conf` and the `STATIC_FILE_METHOD` setting will say.
 
+### Nothing is compressed, which is the cheapest fix of all
+
+Asked with `Accept-Encoding: gzip`, this server returns plain text and no
+`Content-Encoding` header — measured from a laptop on the same network as the
+browser, not through any proxy. The bundles compress like this:
+
+| | raw | gzipped | |
+| --- | --- | --- | --- |
+| `common.70a1cb1a.bundle.js` | 3,732 KB | 959 KB | 74% |
+| `jquery.0838d58a.bundle.js` | 874 KB | 257 KB | 71% |
+| `semantic-ui.03304b73.css` | 798 KB | 118 KB | 85% |
+
+The 9.1 MB cold load becomes roughly 2 MB. Nothing else here costs so little:
+
+```apache
+AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css \
+                              text/javascript application/javascript \
+                              application/json image/svg+xml
+```
+
+That needs `a2enmod deflate`. It applies to whatever Apache serves, so it
+works whether or not the `Alias` question below is resolved — although once
+the bundles come off disk, Apache can also serve pre-compressed `.gz` files
+if webpack has produced them.
+
 ### While you are in the file
 
 The `/dist` filenames are content-hashed by webpack: `common.70a1cb1a.bundle.js`

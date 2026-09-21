@@ -19,12 +19,14 @@ echo "   => the Python application is serving it, and the Alias lines are not"
 echo "      in effect. Apache would send Accept-Ranges: bytes and a hex ETag."
 echo
 echo "== 2. does it speak HTTP/2 =========================================="
-curl -sI --http2 "$HOST/" | head -1
-echo "   'HTTP/2 200' is what you want. 'HTTP/1.1 200' means the Protocols"
-echo "   line is missing, so a browser opens six connections and competes"
-echo "   with itself for the 9 MB this page asks for."
+# GET, not HEAD: this server answers HEAD / with 400, which says nothing about
+# the protocol and looks alarming in a report.
+curl -s --http2 -o /dev/null -w '   negotiated: HTTP/%{http_version}\n' "$HOST/"
+echo "   '2' is what you want. '1.1' means the Protocols line is missing, so"
+echo "   a browser opens six connections and competes with itself for the"
+echo "   9 MB this page asks for."
 echo
-echo "== 3. is the body encoded the way the headers say =================="
+echo "== 3. is anything compressed ======================================="
 hdrs=$(curl -sI -H 'Accept-Encoding: gzip' "$ASSET")
 enc=$(printf '%s' "$hdrs" | grep -ic '^content-encoding: gzip')
 magic=$(curl -s --raw -H 'Accept-Encoding: gzip' "$ASSET" | head -c 2 | od -An -tx1 | tr -d ' ')
@@ -32,13 +34,13 @@ echo "   Content-Encoding: gzip header present? $([ "$enc" -gt 0 ] && echo yes |
 echo "   first two bytes of the body: $magic  (1f8b = gzip, anything else = plain)"
 echo
 if [ "$enc" -eq 0 ] && [ "$magic" = "1f8b" ]; then
-  echo "   *** gzipped body with no Content-Encoding header. That is the bug:"
-  echo "       a strict client cannot parse it, a lenient one sniffs it and"
-  echo "       carries on -- which is exactly Safari failing where Chrome does"
-  echo "       not. Look at mod_deflate and anything in front of Apache."
+  echo "   *** gzipped body with no Content-Encoding header: a strict client"
+  echo "       cannot parse it. Look at mod_deflate and anything in front."
+elif [ "$enc" -eq 0 ]; then
+  echo "   *** nothing is compressed. gzip asked for, plain text returned."
+  echo "       These files compress by 71-85%: the 9 MB this page pulls would"
+  echo "       be about 2 MB. Nothing else on this list is worth as much for"
+  echo "       as little."
 else
-  echo "   Encoding looks consistent. If Safari still fails here and Chrome"
-  echo "   does not, the likely difference is a dropped keep-alive connection:"
-  echo "   Chrome silently retries a request that dies on a reused idle"
-  echo "   connection, Safari reports it. Same server fault either way."
+  echo "   Compression is on."
 fi
