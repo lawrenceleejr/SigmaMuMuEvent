@@ -130,3 +130,51 @@ changed; no Indico data, settings or files are touched by any of this.
 The event banners were 680 KB each and are now about 180 KB, which made the
 failures rarer but not rare enough — the banner was never the bulk of the
 9.1 MB.
+
+---
+
+# A second, unrelated item: link previews have no image
+
+Pasting an Indico event link into Slack, iMessage or anywhere else shows no
+picture. The page does emit the tag, but with a **relative** URL:
+
+    <meta property="og:image" content="/event/124/logo-1833626809.png">
+
+Open Graph requires an absolute URL, and scrapers do not resolve relative ones
+against the page they came from, so they show nothing.
+
+This is Indico's own doing rather than a local misconfiguration.
+`indico/modules/events/views.py` builds the tag from `event.logo_url`, which is
+`url_for(...)` **without** `_external=True`, while the no-logo fallback on the
+very next line does pass it — and the model already offers an
+`external_logo_url` property used elsewhere for exactly this.
+
+If you would rather not carry a patch, the include that renders these tags can
+be overridden in the customization directory. Indico includes it as
+`meta.html` (from `indico/web/templates/indico_base.html`), so the override
+goes at `<CUSTOMIZATION_DIR>/templates/meta.html`:
+
+```jinja
+{%- if page_metadata.og -%}
+    {% for key, value in page_metadata.og.items() -%}
+        {#- Open Graph needs absolute URLs; Indico emits the event logo relative -#}
+        {%- set value = (request.host_url.rstrip('/') ~ value)
+                        if value is string and value.startswith('/') else value -%}
+        <meta property="og:{{ key }}" content="{{ value|striptags|truncate(500) }}">
+    {% endfor %}
+{%- endif %}
+
+{%- if page_metadata.json_ld %}
+    <script type="application/ld+json">
+        {{ page_metadata.json_ld|tojson }}
+    </script>
+{% endif %}
+
+{%- if page_metadata.keywords %}
+    <meta name="keywords" content="{{ page_metadata.keywords|join(',') }}">
+{%- endif -%}
+```
+
+That is Indico's own template with two lines added, so it keeps working if the
+rest of the file changes upstream; check it against the installed copy after
+an upgrade.
