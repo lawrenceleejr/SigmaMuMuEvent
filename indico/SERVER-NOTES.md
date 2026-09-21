@@ -120,6 +120,57 @@ curl -sI https://indico.muoncollider.us/event/124/    # should still be 200, app
 The event page itself must keep coming from uWSGI: if that 404s, an
 `AliasMatch` is too greedy and is swallowing application routes.
 
+## If those lines are already in the vhost
+
+They are, but they are not taking effect. As of this writing the response
+still says so:
+
+    $ curl -sI https://indico.muoncollider.us/dist/css/main.82dc38ee.css
+    HTTP/1.1 200 OK
+    Cache-Control: no-cache
+    ETag: "1774622227.3972957-485028-3837599890"
+    X-Indico-URL: /dist/css/main.82dc38ee.css
+
+Two tells, either one conclusive:
+
+- **`X-Indico-URL`** is set by the Indico application. Apache never adds it.
+- **The ETag format.** `1774622227.3972957-485028-3837599890` is Werkzeug's
+  `mtime-size-inode`. Apache's own ETags are hex triples that look nothing
+  like that.
+
+Four things to check, in the order they usually turn out to be the cause:
+
+1. **`ProxyPass` is winning.** mod_proxy claims the URL before mod_alias gets
+   to it, whatever the order of the lines in the file. The fix is an explicit
+   exclusion, which must come *before* the general `ProxyPass`:
+
+   ```apache
+   ProxyPass /css  !
+   ProxyPass /dist !
+   ProxyPass /images !
+   ProxyPass /fonts !
+   ProxyPass /robots.txt !
+   ProxyPass / unix:/opt/indico/web/uwsgi.sock|uwsgi://localhost/
+   ```
+
+2. **A different vhost is answering.** `apache2ctl -S` lists which
+   `ServerName` matches port 443 first; the lines may be in a file that never
+   matches this host.
+
+3. **The path is wrong for this installation.** `ls
+   /opt/indico/web/static/dist/js/` should list the bundles. If Indico lives
+   elsewhere, both `AliasMatch` lines and `XSendFilePath` need that path. (A
+   wrong path gives 404s rather than app-served files, so this one shows up
+   differently — but it is worth ruling out.)
+
+4. **The config was edited but not reloaded.** `systemctl status apache2`
+   shows when it last started; `apache2ctl -t -D DUMP_CONFIG | grep -iE
+   "alias|proxypass"` shows what is actually loaded, rather than what is in
+   the file on disk.
+
+When it is working, the `curl` above loses `X-Indico-URL`, gains
+`Accept-Ranges: bytes`, and its ETag changes shape.
+
 ## Rolling back
 
 Comment out the added lines and `systemctl reload apache2`. Nothing else
