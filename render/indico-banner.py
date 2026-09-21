@@ -21,7 +21,9 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / 'out'
 WIDTH, QUALITY = 1600, 84
-BANNERS = ['sigmamumu-banner-light', 'usmcc-2026-banner-light']
+# The reunion runs on the cream skin, the meeting on the dark one, which is
+# how the two Indico pages tell themselves apart at a glance.
+BANNERS = ['sigmamumu-banner-light', 'usmcc-2026-banner-dark']
 
 for name in BANNERS:
     src = OUT / f'{name}.png'
