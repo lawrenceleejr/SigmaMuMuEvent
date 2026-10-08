@@ -53,8 +53,17 @@ jobs:
 
       - name: Build
         working-directory: site
-        # Pages hands us the right base URL for a project site (/<repo>/).
-        run: hugo --minify --baseURL "${{ steps.pages.outputs.base_url }}/"
+        # Pages reports the custom domain as http://, and Hugo bakes whatever
+        # it is given into every absolute URL -- including og:image, which some
+        # platforms will not fetch over http. The site knows its own address,
+        # so use the baseURL from hugo.toml and only fall back to the one Pages
+        # reports (a project site at /<repo>/) when there is no custom domain.
+        run: |
+          if [ -f ../site/static/CNAME ] || [ -f static/CNAME ]; then
+            hugo --minify
+          else
+            hugo --minify --baseURL "${{ steps.pages.outputs.base_url }}/"
+          fi
 
       - uses: actions/upload-pages-artifact@v3
         with:
