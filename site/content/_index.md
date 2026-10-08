@@ -23,6 +23,13 @@ text = "Curious about the 10 TeV muon collider renaissance?"
 op = "&&"
 text = "Want to help make tomorrow's energy frontier a reality?"
 
+# The three above are one condition; this is the other way into the room, for
+# the people still in the field rather than the alumni. Hence || rather than
+# &&: either clause gets you an invitation.
+[[params.questions]]
+op = "||"
+text = "Still in the field and want to meet the alumni now in industry?"
+
 [[params.program]]
 time = "4:45"
 name = "The physics case for a 10 TeV muon collider\nProf Michael Peskin"
