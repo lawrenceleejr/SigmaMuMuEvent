@@ -13,7 +13,7 @@ copyright = "© 2026 US Muon Collider Collaboration. All rights reserved."
 
 [[params.questions]]
 op = "if"
-text = "Want to reconnect with the friends and physics of your HEP days?"
+text = "Want to reconnect with the friends and physics of your days in HEP or related fields?"
 
 [[params.questions]]
 op = "&&"
