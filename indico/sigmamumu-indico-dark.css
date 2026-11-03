@@ -456,6 +456,17 @@ body > .header,
 }
 
 /* ---- the event menu ----------------------------------------------------- */
+/* The support box: the event's contact addresses, which Indico renders at the
+   foot of the menu in its own panel -- a blue header and a white card that
+   belong to no part of this skin. Hidden rather than restyled, because the
+   addresses are already in the description and on the registration page, and
+   a contact panel nobody reads is worse than none.
+
+   To bring it back, delete this rule. To remove it properly, clear the
+   support/contact fields in the event's settings and Indico stops rendering
+   it at all -- then this rule matches nothing and can go. */
+.conf_leftMenu .support_box { display: none !important; }
+
 .conf_leftMenu nav,
 .conf_leftMenu ul,
 .conf_leftMenu #outer {
