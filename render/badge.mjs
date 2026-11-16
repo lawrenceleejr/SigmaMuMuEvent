@@ -129,6 +129,16 @@ for (const file of [...new Set([...fontCss.matchAll(/url\('([^']+)'\)/g)].map(m 
 }
 
 const U = W / 1200;   // one unit: every measure below is written at 1200 wide
+const MM = (DPI * U) / 25.4 / (W / 1200);   // one millimetre, in CSS px
+
+/* Spacing is a grid of 2 mm, and nothing sits closer than 4 mm to anything
+ * else. The previous layout had two rules bracketing the name, which turned
+ * the badge into a box it does not need -- and both of them touched what they
+ * were meant to separate: the top rule crossed the mark's lettering, the
+ * bottom one ran into the QR's tile. One rule, under the header, is enough;
+ * the footer is told apart by sitting at the foot.
+ */
+const M = 6;        // the margin, mm, the same on all four sides
 const html = `<!doctype html><html><head><meta charset="utf-8"><style>
 ${fontCss}
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -140,49 +150,53 @@ html, body { width: ${W}px; height: ${H}px; overflow: hidden; background: ${PAPE
   color: ${INK};
 }
 /* The field, masked away from the middle so the name band is clean ground,
-   and knocked well back: on the Indico pages it sits behind running text at
-   the same strength, but here it runs under tracked capitals, which have far
-   less ink to defend themselves with. */
+   and knocked back: on the Indico pages it sits behind running text at the
+   same strength, but here it runs under tracked capitals, which have far less
+   ink to defend themselves with. */
 .field {
-  opacity: 0.40;
   position: absolute; inset: 0;
+  opacity: 0.40;
   background: url('${fieldURI}') center / cover no-repeat;
   -webkit-mask-image: linear-gradient(to bottom,
-      rgba(0,0,0,1) 0%, rgba(0,0,0,1) 18%, rgba(0,0,0,0) 32%,
-      rgba(0,0,0,0) 70%, rgba(0,0,0,1) 86%, rgba(0,0,0,1) 100%);
+      rgba(0,0,0,1) 0%, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 34%,
+      rgba(0,0,0,0) 64%, rgba(0,0,0,1) 80%, rgba(0,0,0,1) 100%);
           mask-image: linear-gradient(to bottom,
-      rgba(0,0,0,1) 0%, rgba(0,0,0,1) 18%, rgba(0,0,0,0) 32%,
-      rgba(0,0,0,0) 70%, rgba(0,0,0,1) 86%, rgba(0,0,0,1) 100%);
+      rgba(0,0,0,1) 0%, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 34%,
+      rgba(0,0,0,0) 64%, rgba(0,0,0,1) 80%, rgba(0,0,0,1) 100%);
 }
-.head, .foot { position: absolute; left: ${70 * U}px; right: ${70 * U}px; }
-.head { top: ${62 * U}px; display: flex; align-items: flex-start; justify-content: space-between; }
-/* One short word, so it can be set as a wordmark rather than as a label:
-   larger, tracked a little less, and sitting on the same optical line as the
-   mark opposite it. */
+.head {
+  position: absolute; left: ${M * MM}px; right: ${M * MM}px; top: ${5 * MM}px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+/* One short word, set as a wordmark rather than a label, on the mark's own
+   optical centre line. */
 .meeting {
-  font-size: ${54 * U}px; font-weight: 700; letter-spacing: 0.1em;
-  text-transform: uppercase; line-height: 1; margin-top: ${30 * U}px;
+  font-size: ${4.6 * MM}px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; line-height: 1;
 }
-.mark { width: ${180 * U}px; height: ${180 * U}px; display: block; flex: 0 0 auto; }
-.rule { position: absolute; left: ${70 * U}px; right: ${70 * U}px; height: ${3 * U}px;
-        background: ${ACCENT}; }
-.rule.top { top: ${236 * U}px; }
-.rule.bottom { bottom: ${276 * U}px; }
-.foot { bottom: ${70 * U}px; display: flex; align-items: baseline; justify-content: space-between; }
-.when { font-size: ${30 * U}px; font-weight: 700; letter-spacing: 0.085em;
+.mark { width: ${15 * MM}px; height: ${15 * MM}px; display: block; flex: 0 0 auto; }
+/* The one rule: 4 mm clear of the mark above it. */
+.rule {
+  position: absolute; left: ${M * MM}px; right: ${M * MM}px; top: ${24 * MM}px;
+  height: ${0.3 * MM}px; background: ${ACCENT};
+}
+.foot {
+  position: absolute; left: ${M * MM}px; right: ${M * MM}px; bottom: ${M * MM}px;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: ${8 * MM}px;
+}
+.when { font-size: ${2.6 * MM}px; font-weight: 700; letter-spacing: 0.085em;
         text-transform: uppercase; white-space: nowrap; }
-/* The URL earns its size: it is the fallback for everyone whose phone is in a
-   bag, and it was set smaller than the fine print on an email. */
-.where { font-size: ${28 * U}px; font-weight: 500; letter-spacing: 0.02em; color: ${MUTED};
-         margin-top: ${14 * U}px; }
-.ask { font-size: ${26 * U}px; font-weight: 700; letter-spacing: 0.05em;
-       line-height: 1.35; text-transform: uppercase; color: ${INK}; white-space: nowrap; }
-.qr { display: flex; align-items: center; gap: ${18 * U}px; flex: 0 0 auto; }
-.qr img { width: ${210 * U}px; height: ${210 * U}px; display: block;
-          border-radius: ${6 * U}px; }
-.qr .label { text-align: right; max-width: ${420 * U}px; }
-.foot { align-items: flex-end; gap: ${26 * U}px; }
-.foot > div:first-child { flex: 0 1 auto; min-width: 0; }
+.where { font-size: ${2.3 * MM}px; font-weight: 500; letter-spacing: 0.02em;
+         color: ${MUTED}; margin-top: ${1.4 * MM}px; white-space: nowrap; }
+/* The code and what it is for, as one block: the caption sits above it rather
+   than beside it, so neither has to be squeezed to fit the other. */
+.qr { flex: 0 0 auto; text-align: right; }
+.ask { font-size: ${2.2 * MM}px; font-weight: 700; letter-spacing: 0.05em;
+       line-height: 1.4; text-transform: uppercase; color: ${MUTED};
+       white-space: nowrap; margin-bottom: ${2 * MM}px; }
+.qr img { width: ${18 * MM}px; height: ${18 * MM}px; display: block; margin-left: auto;
+          border-radius: ${1 * MM}px; }
 </style></head><body>
 <div class="badge">
   <div class="field"></div>
@@ -190,15 +204,14 @@ html, body { width: ${W}px; height: ${H}px; overflow: hidden; background: ${PAPE
     <div class="meeting">USMCC2026</div>
     <img class="mark" src="${markURI}" alt="">
   </div>
-  <div class="rule top"></div>
-  <div class="rule bottom"></div>
+  <div class="rule"></div>
   <div class="foot">
     <div>
       <div class="when">Stanford &middot; Dec 13&ndash;16, 2026</div>
       <div class="where">indico.muoncollider.us/e/usmcc2026</div>
     </div>
     <div class="qr">
-      <div class="label"><div class="ask">Program, participants<br>&amp; details</div></div>
+      <div class="ask">Program,<br>participants,<br>&amp; details</div>
       <img src="${qrURI}" alt="">
     </div>
   </div>
@@ -229,7 +242,7 @@ if (a.includes('--audit')) {
   const rows = await page.evaluate(() => {
     const sel = {
       'sheet': '.badge', 'wordmark': '.meeting', 'mark': '.mark',
-      'rule top': '.rule.top', 'rule bottom': '.rule.bottom',
+      'rule': '.rule',
       'date line': '.when', 'url line': '.where', 'qr caption': '.ask', 'qr': '.qr img',
     };
     const out = {};
@@ -248,6 +261,11 @@ if (a.includes('--audit')) {
   console.log(`\naudit — ${(sheet.w * MM).toFixed(1)} x ${(sheet.h * MM).toFixed(1)} mm sheet`);
   console.log(['element', 'left', 'right', 'top', 'bottom', 'width', 'height', 'type']
     .map((h, i) => i ? h.padStart(8) : h.padEnd(12)).join(''));
+  const gap = (a, b) => {
+    const dx = Math.max(b.x - (a.x + a.w), a.x - (b.x + b.w));
+    const dy = Math.max(b.y - (a.y + a.h), a.y - (b.y + b.h));
+    return (dx >= 0 || dy >= 0) ? Math.max(dx, dy) : Math.max(dx, dy); // <0 = overlap
+  };
   for (const [k, r] of Object.entries(rows)) {
     if (k === 'sheet') continue;
     const f = v => (v * MM).toFixed(1).padStart(8);
@@ -255,6 +273,24 @@ if (a.includes('--audit')) {
       + f(sheet.h - (r.y + r.h)) + f(r.w) + f(r.h)
       + (r.size ? (r.size * MM).toFixed(1).padStart(8) : ''.padStart(8)));
   }
+  // Nothing on a 101 mm sheet should come within 4 mm of anything else. The
+  // pair that broke this rule last time -- a rule and the thing it separated
+  // -- is exactly the pair nobody checks.
+  // A date and the URL under it are one block, as are a caption and the code
+  // it labels: the space between them is leading, not clearance.
+  const paired = [['date line', 'url line'], ['qr caption', 'qr']]
+    .map(p => p.sort().join('|'));
+  const keys = Object.keys(rows).filter(k => k !== 'sheet');
+  const tight = [];
+  for (let i = 0; i < keys.length; i++)
+    for (let j = i + 1; j < keys.length; j++) {
+      if (paired.includes([keys[i], keys[j]].sort().join('|'))) continue;
+      const g = gap(rows[keys[i]], rows[keys[j]]) * MM;
+      if (g < 4) tight.push([keys[i], keys[j], g]);
+    }
+  if (!tight.length) console.log('\nclearances: nothing within 4 mm of anything else');
+  else for (const [a, b, g] of tight.sort((x, y) => x[2] - y[2]))
+    console.log(`${g < 0 ? 'OVERLAP ' : 'tight   '} ${a} / ${b}: ${g.toFixed(1)} mm`);
 }
 
 await mkdir(resolve(ROOT, 'out'), { recursive: true });
