@@ -91,6 +91,32 @@ const fieldURI = await dataURI(FIELD, 'image/png');
 const markBuf = await fetch(MARK).then(r => r.arrayBuffer());
 const markURI = `data:image/png;base64,${Buffer.from(markBuf).toString('base64')}`;
 
+/* Size, before anything else: a QR is only as good as its smallest module,
+ * and the usual floor for a phone at arm's length is 0.4 mm. This code is
+ * version 3 (29 modules) for a 41-character URL, so at 210 px on a 300 dpi
+ * sheet each module lands at about 0.55 mm with room to spare. The render
+ * decodes the finished badge and fails if it cannot read itself back.
+ *
+ * The QR, drawn as an SVG by segno so it stays crisp at any size. Error
+ * correction M: a badge gets creased and thumbed, and the URL is short enough
+ * that the extra redundancy costs no modules anyone will notice. Light on dark
+ * is the readable way round here -- phone decoders handle an inverted code far
+ * less reliably than a dark-on-light one, so the code sits on its own bone
+ * patch rather than on the badge's ground. */
+const QR_URL = str('url', 'https://indico.muoncollider.us/e/usmcc2026');
+const qrSvg = await new Promise((ok, no) => {
+  const p = spawn('python3', ['-c', `
+import segno, sys
+segno.make(sys.argv[1], error='m').save(sys.stdout.buffer, kind='svg',
+    scale=10, border=2, dark='#141312', light='#efe9da')
+`, QR_URL], { stdio: ['ignore', 'pipe', 'inherit'] });
+  const out = [];
+  p.stdout.on('data', d => out.push(d));
+  p.on('exit', c => c === 0 ? ok(Buffer.concat(out).toString('utf8'))
+                            : no(new Error('qr failed: ' + c)));
+});
+const qrURI = `data:image/svg+xml;base64,${Buffer.from(qrSvg).toString('base64')}`;
+
 // Archivo, from the site's own copy, so the badge is set in the same face as
 // everything else rather than whatever the renderer happens to have. The faces
 // are inlined rather than served: setContent gives the page an about:blank
@@ -137,14 +163,26 @@ html, body { width: ${W}px; height: ${H}px; overflow: hidden; background: ${PAPE
   font-size: ${54 * U}px; font-weight: 700; letter-spacing: 0.1em;
   text-transform: uppercase; line-height: 1; margin-top: ${30 * U}px;
 }
-.mark { width: ${132 * U}px; height: ${132 * U}px; display: block; flex: 0 0 auto; }
+.mark { width: ${180 * U}px; height: ${180 * U}px; display: block; flex: 0 0 auto; }
 .rule { position: absolute; left: ${70 * U}px; right: ${70 * U}px; height: ${3 * U}px;
         background: ${ACCENT}; }
 .rule.top { top: ${236 * U}px; }
-.rule.bottom { bottom: ${124 * U}px; }
-.foot { bottom: ${62 * U}px; display: flex; align-items: baseline; justify-content: space-between; }
-.when { font-size: ${26 * U}px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
-.where { font-size: ${20 * U}px; font-weight: 500; letter-spacing: 0.04em; color: ${MUTED}; }
+.rule.bottom { bottom: ${268 * U}px; }
+.foot { bottom: ${56 * U}px; display: flex; align-items: baseline; justify-content: space-between; }
+.when { font-size: ${30 * U}px; font-weight: 700; letter-spacing: 0.085em;
+        text-transform: uppercase; white-space: nowrap; }
+/* The URL earns its size: it is the fallback for everyone whose phone is in a
+   bag, and it was set smaller than the fine print on an email. */
+.where { font-size: ${26 * U}px; font-weight: 500; letter-spacing: 0.02em; color: ${MUTED};
+         margin-top: ${10 * U}px; }
+.ask { font-size: ${21 * U}px; font-weight: 700; letter-spacing: 0.05em;
+       line-height: 1.35; text-transform: uppercase; color: ${INK}; white-space: nowrap; }
+.qr { display: flex; align-items: center; gap: ${18 * U}px; flex: 0 0 auto; }
+.qr img { width: ${210 * U}px; height: ${210 * U}px; display: block;
+          border-radius: ${6 * U}px; }
+.qr .label { text-align: right; max-width: ${420 * U}px; }
+.foot { align-items: flex-end; gap: ${26 * U}px; }
+.foot > div:first-child { flex: 0 1 auto; min-width: 0; }
 </style></head><body>
 <div class="badge">
   <div class="field"></div>
@@ -155,8 +193,14 @@ html, body { width: ${W}px; height: ${H}px; overflow: hidden; background: ${PAPE
   <div class="rule top"></div>
   <div class="rule bottom"></div>
   <div class="foot">
-    <div class="when">Stanford &middot; Dec 13&ndash;16, 2026</div>
-    <div class="where">indico.muoncollider.us/e/usmcc2026</div>
+    <div>
+      <div class="when">Stanford &middot; Dec 13&ndash;16, 2026</div>
+      <div class="where">indico.muoncollider.us/e/usmcc2026</div>
+    </div>
+    <div class="qr">
+      <div class="label"><div class="ask">Program, participants<br>&amp; details</div></div>
+      <img src="${qrURI}" alt="">
+    </div>
   </div>
 </div></body></html>`;
 
