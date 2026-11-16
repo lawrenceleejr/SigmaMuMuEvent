@@ -130,9 +130,12 @@ html, body { width: ${W}px; height: ${H}px; overflow: hidden; background: ${PAPE
 }
 .head, .foot { position: absolute; left: ${70 * U}px; right: ${70 * U}px; }
 .head { top: ${62 * U}px; display: flex; align-items: flex-start; justify-content: space-between; }
+/* One short word, so it can be set as a wordmark rather than as a label:
+   larger, tracked a little less, and sitting on the same optical line as the
+   mark opposite it. */
 .meeting {
-  font-size: ${27 * U}px; font-weight: 700; letter-spacing: 0.145em;
-  text-transform: uppercase; line-height: 1.32; max-width: ${720 * U}px;
+  font-size: ${54 * U}px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; line-height: 1; margin-top: ${30 * U}px;
 }
 .mark { width: ${132 * U}px; height: ${132 * U}px; display: block; flex: 0 0 auto; }
 .rule { position: absolute; left: ${70 * U}px; right: ${70 * U}px; height: ${3 * U}px;
@@ -146,7 +149,7 @@ html, body { width: ${W}px; height: ${H}px; overflow: hidden; background: ${PAPE
 <div class="badge">
   <div class="field"></div>
   <div class="head">
-    <div class="meeting">US Muon Collider<br>Collaboration Meeting</div>
+    <div class="meeting">USMCC2026</div>
     <img class="mark" src="${markURI}" alt="">
   </div>
   <div class="rule top"></div>
