@@ -167,15 +167,15 @@ html, body { width: ${W}px; height: ${H}px; overflow: hidden; background: ${PAPE
 .rule { position: absolute; left: ${70 * U}px; right: ${70 * U}px; height: ${3 * U}px;
         background: ${ACCENT}; }
 .rule.top { top: ${236 * U}px; }
-.rule.bottom { bottom: ${268 * U}px; }
-.foot { bottom: ${56 * U}px; display: flex; align-items: baseline; justify-content: space-between; }
+.rule.bottom { bottom: ${276 * U}px; }
+.foot { bottom: ${70 * U}px; display: flex; align-items: baseline; justify-content: space-between; }
 .when { font-size: ${30 * U}px; font-weight: 700; letter-spacing: 0.085em;
         text-transform: uppercase; white-space: nowrap; }
 /* The URL earns its size: it is the fallback for everyone whose phone is in a
    bag, and it was set smaller than the fine print on an email. */
-.where { font-size: ${26 * U}px; font-weight: 500; letter-spacing: 0.02em; color: ${MUTED};
-         margin-top: ${10 * U}px; }
-.ask { font-size: ${21 * U}px; font-weight: 700; letter-spacing: 0.05em;
+.where { font-size: ${28 * U}px; font-weight: 500; letter-spacing: 0.02em; color: ${MUTED};
+         margin-top: ${14 * U}px; }
+.ask { font-size: ${26 * U}px; font-weight: 700; letter-spacing: 0.05em;
        line-height: 1.35; text-transform: uppercase; color: ${INK}; white-space: nowrap; }
 .qr { display: flex; align-items: center; gap: ${18 * U}px; flex: 0 0 auto; }
 .qr img { width: ${210 * U}px; height: ${210 * U}px; display: block;
@@ -220,6 +220,42 @@ const usedArchivo = await page.evaluate(() => {
   return document.fonts.check(`${s.fontWeight} ${s.fontSize} Archivo`);
 });
 if (!usedArchivo) { console.error('Archivo did not load; refusing to write'); process.exit(1); }
+
+/* --audit reports the layout as the browser actually laid it out, in mm at the
+ * output resolution. Measuring the PNG instead sounds more honest and is not:
+ * the mesh's brightest vertices read as ink, so every box comes back larger
+ * than the element that drew it. */
+if (a.includes('--audit')) {
+  const rows = await page.evaluate(() => {
+    const sel = {
+      'sheet': '.badge', 'wordmark': '.meeting', 'mark': '.mark',
+      'rule top': '.rule.top', 'rule bottom': '.rule.bottom',
+      'date line': '.when', 'url line': '.where', 'qr caption': '.ask', 'qr': '.qr img',
+    };
+    const out = {};
+    for (const [k, q] of Object.entries(sel)) {
+      const el = document.querySelector(q);
+      if (!el) continue;
+      const r = el.getBoundingClientRect();
+      const cs = getComputedStyle(el);
+      out[k] = { x: r.x, y: r.y, w: r.width, h: r.height,
+                 size: parseFloat(cs.fontSize) || null };
+    }
+    return out;
+  });
+  const MM = 25.4 / DPI;
+  const sheet = rows['sheet'];
+  console.log(`\naudit — ${(sheet.w * MM).toFixed(1)} x ${(sheet.h * MM).toFixed(1)} mm sheet`);
+  console.log(['element', 'left', 'right', 'top', 'bottom', 'width', 'height', 'type']
+    .map((h, i) => i ? h.padStart(8) : h.padEnd(12)).join(''));
+  for (const [k, r] of Object.entries(rows)) {
+    if (k === 'sheet') continue;
+    const f = v => (v * MM).toFixed(1).padStart(8);
+    console.log(k.padEnd(12) + f(r.x) + f(sheet.w - (r.x + r.w)) + f(r.y)
+      + f(sheet.h - (r.y + r.h)) + f(r.w) + f(r.h)
+      + (r.size ? (r.size * MM).toFixed(1).padStart(8) : ''.padStart(8)));
+  }
+}
 
 await mkdir(resolve(ROOT, 'out'), { recursive: true });
 await writeFile(OUT, await page.locator('.badge').screenshot());
