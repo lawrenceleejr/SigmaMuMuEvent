@@ -17,9 +17,11 @@
  * field pulled off it: a name set over a Feynman diagram cannot be read across
  * a room, which is the only thing a badge is for.
  *
- * The field itself comes from render/slide-bg.mjs, veiled and then masked to
- * the top and bottom thirds, so the badge is recognisably from the same family
- * as the slides and the banner without fighting the type.
+ * The field itself is the plain mesh from render/field-still.mjs -- the one
+ * behind the Indico pages -- masked to the top and bottom thirds. Not the
+ * slide background: that is built around a drawn VBF diagram, which is a
+ * picture with a subject and wants to be looked at, where a badge wants a
+ * texture nobody looks at twice.
  */
 import { chromium } from 'playwright-core';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
@@ -67,16 +69,21 @@ const dataURI = async (path, mime) =>
   `data:${mime};base64,${(await readFile(path)).toString('base64')}`;
 
 // The field, rendered once at the badge's own size and reused on later runs.
+// field-still.mjs writes to site/static/img by design -- it is the skin's
+// background first -- so it is rendered there and copied here.
 const haveField = await readFile(FIELD).then(() => true, () => false);
 if (!haveField) {
   console.log(`field: rendering ${FIELD}`);
-  const p = spawn(process.execPath, [
-    resolve(ROOT, 'render/slide-bg.mjs'), '--theme', THEME, '--w', String(W),
-    '--h', String(H), '--veil', '0.42', '--seed', String(num('seed', 7)),
-    '--out', FIELD,
-  ], { stdio: 'inherit', env: { ...process.env, CHROME: chromePath } });
+  const args = ['--w', String(W), '--h', String(H),
+                '--scale', String(num('scale', 1.35)),
+                '--seed', String(num('seed', 4271))];
+  if (DARK) args.push('--dark');
+  const p = spawn(process.execPath, [resolve(ROOT, 'render/field-still.mjs'), ...args],
+                  { stdio: 'inherit', env: { ...process.env, CHROME: chromePath } });
   const [code] = await once(p, 'exit');
   if (code !== 0) { console.error('field render failed'); process.exit(1); }
+  const written = resolve(ROOT, `site/static/img/field-still${DARK ? '-dark' : ''}.png`);
+  await writeFile(FIELD, await readFile(written));
 }
 
 const fieldURI = await dataURI(FIELD, 'image/png');
@@ -106,8 +113,12 @@ html, body { width: ${W}px; height: ${H}px; overflow: hidden; background: ${PAPE
   font-family: Archivo, 'Helvetica Neue', Arial, sans-serif;
   color: ${INK};
 }
-/* The field, masked away from the middle so the name band is clean ground. */
+/* The field, masked away from the middle so the name band is clean ground,
+   and knocked well back: on the Indico pages it sits behind running text at
+   the same strength, but here it runs under tracked capitals, which have far
+   less ink to defend themselves with. */
 .field {
+  opacity: 0.40;
   position: absolute; inset: 0;
   background: url('${fieldURI}') center / cover no-repeat;
   -webkit-mask-image: linear-gradient(to bottom,
