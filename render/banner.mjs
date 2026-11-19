@@ -59,10 +59,16 @@ const EVENTS = {
   },
 };
 const E = EVENTS[EVENT];
+/* Every type size here is a fraction of the height, which holds while the
+ * frame stays near 2.4:1. Ask for a squarer one -- 16:9, say -- and the same
+ * fractions give type that is taller against a narrower sheet, until the title
+ * runs into the mark. This scales the whole type block at once, so the
+ * relationships between its parts survive the change. */
+const TS = num('type', 1);
 // The lockup's sigma, and with it the whole mark: everything else in the
 // lockup is a ratio of this. Sized so the mu mu's descender clears the rule,
 // which the layout audit checks rather than trusts.
-const SIG = Math.round(num('sig', 0.44) * H);
+const SIG = Math.round(num('sig', 0.44) * H * TS);
 // How far the title sits from the lockup.
 const GAP = Math.round(num('gap', 0.05) * W);
 if (!E) { console.error(`unknown --event ${EVENT}; try ${Object.keys(EVENTS).join(' or ')}`); process.exit(1); }
@@ -155,7 +161,7 @@ const html = `<!doctype html><html><head><meta charset="utf-8">
   h1 {
     margin-top: ${Math.round(H * 0.055)}px;
     color: ${INK};
-    font-size: ${Math.round(H * 0.132)}px;
+    font-size: ${Math.round(H * 0.132 * TS)}px;
     font-weight: 800;
     line-height: 1.02;
     letter-spacing: -.022em;
@@ -204,7 +210,7 @@ const html = `<!doctype html><html><head><meta charset="utf-8">
     top: ${Math.round(SIG * 0.118)}px;
     left: ${Math.round(SIG * 0.011)}px;
   }
-  #row h1 { margin-top: 0; font-size: ${Math.round(H * 0.1)}px;
+  #row h1 { margin-top: 0; font-size: ${Math.round(H * 0.1 * TS)}px;
             text-transform: uppercase; letter-spacing: -.015em;
             max-width: ${Math.round(W * 0.5)}px; }
   /* A zero-sized inline-block sits on the baseline of its line, so its top
@@ -218,7 +224,7 @@ const html = `<!doctype html><html><head><meta charset="utf-8">
   .tagline {
     margin-top: ${Math.round(H * 0.026)}px;
     color: ${ACCENT};
-    font-size: ${Math.round(H * 0.042)}px;
+    font-size: ${Math.round(H * 0.042 * TS)}px;
     font-weight: 700;
     letter-spacing: .14em;
     text-transform: uppercase;
@@ -240,7 +246,7 @@ const html = `<!doctype html><html><head><meta charset="utf-8">
     align-items: flex-start;
     gap: ${Math.round(H * 0.012)}px;
     margin-top: ${Math.round(H * 0.036)}px;
-    font-size: ${Math.round(H * 0.046)}px;
+    font-size: ${Math.round(H * 0.046 * TS)}px;
     font-weight: 600;
     letter-spacing: .09em;
     text-transform: uppercase;
