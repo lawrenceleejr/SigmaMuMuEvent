@@ -287,3 +287,27 @@ browser keeps it.
 
 Without the script nothing breaks: the pages keep the full field, exactly as
 now.
+
+## Two ways to install it
+
+Indico takes a stylesheet from an event manager, never a script, so one of
+these has to happen on the server whichever way round it goes.
+
+**Copy the file.** `field-guard.js` into `<CUSTOMIZATION_DIR>/js/`. Nothing
+cross-origin, nothing to review again later; a change means another copy.
+
+**Or load it from the event site.** `customization-js-loader.js` goes in
+`<CUSTOMIZATION_DIR>/js/` instead and fetches the guard from
+hepalumni.muoncollider.us, so later changes ship with the site and never need
+you again. The trade, stated plainly: a script from that host runs with the
+full privileges of an Indico page, including the reader's logged-in session.
+The stylesheet already pulls images from there, but an image cannot act and a
+script can. The loader therefore pins the file with a Subresource Integrity
+hash, so the browser refuses anything whose bytes differ — tested: a tampered
+file is refused and the page is unaffected, and so is the event site being
+unreachable. Updating the script then means updating the hash, which is a
+one-line change on the server:
+
+    openssl dgst -sha384 -binary field-guard.js | openssl base64 -A
+
+For a file this small and this stable, copying it is the quieter choice.
