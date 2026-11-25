@@ -1,7 +1,14 @@
 # Institutional marks
 
 Downloaded from each institution's own brand site on 20 September 2026, not
-from an image search. Every file has a transparent background.
+from an image search, except where the table says otherwise. Every file has a
+transparent background.
+
+A mark here is someone else's trademark: it says who funded or hosted
+something, so it goes up where that is true and comes down when it stops
+being. Most of these foundations publish guidance on clear space and minimum
+size; the files are stored at full size so a layout can respect it rather
+than scale whatever is to hand.
 
 | file | what it is | from |
 | --- | --- | --- |
@@ -9,6 +16,7 @@ from an image search. Every file has a transparent background.
 | `original/stanford-university-stacked.png` | Stanford University signature, stacked, 600 × 400 | `identity.stanford.edu` |
 | `original/ut-knoxville-horizontal.png` | UT Knoxville lockup, horizontal, 2075 × 959 | `brand.utk.edu` |
 | `original/ut-knoxville-stacked.png` | the same, centred, 1607 × 1273 | `brand.utk.edu` |
+| `original/kavli-foundation.png` | The Kavli Foundation lockup, 1845 × 752 | supplied by the organisers |
 
 `row/` holds the same marks trimmed to their own ink and scaled to sit
 together: institutions publish their logos with different margins built in,
