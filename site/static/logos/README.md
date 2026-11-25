@@ -17,6 +17,7 @@ than scale whatever is to hand.
 | `original/ut-knoxville-horizontal.png` | UT Knoxville lockup, horizontal, 2075 × 959 | `brand.utk.edu` |
 | `original/ut-knoxville-stacked.png` | the same, centred, 1607 × 1273 | `brand.utk.edu` |
 | `original/kavli-foundation.png` | The Kavli Foundation lockup, 1845 × 752 | supplied by the organisers |
+| `trimmed/kavli-foundation.png` | the same, cropped to its own ink, 1634 × 536 | cropped here |
 
 `row/` holds the same marks trimmed to their own ink and scaled to sit
 together: institutions publish their logos with different margins built in,
@@ -48,3 +49,10 @@ guidance, and for a meeting page listing participating institutions the
 normal course is a quick check with each communications office.
 
     python3 render/logos.py        # rebuilds row/ and white/ from original/
+
+`trimmed/` is for dropping a mark into a fixed width somewhere that is not
+this site -- an Indico description, a slide. The published file carries about
+11% of margin inside the image, so at a given display width the mark reads
+smaller than the box it sits in; cropped to its ink it fills what it is given
+and the surrounding space can be decided by whoever is laying it out. Nothing
+is rescaled, so it is still the publisher's own artwork.
