@@ -149,6 +149,50 @@ input, select, textarea, button, .i-button {
   }
 }
 
+/* ---- when the machine cannot afford the field ---------------------------
+   Measured, not guessed: on a 1440x900 viewport in a software rasteriser the
+   animated field holds about 20 fps and spends 1.75s of main-thread time every
+   3s. The same page with the field as a flat image runs at 60 and spends
+   0.04s -- one fortieth. The frosted panes are not the problem: dropping
+   backdrop-filter entirely changes nothing a measurement can see, because what
+   makes them expensive is the animation invalidating the backdrop underneath,
+   not the blur itself.
+
+   So the ladder has three rungs, and only the field changes between them:
+
+     full   609 lines, 335 of them animating   as designed
+     lite   the same field, 101 animating      about 29 fps, 40% of the work
+     still  the finished field as a PNG        60 fps, 2% of the work
+
+   site/static/js/field-guard.js counts frames once, sets data-smm-field on
+   <html>, and remembers the answer. Where that script cannot be installed --
+   Indico takes a stylesheet, not a script -- these rules still do something:
+   a browser that reports a slow screen, or a reader who has asked for less
+   motion, gets the still field without anything having to measure. */
+html[data-smm-field="lite"] body::before {
+  background-image:
+    linear-gradient(rgba(20, 19, 18, var(--smm-veil)),
+                    rgba(20, 19, 18, var(--smm-veil))),
+    url("https://hepalumni.muoncollider.us/img/field-live-dark-lite.svg?v=2");
+}
+html[data-smm-field="still"] body::before {
+  background-image:
+    linear-gradient(rgba(20, 19, 18, var(--smm-veil)),
+                    rgba(20, 19, 18, var(--smm-veil))),
+    url("https://hepalumni.muoncollider.us/img/field-still-dark.png?v=2");
+}
+/* A screen that cannot repaint quickly -- an e-reader, a remote desktop, a
+   machine on battery saver -- says so, and gets the picture rather than the
+   animation. */
+@media (update: slow) {
+  body::before {
+    background-image:
+      linear-gradient(rgba(20, 19, 18, var(--smm-veil)),
+                      rgba(20, 19, 18, var(--smm-veil))),
+      url("https://hepalumni.muoncollider.us/img/field-still-dark.png?v=2");
+  }
+}
+
 /* ---- make Indico fluid -------------------------------------------------- */
 /* The conference theme hard-codes pixel widths (950px on the title and the
    section box, 700px on the dateline, 200px on the menu), so a phone gets a

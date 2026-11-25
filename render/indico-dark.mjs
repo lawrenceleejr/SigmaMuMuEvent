@@ -104,6 +104,7 @@ swap('  -webkit-backdrop-filter: blur(15px) saturate(1.25);\n'
    + '  backdrop-filter: blur(4px);');
 
 // ---- assets -------------------------------------------------------------
+swap('img/field-live-lite.svg', 'img/field-live-dark-lite.svg');
 swap('img/field-live.svg', 'img/field-live-dark.svg');
 swap('img/field-still.png', 'img/field-still-dark.png');
 

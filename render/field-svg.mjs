@@ -47,7 +47,10 @@ const SCALE = num('scale', 2.4), SPACING = num('spacing', 30);
 // mesh: seeded alike they came out identical, which makes the dark skin look
 // like a recolour of the light one rather than its own artwork.
 const SEED = num('seed', DARK ? 4271 : 2026), SECONDS = num('seconds', 26);
-const OUT = resolve(ROOT, `site/static/img/field-live${DARK ? '-dark' : ''}.svg`);
+/* --out so a variant can be written beside the default rather than over it:
+   the lighter field the performance guard falls back to is the same generator
+   at a lower churn, and without this it silently replaced the real one. */
+const OUT = resolve(ROOT, str('out', `site/static/img/field-live${DARK ? '-dark' : ''}.svg`));
 
 const PAPER = DARK ? '#141312' : '#f5f0e1';
 const INK = DARK ? '#efe9da' : '#201e1d';
