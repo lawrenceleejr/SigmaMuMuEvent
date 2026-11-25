@@ -254,3 +254,36 @@ goes at `<CUSTOMIZATION_DIR>/templates/meta.html`:
 That is Indico's own template with two lines added, so it keeps working if the
 rest of the file changes upstream; check it against the installed copy after
 an upgrade.
+
+---
+
+# A third item: the animated field, on machines that struggle
+
+Some readers report the event pages pinning their GPU or CPU. Measured on a
+1440x900 viewport in a software rasteriser:
+
+| field | frame rate | main-thread time per 3 s |
+| --- | --- | --- |
+| animated, as shipped | ~20 fps | 1.75 s |
+| animated, lighter variant | ~29 fps | 0.71 s |
+| the same field as a PNG | 60 fps | 0.04 s |
+
+The frosted panes are **not** the cause: removing `backdrop-filter` entirely
+changes nothing a measurement can see. What makes a blur expensive here is the
+animation invalidating its backdrop, not the blur.
+
+The stylesheet now reads `data-smm-field` on `<html>` and swaps the field for a
+lighter animation (`lite`) or a flat image (`still`). It also falls back to the
+still field for `prefers-reduced-motion` and for a browser that reports a slow
+screen, so the CSS alone already helps the worst cases.
+
+**To let it measure the machine**, put `field-guard.js` from the event site in
+`<CUSTOMIZATION_DIR>/js/`. It samples the frame rate three times across eight
+seconds, takes the worst sample, sets the attribute, and remembers the verdict
+for a week. It talks to nothing, stores one string in `localStorage`, and takes
+`?field=still|lite|full` as a manual override — which is also the answer to
+give anyone who writes in: **add `?field=still` to the URL once** and their
+browser keeps it.
+
+Without the script nothing breaks: the pages keep the full field, exactly as
+now.

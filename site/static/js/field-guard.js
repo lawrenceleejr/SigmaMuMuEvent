@@ -14,7 +14,9 @@
  *
  * The answer is remembered, so only the first page of a visit pays to find
  * out, and it is re-measured after a week in case the machine or the browser
- * has changed. Anyone who has asked for less motion goes straight to still
+ * has changed. It is sampled three times across eight seconds and the worst
+ * sample decides, because the field's own cost rises and falls across its
+ * loop and one window can land in the quiet part of it. Anyone who has asked for less motion goes straight to still
  * without being measured.
  *
  * Install by putting this file in <CUSTOMIZATION_DIR>/js/ on the Indico
@@ -58,33 +60,59 @@
     set('still'); remember('still'); return;
   }
 
-  // Measure. The first second after load is full of other work -- fonts,
-  // images, Indico's own scripts -- so it is skipped rather than blamed on the
-  // field. A hidden tab throttles rAF to a crawl and would fail every machine,
-  // so measuring stops if the page is not being looked at.
-  var START_AFTER = 1000, SAMPLE = 2000;
-  function measure() {
-    if (document.hidden) return;                 // try again when it is shown
+  /* Measure, three times, and believe the worst of them.
+   *
+   * One sample is not enough, and that is measured too: the field's own cost
+   * rises and falls across its 26-second loop as lines start and finish
+   * drawing. On one page, sampled every few seconds, it ran 25, 18, 18, 16 and
+   * then 42 fps -- so a single window can easily land in the quiet phase and
+   * declare a struggling machine healthy. Three short samples, spread across
+   * eight seconds, cover both phases; the lowest decides.
+   *
+   * The first second after load is skipped rather than blamed on the field:
+   * fonts, images and Indico's own scripts are all still arriving. A hidden
+   * tab throttles rAF to a crawl and would fail every machine, so sampling
+   * stops if nobody is looking.
+   */
+  var START_AFTER = 1000, SAMPLE = 1000, AT = [0, 3500, 7000];
+
+  function sample(done) {
+    if (document.hidden) { done(null); return; }
     var frames = 0, t0 = 0;
-    function tick(t) {
-      if (!t0) { t0 = t; }
+    requestAnimationFrame(function tick(t) {
+      if (!t0) t0 = t;
       frames++;
       var elapsed = t - t0;
       if (elapsed < SAMPLE) { requestAnimationFrame(tick); return; }
-      if (document.hidden) return;               // hidden mid-sample: no verdict
-      var fps = frames / (elapsed / 1000);
-      // 45 and 24 rather than 60 and 30: a machine that merely misses a few
-      // frames is not struggling, and the rung below is cheap enough that
-      // being wrong about it costs the reader a little motion, not a working
-      // page. Below 24 the page feels broken, and that is worth a still field.
-      var level = fps < 24 ? 'still' : fps < 45 ? 'lite' : 'full';
-      set(level); remember(level);
-      if (window.console && level !== 'full') {
-        console.info('[sigmamumu] ' + Math.round(fps) + ' fps; field set to ' + level
-                   + '. Override with ?field=full');
+      done(document.hidden ? null : frames / (elapsed / 1000));
+    });
+  }
+
+  function measure() {
+    var worst = Infinity, i = 0;
+    (function next() {
+      if (i >= AT.length) {
+        if (worst === Infinity) return;            // never got a clean sample
+        // 45 and 24 rather than 60 and 30: a machine that merely misses a few
+        // frames is not struggling, and the rung below costs the reader a
+        // little motion rather than a working page. Below 24 the page feels
+        // broken, which is worth a still field.
+        var level = worst < 24 ? 'still' : worst < 45 ? 'lite' : 'full';
+        set(level); remember(level);
+        if (window.console && level !== 'full') {
+          console.info('[sigmamumu] worst of three samples ' + Math.round(worst)
+            + ' fps; field set to ' + level + '. Override with ?field=full');
+        }
+        return;
       }
-    }
-    requestAnimationFrame(tick);
+      var wait = i === 0 ? 0 : AT[i] - AT[i - 1] - SAMPLE;
+      setTimeout(function () {
+        sample(function (fps) {
+          if (fps !== null && fps < worst) worst = fps;
+          i++; next();
+        });
+      }, Math.max(0, wait));
+    })();
   }
 
   function begin() { setTimeout(measure, START_AFTER); }
