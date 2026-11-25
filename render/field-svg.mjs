@@ -158,6 +158,16 @@ growValues.push(0);
    option and a record -- there is no frame-rate knob in SMIL, and this is the
    obvious thing to reach for. What does reduce the bill is animating fewer
    things: see --churn and --buckets below, both of which scale it. */
+/* --once makes the field draw itself one time and then hold, instead of
+   looping forever. It is the only change that takes the cost to zero without
+   taking the motion away: an animated background re-rasterises the whole
+   viewport layer on every tick whatever is in it -- thinning the field from
+   335 moving lines to 29 only moved a software rasteriser from 20 fps to 30 --
+   so the question is not how much moves but for how long. A frozen animation
+   stops invalidating, and the page costs what a flat image costs. */
+const ONCE = a.includes('--once');
+const REPEAT = ONCE ? '1" fill="freeze' : 'indefinite';
+
 const FPS = num('fps', 0);
 function resample(times, values, hz) {
   if (!hz) return [times, values];
@@ -194,11 +204,18 @@ const CALC = FPS ? 'discrete' : 'linear';
 // Opacity is its own animation: up over the first 3% so a line does not blink
 // into existence at full strength, held, then out at the end. On a group this
 // multiplies through to every line inside it.
-const [fadeT, fadeV] = resample([0, 0.03, 0.82, 1], [0, 1, 1, 0], FPS);
+/* Where the loop fades a line out at the end, a one-shot run must not: the
+   last keyframe is what fill="freeze" holds forever, and a fade that ends at
+   zero freezes the line invisible. Measured, before this: the frozen field
+   carried 3.5% ink against 7% mid-draw -- half the picture gone, which is
+   exactly the half that was animating. */
+const [fadeT, fadeV] = resample(ONCE ? [0, 0.03, 1] : [0, 0.03, 0.82, 1],
+                                ONCE ? [0, 1, 1]    : [0, 1, 1, 0], FPS);
 const FADE_TIMES = fadeT.join(';');
 const FADE_VALUES = fadeV.join(';');
 // The scalars and the vertex marks only fade -- their dasharray is spoken for.
-const [glowT, glowV] = resample([0, 0.04, 0.82, 1], [0, 1, 1, 0], FPS);
+const [glowT, glowV] = resample(ONCE ? [0, 0.04, 1] : [0, 0.04, 0.82, 1],
+                                ONCE ? [0, 1, 1]    : [0, 1, 1, 0], FPS);
 const GLOW_TIMES = glowT.join(';');
 const GLOW_VALUES = glowV.join(';');
 
@@ -307,7 +324,7 @@ for (const m of marks.values()) {
 // stroke-dashoffset inherits, and group opacity multiplies through, so one
 // pair of <animate> elements on the group drives everything inside it.
 const anim = (attr, times, values, begin) =>
-  `<animate attributeName="${attr}" dur="${SECONDS}s" repeatCount="indefinite"`
+  `<animate attributeName="${attr}" dur="${SECONDS}s" repeatCount="${REPEAT}"`
   + ` calcMode="${CALC}" keyTimes="${times}" values="${values}" begin="${begin}s"/>`;
 
 let body = still ? `<g>${still}</g>\n` : '';

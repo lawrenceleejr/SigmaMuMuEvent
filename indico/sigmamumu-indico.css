@@ -102,7 +102,7 @@ body::before {
   background-image:
     linear-gradient(rgba(245, 240, 225, var(--smm-veil)),
                     rgba(245, 240, 225, var(--smm-veil))),
-    url("https://hepalumni.muoncollider.us/img/field-live.svg?v=2");
+    url("https://hepalumni.muoncollider.us/img/field-live.svg?v=3");
   background-repeat: no-repeat, no-repeat;
   background-position: center center, center center;
   background-size: cover, cover;
@@ -125,7 +125,19 @@ input, select, textarea, button, .i-button {
    copy went on showing the old behaviour -- which, in Safari, was no
    animation at all. Bump it whenever the SVG is regenerated.
 
-   The field draws itself: field-live.svg carries its own SMIL animation, and
+   The field draws itself ONCE and then holds. That is the whole answer to the
+   complaint that this page pinned a weak machine's processor, and it is the
+   only answer that keeps the motion. What costs is not how much moves but
+   that anything does: Blink re-rasterises the whole viewport layer on every
+   animation tick whatever is in it, so thinning the field from 335 moving
+   lines to 29 moved a software rasteriser from 20 fps to 30, and shrinking
+   the painted area plateaued at 33. Stepping the animation down to 24 fps
+   does nothing at all -- the generator measured 29.5 against 29.8, because a
+   value that holds still is still a tick. A finished animation, though, stops
+   invalidating: 20 fps while it draws, 61 once it has, and from then on the
+   page costs what a flat image costs.
+
+   field-live.svg carries its own SMIL animation, and
    an SVG used as a background-image runs that (it is loaded without scripts,
    but not frozen). It used to carry CSS keyframes instead, which Chrome and
    iOS ran and Safari on the desktop did not — it rendered the first frame and
@@ -167,7 +179,7 @@ html[data-smm-field="lite"] body::before {
   background-image:
     linear-gradient(rgba(245, 240, 225, var(--smm-veil)),
                     rgba(245, 240, 225, var(--smm-veil))),
-    url("https://hepalumni.muoncollider.us/img/field-live-lite.svg?v=2");
+    url("https://hepalumni.muoncollider.us/img/field-live-lite.svg?v=3");
 }
 html[data-smm-field="still"] body::before {
   background-image:
