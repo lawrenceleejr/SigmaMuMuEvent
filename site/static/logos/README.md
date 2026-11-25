@@ -18,6 +18,7 @@ than scale whatever is to hand.
 | `original/ut-knoxville-stacked.png` | the same, centred, 1607 × 1273 | `brand.utk.edu` |
 | `original/kavli-foundation.png` | The Kavli Foundation lockup, 1845 × 752 | supplied by the organisers |
 | `trimmed/kavli-foundation.png` | the same, cropped to its own ink, 1634 × 536 | cropped here |
+| `small/kavli-foundation.png` | the same at 20%, 369 × 150 | scaled here |
 
 `row/` holds the same marks trimmed to their own ink and scaled to sit
 together: institutions publish their logos with different margins built in,
@@ -56,3 +57,10 @@ this site -- an Indico description, a slide. The published file carries about
 smaller than the box it sits in; cropped to its ink it fills what it is given
 and the surrounding space can be decided by whoever is laying it out. Nothing
 is rescaled, so it is still the publisher's own artwork.
+
+`small/` is the published file at a fifth of its size, for somewhere that
+wants a ready-made small image rather than a large one constrained by an
+attribute -- Indico's markdown editor, for one, which has no syntax for a
+width. It is resampled with Lanczos from the full-size original, so it is
+sharper than the same file squeezed by a browser, and small enough that
+nobody downloads 87 KB to see 369 pixels.
